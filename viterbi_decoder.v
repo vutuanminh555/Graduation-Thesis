@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module viterbi_decoder(sys_clk,rst,en,i_data,o_data,o_done);
+module viterbi_decoder(sys_clk,rst,en,i_data,o_data,o_done); // need to change wire width 
 
 input sys_clk,rst,en;
 input [15:0] i_data;

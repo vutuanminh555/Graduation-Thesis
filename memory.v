@@ -15,7 +15,7 @@ reg [2:0] trace;
 integer i;
 integer k;
 
-always @ (posedge clk or negedge rst)
+always @ (posedge clk or negedge rst) // need to consider memory depth of 5 times the constraint length with radix-2 (5 x K x k) and half of that with radix-4
 begin
     if (rst == 0)
     begin 

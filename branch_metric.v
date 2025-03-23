@@ -1,14 +1,19 @@
 `timescale 1ns / 1ps
 
-module branch_metric(rst,en_branch,i_Rx,HD1,HD2,HD3,HD4,HD5,HD6,HD7,HD8);
-
+module branch_metric(rst,en_branch,i_Rx,HD);
 input rst, en_branch;
-input [1:0] i_Rx;
+input [3:0] i_Rx; // change to 4 bit 
 
-output reg [1:0] HD1,HD2,HD3,HD4,HD5,HD6,HD7,HD8;
+generate
+    genvar i;
 
-always @ (*)  
-if(rst == 0)
+endgenerate
+
+
+output reg [3:0] HD [3:0][3:0]; // [bit_size], [radix][state]
+
+always @ (*)  // need to use genvar variable and generate block 
+if(rst == 0) // use integer and for loop
 begin
     HD1 = 0;
     HD2 = 0;
