@@ -5,7 +5,7 @@ module extract_bit(rst,clk,en_extract,i_data,o_Rx);
 input rst,clk,en_extract;
 input [15:0] i_data;
 
-output reg [1:0] o_Rx;
+output reg [3:0] o_Rx; // changed to 4 bit
 
 reg [3:0] count;
 
@@ -14,18 +14,18 @@ begin
     if (rst == 0)
     begin
         count <= 4'b1111; // MSB to LSB 
-        o_Rx <= 2'b00;
+        o_Rx <= 4'b0000;
     end
     else 
     begin
         if (en_extract == 1)
         begin
-            o_Rx <= {i_data[count], i_data[count - 1]};
-            count <= count - 2; // 1 - 2  = 15
+            o_Rx <= {i_data[count], i_data[count - 3]}; // changed
+            count <= count - 4; // 3 - 4 = 15
         end
         else if(en_extract == 0)
         begin
-            o_Rx <= 2'b00;
+            o_Rx <= 4'b0000;
             count <= count;
         end
     end
