@@ -1,12 +1,12 @@
 `timescale 1ns / 1ps
 
 module add_compare_select(clk, rst, en_add,
-                        HD1, HD2, HD3, HD4, HD5, HD6, HD7, HD8,
+                        HD,
                         o_prv_st_00, o_prv_st_10, o_prv_st_01, o_prv_st_11,
                         o_select_node);
 
 input clk, rst, en_add;
-input [1:0] HD1, HD2, HD3, HD4, HD5, HD6, HD7, HD8;
+input [3:0] HD [15:0];
 
 output reg [1:0] o_prv_st_00, o_prv_st_01, o_prv_st_10, o_prv_st_11;
 output reg [1:0] o_select_node;
@@ -33,7 +33,7 @@ begin
     end
     else 
     begin
-    if(en_add == 1)  
+    if(en_add == 1)  // state should be the state of the last 2 bit, but have to compare 4 possible transition
     begin   
                 if(((HD1 + sum00) == (HD5 + sum01)) || ((HD1 + sum00) < (HD5 + sum01)))
                 begin
