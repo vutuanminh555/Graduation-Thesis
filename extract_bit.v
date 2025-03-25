@@ -1,9 +1,11 @@
 `timescale 1ns / 1ps
 
-module extract_bit(rst,clk,en_extract,i_data,o_Rx);
+module extract_bit(rst,clk,en_extract,
+                    i_data, 
+                    o_Rx);
 
 input rst,clk,en_extract;
-input [15:0] i_data;
+input [59:0] i_data; // depends on traceback depth, choose between 120 and 60
 
 output reg [3:0] o_Rx; // changed to 4 bit
 

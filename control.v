@@ -1,10 +1,11 @@
 `timescale 1ns / 1ps
 
-module control(clk,rst,en,en_extract,en_branch,en_add,en_memory,en_traceback);
+module control(clk,rst,en,
+                en_c,en_extract,en_branch,en_add,en_memory,en_traceback);
 
 input clk,rst,en;
 
-output reg en_extract,en_branch,en_add,en_memory,en_traceback;
+output reg en_c,en_extract,en_branch,en_add,en_memory,en_traceback;
 
 reg [2:0] state, nxt_state;
 reg [3:0] count;
@@ -45,14 +46,14 @@ begin
     case(state)
     s0:
     begin
-        en_extract=0; en_branch=0; en_add=0; en_memory=0; en_traceback=0;
+        en_c=0; en_extract=0; en_branch=0; en_add=0; en_memory=0; en_traceback=0;
         nxt_state = s1;
     end
     
     s1:
     begin
-        en_extract=1; en_branch=0; en_add=0; en_memory=0; en_traceback=0;
-        nxt_state = s2;
+        en_c = 1; en_extract=1; en_branch=1; en_add=1; en_memory=1; en_traceback=1;
+        nxt_state = s1; // s2
     end
     
     s2:

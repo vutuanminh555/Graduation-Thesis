@@ -1,12 +1,13 @@
 `timescale 1ns / 1ps
 
-module memory(clk,rst,en_memory,i_prv_st_00,i_prv_st_10,i_prv_st_01,i_prv_st_11,
-                o_bck_prv_st_00,o_bck_prv_st_10,o_bck_prv_st_01,o_bck_prv_st_11);
+module memory(  clk, rst, en_m,
+                i_prv_st,
+                o_bck_prv_st);
 
-input clk,rst,en_memory;
-input [1:0] i_prv_st_00,i_prv_st_10,i_prv_st_01,i_prv_st_11;
+input clk, rst, en_m;
+input [7:0] i_prv_st [255:0];
 
-output reg [1:0] o_bck_prv_st_00,o_bck_prv_st_10,o_bck_prv_st_01,o_bck_prv_st_11;
+output reg [7:0] o_bck_prv_st [255:0];
 
 reg [3:0] count; 
 reg [1:0] trellis_diagr[0:3][0:7];

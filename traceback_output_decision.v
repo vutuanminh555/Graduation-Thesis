@@ -1,14 +1,14 @@
 `timescale 1ns / 1ps
 
-module traceback_output(clk,rst,en_traceback,i_select_node,
-                        i_bck_prv_st_00,i_bck_prv_st_10,i_bck_prv_st_01,i_bck_prv_st_11,
-                        o_data,o_done);
+module traceback_output(clk, rst, en_t,
+                        i_sel_node, i_bck_prv_st,
+                        o_data, o_done);
 
-input clk,rst,en_traceback;
-input [1:0] i_select_node;
-input [1:0] i_bck_prv_st_00,i_bck_prv_st_10,i_bck_prv_st_01,i_bck_prv_st_11; 
+input clk, rst, en_t;
+input [7:0] i_sel_node;
+input [7:0] i_bck_prv_st [255:0]; 
 
-output reg [7:0] o_data;
+output reg [19:0] o_data;
 output reg o_done;
 
 reg [7:0] select_bit_out;

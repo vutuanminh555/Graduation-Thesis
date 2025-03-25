@@ -1,15 +1,15 @@
 `timescale 1ns / 1ps
 
-module add_compare_select(clk, rst, en_add,
-                        HD,
-                        o_prv_st_00, o_prv_st_10, o_prv_st_01, o_prv_st_11,
-                        o_select_node);
+module add_compare_select(clk, rst, en_a,
+                        i_dist,
+                        o_prv_st,
+                        o_sel_node);
 
-input clk, rst, en_add;
-input [3:0] HD [15:0];
+input clk, rst, en_a;
+input [3:0] i_dist [1023:0];
 
-output reg [1:0] o_prv_st_00, o_prv_st_01, o_prv_st_10, o_prv_st_11;
-output reg [1:0] o_select_node;
+output reg [7:0] o_prv_st [255:0];
+output reg [7:0] o_sel_node;
 
 reg [4:0] sum00, sum10, sum01, sum11; // dai gia tri tu 0 - 16 , phai can den 5 bit
 reg [4:0] min_sum;
@@ -29,11 +29,11 @@ begin
         o_prv_st_01 <= 2'b00;
         o_prv_st_10 <= 2'b00;
         o_prv_st_11 <= 2'b00;
-        o_select_node <= 2'b00;
+        o_sel_node <= 2'b00;
     end
     else 
     begin
-    if(en_add == 1)  // state should be the state of the last 2 bit, but have to compare 4 possible transition
+    if(en_a == 1)  // state should be the state of the last 2 bit, but have to compare 4 possible transition
     begin   
                 if(((HD1 + sum00) == (HD5 + sum01)) || ((HD1 + sum00) < (HD5 + sum01)))
                 begin
@@ -98,7 +98,7 @@ begin
         o_prv_st_01 <= 2'b00;
         o_prv_st_10 <= 2'b00;
         o_prv_st_11 <= 2'b00;
-        o_select_node <= 2'b00;
+        o_sel_node <= 2'b00;
     end
 end
 end
