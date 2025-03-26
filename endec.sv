@@ -25,7 +25,7 @@ output [`DATA_FRAME_LENGTH - 1:0] o_decoder_data;
 output o_decoder_done;
 
 
-wire en_c, en_e, en_b, en_a, en_m, en_t;
+wire en_ce, en_s, en_bm, en_acs, en_td, en_t;
 
 wire [`RADIX - 1:0] rx;
 
@@ -45,16 +45,16 @@ wire [`MAX_SHIFT_REG_NUM - 1:0] sel_node;
 control C1 (.clk(sys_clk),
             .rst(rst),
             .en(en),
-            .o_en_c(en_c),
-            .o_en_e(en_e),
-            .o_en_b(en_b),
-            .o_en_a(en_a),
-            .o_en_m(en_m),
+            .o_en_ce(en_ce),
+            .o_en_s(en_s),
+            .o_en_bm(en_bm),
+            .o_en_acs(en_acs),
+            .o_en_td(en_td),
             .o_en_t(en_t));
 
 conv_encoder CE1(   .clk(sys_clk),
                     .rst(rst),
-                    .en_c(en_c),
+                    .en_ce(en_ce),
                     .i_code_rate(i_code_rate),
                     .i_constr_len(i_constr_len),
                     .i_gen_poly(i_gen_poly),
@@ -66,27 +66,27 @@ conv_encoder CE1(   .clk(sys_clk),
 
 slice S1 (  .rst(rst),
             .clk(sys_clk),
-            .en_e(en_e),
+            .en_s(en_s),
             .i_data_frame(i_decoder_data_frame),
             .o_rx(rx));
 
 branch_metric BM1 ( .clk(sys_clk),
                     .rst(rst),
-                    .en_b(en_b),
+                    .en_bm(en_bm),
                     .i_rx(rx),
                     .i_mux(mux_data),
                     .o_distance(distance));
 
 add_compare_select ACS1 (   .clk(sys_clk),
                             .rst(rst),
-                            .en_a(en_a),
+                            .en_acs(en_acs),
                             .i_distance(distance),
                             .o_fwd_nxt_st(fwd_nxt_st),
                             .o_sel_node(sel_node));
 
 trellis_diagr TD1 ( .clk(sys_clk),
                     .rst(rst),
-                    .en_m(en_m),
+                    .en_td(en_td),
                     .i_fwd_nxt_st(fwd_nxt_st),
                     .o_bck_prv_st(bck_prv_st));
 

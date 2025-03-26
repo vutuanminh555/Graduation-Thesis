@@ -1,11 +1,12 @@
+`include "param_def.sv"
 `timescale 1ns / 1ps
 
-module control(clk,rst,en,
-                en_c,en_extract,en_branch,en_add,en_memory,en_traceback);
+module control( clk, rst, en,
+                o_en_ce, o_en_s, o_en_bm, o_en_acs, o_en_td, o_en_t);
 
-input clk,rst,en;
+input clk, rst, en;
 
-output reg en_c,en_extract,en_branch,en_add,en_memory,en_traceback;
+output reg o_en_ce, o_en_s, o_en_bm, o_en_acs, o_en_td, o_en_t;
 
 // reg [2:0] state, nxt_state;
 // reg [3:0] count;

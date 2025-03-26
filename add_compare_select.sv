@@ -1,12 +1,13 @@
+`include "param_def.sv"
 `timescale 1ns / 1ps
 
-module add_compare_select(clk, rst, en_a,
+module add_compare_select(clk, rst, en_acs,
                         i_distance,
                         o_fwd_nxt_st,
                         o_sel_node);
 
-input clk, rst, en_a;
-input [3:0] i_distance [1023:0];
+input clk, rst, en_acs;
+input [2:0] i_distance [`MAX_TRANSITION_NUM - 1:0];
 
 output reg [7:0] o_fwd_nxt_st [255:0];
 output reg [7:0] o_sel_node;

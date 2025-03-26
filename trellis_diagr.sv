@@ -1,13 +1,14 @@
+`include "param_def.sv"
 `timescale 1ns / 1ps
 
-module trellis_diagr(  clk, rst, en_m,
+module trellis_diagr(  clk, rst, en_td,
                 i_fwd_nxt_st,
                 o_bck_prv_st);
 
-input clk, rst, en_m;
+input clk, rst, en_td;
 input [7:0] i_fwd_nxt_st [255:0];
 
-output reg [7:0] o_bck_prv_st [255:0];
+output reg [`MAX_CONSTRAINT_LENGTH - 1:0] o_bck_prv_st [`MAX_STATE_NUM - 1:0];
 
 // reg [3:0] count; 
 // reg [1:0] trellis_diagr[0:3][0:7];

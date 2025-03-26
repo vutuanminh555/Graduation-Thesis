@@ -1,11 +1,11 @@
 `include "param_def.sv"
 `timescale 1ns/1ps
 
-module conv_encoder(clk, rst, en_c,
+module conv_encoder(clk, rst, en_ce,
                     i_code_rate, i_constr_len, i_gen_poly, i_encoder_bit, i_mode_sel,
                     o_mux, o_encoder_data, o_encoder_done); // need to calculate distance
 
-input clk, rst, en_c;
+input clk, rst, en_ce;
 input i_code_rate;
 input [1:0] i_constr_len;
 input [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE - 1:0]; // max K = 9, max code rate = 3

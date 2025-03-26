@@ -1,12 +1,12 @@
 `include "param_def.sv"
 `timescale 1ns / 1ps
 
-module branch_metric(clk, rst, en_b, 
+module branch_metric(clk, rst, en_bm, 
                     i_rx,
                     i_mux,
                     o_distance);   // need to calculate distance, use 3 bits (8 levels) to quantize soft decision
 
-input clk, rst, en_b;
+input clk, rst, en_bm;
 input [31:0] i_mux; // need input bit, state, nxt_state (nxt_state 2), output to calculate distance
 input [`RADIX - 1:0] i_rx; // change to 4 bit 
 

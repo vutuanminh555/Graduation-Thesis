@@ -1,11 +1,11 @@
 `include "param_def.sv"
 `timescale 1ns / 1ps
 
-module slice(   rst, clk, en_extract,
+module slice(   rst, clk, en_s,
                 i_data_frame, 
                 o_rx);
 
-input rst,clk,en_extract;
+input rst, clk, en_s;
 input [`TRACEBACK_DEPTH - 1:0] i_data_frame; // depends on traceback depth, choose between 120 and 60
 
 output reg [`RADIX - 1:0] o_rx; // changed to 4 bit

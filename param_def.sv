@@ -1,3 +1,6 @@
+`ifndef PARAM_DEF_H
+`define PARAM_DEF_H
+
 // constant
 `define ENCODE_MODE             1'b0
 `define DECODE_MODE             1'b1
@@ -24,3 +27,4 @@
 `define CODE_RATE_2             1'b0 // 1/2
 `define CODE_RATE_3             1'b1 // 1/3
 
+`endif

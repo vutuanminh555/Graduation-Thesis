@@ -4,8 +4,8 @@
 module endec_tb(); 
 
 reg clk, rst, en; // need changing
-reg [`MAX_CODE_RATE -1:0] i_code_rate;
-reg [`MAX_CONSTRAINT_LENGTH - 1:0] i_constr_len;
+reg i_code_rate;
+reg [1:0] i_constr_len;
 reg [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE - 1:0];
 reg i_mode_sel;
 reg i_encoder_bit;
