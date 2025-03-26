@@ -4,9 +4,13 @@
 module endec_tb(); 
 
 reg clk, rst, en; // need changing
+reg [`MAX_CODE_RATE -1:0] i_code_rate;
+reg [`MAX_CONSTRAINT_LENGTH - 1:0] i_constr_len;
+reg [`MAX_SHIFT_REG_NUM - 1:0] gen_poly;
 reg i_mode_sel;
 reg i_encoder_bit;
 reg [`TRACEBACK_DEPTH - 1:0] i_decoder_data_frame;
+
 
 wire [`MAX_CODE_RATE - 1:0] o_encoder_data;
 wire o_encoder_done;
@@ -21,6 +25,9 @@ wire o_decoder_done;
 endec E1 (  .sys_clk(clk), // add code rate. constraint length. poly input 
             .rst(rst),
             .en(en),
+            .i_code_rate(i_code_rate),
+            .i_constr_len(i_constr_len),
+            .i_gen_poly(i_gen_poly),
             .i_mode_sel(i_mode_sel),
             .i_encoder_bit(i_encoder_bit), 
             .i_decoder_data_frame(i_decoder_data_frame), 
@@ -46,6 +53,9 @@ end
 
 initial
 begin
+    i_code_rate = ;
+    i_constr_len = ;
+    i_gen_poly = ;
     i_mode_sel = ;
     i_encoder_bit = ;
     i_decoder_data_frame = ;
