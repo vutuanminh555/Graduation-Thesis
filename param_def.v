@@ -1,8 +1,12 @@
 // constant
+`define ENCODE_MODE             1'b0
+`define DECODE_MODE             1'b1
+
 `define MAX_CODE_RATE           3
 `define MAX_CONSTRAINT_LENGTH   9
 `define MAX_STATE_NUM           256 // = 2 ^ (MAX_CONSTRAINT_LENGTH - 1), must be hardcoded         
 `define RADIX                   4 // transition per state
+
 
 // derivative
 `define MAX_SHIFT_REG_NUM       `MAX_CONSTRAINT_LENGTH-1 

@@ -14,7 +14,7 @@ module endec(   sys_clk, rst, en,
 input sys_clk, rst, en;
 input [`MAX_CODE_RATE - 1:0] i_code_rate;
 input [`MAX_CONSTRAINT_LENGTH -1:0] i_constr_len;
-input [`MAX_SHIFT_REG_NUM - 1:0] i_gen_poly;
+input [`MAX_SHIFT_REG_NUM - 1:0] i_gen_poly [`MAX_CODE_RATE - 1:0];
 input i_mode_sel;
 input i_encoder_bit;
 input [`TRACEBACK_DEPTH - 1:0] i_decoder_data_frame;

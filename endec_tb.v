@@ -6,7 +6,7 @@ module endec_tb();
 reg clk, rst, en; // need changing
 reg [`MAX_CODE_RATE -1:0] i_code_rate;
 reg [`MAX_CONSTRAINT_LENGTH - 1:0] i_constr_len;
-reg [`MAX_SHIFT_REG_NUM - 1:0] gen_poly;
+reg [`MAX_SHIFT_REG_NUM - 1:0] i_gen_poly [`MAX_CODE_RATE - 1:0];
 reg i_mode_sel;
 reg i_encoder_bit;
 reg [`TRACEBACK_DEPTH - 1:0] i_decoder_data_frame;
@@ -53,12 +53,13 @@ end
 
 initial
 begin
-    i_code_rate = ;
-    i_constr_len = ;
-    i_gen_poly = ;
-    i_mode_sel = ;
-    i_encoder_bit = ;
-    i_decoder_data_frame = ;
+    i_code_rate = 2;
+    i_constr_len = 3;
+    i_gen_poly[0] = 9'b000000111;
+    i_gen_poly[1] = 9'b000000101;
+    i_mode_sel = `DECODE_MODE;
+    i_encoder_bit = 0;
+    i_decoder_data_frame = 0;
 end
 
 // initial
