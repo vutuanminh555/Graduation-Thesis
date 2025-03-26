@@ -26,6 +26,7 @@ logic [1:0] pair_input; // hardcoded, related to radix
 
 // temp variable for encode mode
 logic [`MAX_CONSTRAINT_LENGTH - 2:0] state = 0; // state doesnt count input bit
+logic [`MAX_CODE_RATE - 1:0] encoder_data;
 
 // integer to use with loop
 integer pair_input_value; // all possible input
@@ -33,33 +34,34 @@ integer state_value;  // all possible state for given K
 
 
 
-always @(posedge clk or negedge rst) // should utilize combinational logic to generate output for maximum speed
+always @(posedge clk or negedge rst) // write memory on clock edge 
 begin
     if(rst == 0) // default all output and temp signal to 0
     begin
         o_mux <= 0;
         o_encoder_data <= 0;
         o_encoder_done <= 0;
+        //first_state <= 0;
     end
     else
     begin
-        if(en_conv == 1) // write value to output and memory only when finished calculating
+        if(en_ce == 1)
         begin 
-            if(i_mode_sel == `DECODE_MODE)  // need to shift right 2 times and 2 next state
+            if(i_mode_sel == `DECODE_MODE)  
             begin
                 for(state_value = 0; state_value < `MAX_STATE_NUM; state_value = state_value + 1) // scan through every possible state
                 begin
                     for(pair_input_value = 0; pair_input_value < `RADIX; pair_input_value = pair_input_value + 1) // scan through all possible input with each state
                     begin  // for each iteration need to calculate 
-                        pair_input <= 2'(pair_input_value);
-                        o_first_data <= encode(i_gen_poly, {first_state, pair_input[0]});
-                        first_state <= {}
+                        //first_state <= state_value; // reset the cycle
+                        o_mux <= {pair_input, first_state, second_state, third_state, o_second_data, o_first_data};
                     end
                 end 
             end
             else if(i_mode_sel == `ENCODE_MODE) 
             begin
-                o_encoder_data <= encode(i_gen_poly, {state, i_encoder_bit}); // MSB to LSB
+                //o_encoder_data <= encode(i_gen_poly, {state, i_encoder_bit}); // MSB to LSB
+                o_encoder_data <= encoder_data;
                 state <= {state[`MAX_CONSTRAINT_LENGTH - 3:0], i_encoder_bit}; // shift and change state
             end 
             else 
@@ -76,14 +78,55 @@ begin
     end
 end
 
-always @(*) // changing between working modes: encoder, decoder, different constraint length and code rate
-begin
+always @(*) // read and calculate data from memory
+begin 
+    if(rst == 0 )
+    begin
+        pair_input = 0;
+        o_first_data = 0;
+        first_state = 0;
+        second_state = 0;
+        o_second_data = 0;
+        third_state = 0;
 
+        encoder_data = 0;
+    end
+    else
+    begin
+        if(en_ce == 1) 
+        begin 
+            if(i_mode_sel == `DECODE_MODE)  // need to shift right 2 times and 2 next state
+            begin
+                pair_input = 2'(pair_input_value); // get pair_input_value
+
+                first_state = state_value;
+                o_first_data = encode(i_gen_poly, {first_state, pair_input[0]}); // calculate the first output data
+                second_state = {first_state[`MAX_CONSTRAINT_LENGTH - 3:0], pair_input[0]}; // combine with first bit to create new state, prepare for second bit calculation
+
+                o_second_data = encode(i_gen_poly, {second_state, pair_input[1]}); // calculate the second output data
+                third_state = {second_state[`MAX_CONSTRAINT_LENGTH - 3:0], pair_input[1]}; // calculate third state for mux output
+            end
+            else if(i_mode_sel == `ENCODE_MODE) 
+            begin
+                encoder_data = encode(i_gen_poly, {state, i_encoder_bit});
+            end 
+            else 
+            begin
+
+            end  
+        end
+        else // en_ce != 0
+        begin
+            // o_mux <= 0;
+            // o_encoder_data <= 0;
+            // o_encoder_done <= 0;
+        end
+    end
 end
 
 function logic[`MAX_CODE_RATE - 1:0] encode (   input logic [`MAX_CONSTRAINT_LENGTH - 1:0] gen_poly [`MAX_CODE_RATE - 1:0], // max k outputs 
                                                 input logic [`MAX_CONSTRAINT_LENGTH - 1:0] mux_state); // state combine with input
-    logic[`MAX_CODE_RATE - 1:0] encoded_data = 0;
+    static logic[`MAX_CODE_RATE - 1:0] encoded_data = 0;
     integer i;
     integer k;
     for(i = 0; i < `MAX_CODE_RATE; i = i + 1) // calculate all possible outputs
