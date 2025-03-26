@@ -12,8 +12,8 @@ module endec(   sys_clk, rst, en,
                 o_decoder_data, o_decoder_done);  
 
 input sys_clk, rst, en;
-input [`MAX_CODE_RATE - 1:0] i_code_rate;
-input [`MAX_CONSTRAINT_LENGTH - 1:0] i_constr_len;
+input i_code_rate;
+input [1:0] i_constr_len; 
 input [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE - 1:0];
 input i_mode_sel;
 input i_encoder_bit;
@@ -64,7 +64,7 @@ conv_encoder CE1(   .clk(sys_clk),
                     .o_encoder_data(o_encoder_data),
                     .o_encoder_done(o_encoder_done));
 
-extract E1 (.rst(rst),
+slice S1 (  .rst(rst),
             .clk(sys_clk),
             .en_e(en_e),
             .i_data_frame(i_decoder_data_frame),

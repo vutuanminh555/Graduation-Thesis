@@ -15,5 +15,12 @@
 `define DATA_FRAME_LENGTH       `TRACEBACK_DEPTH/`MAX_CODE_RATE
 `define MAX_TRANSITION_NUM      `RADIX*`MAX_STATE_NUM       
 
+// select constraint length 
+`define CONSTR_LEN_5            2'b00
+`define CONSTR_LEN_7            2'b01
+`define CONSTR_LEN_9            2'b10
 
+// select code rate
+`define CODE_RATE_2             1'b0 // 1/2
+`define CODE_RATE_3             1'b1 // 1/3
 

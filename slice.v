@@ -1,7 +1,7 @@
 `include "param_def.v"
 `timescale 1ns / 1ps
 
-module extract( rst, clk, en_extract,
+module slice(   rst, clk, en_extract,
                 i_data_frame, 
                 o_rx);
 
