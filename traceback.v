@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module traceback_output(clk, rst, en_t,
+module traceback(clk, rst, en_t,
                         i_sel_node, i_bck_prv_st,
                         o_data, o_done);
 

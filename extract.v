@@ -1,15 +1,16 @@
+`include "param_def.v"
 `timescale 1ns / 1ps
 
-module extract_bit(rst,clk,en_extract,
-                    i_data, 
-                    o_Rx);
+module extract( rst, clk, en_extract,
+                i_data_frame, 
+                o_rx);
 
 input rst,clk,en_extract;
-input [59:0] i_data_frame; // depends on traceback depth, choose between 120 and 60
+input [`TRACEBACK_DEPTH - 1:0] i_data_frame; // depends on traceback depth, choose between 120 and 60
 
-output reg [3:0] o_Rx; // changed to 4 bit
+output reg [`RADIX - 1:0] o_rx; // changed to 4 bit
 
-reg [3:0] count;
+//reg [3:0] count;
 
 // always @ (posedge clk or negedge rst)  // extract 4 bit (radix-4) at a time
 // begin

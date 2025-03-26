@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module memory(  clk, rst, en_m,
+module trellis_diagr(  clk, rst, en_m,
                 i_fwd_nxt_st,
                 o_bck_prv_st);
 
