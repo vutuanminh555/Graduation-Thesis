@@ -1,24 +1,33 @@
+`include "param_def.v"
 `timescale 1ns / 1ps
 
-module viterbi_decoder_tb();
+module endec_tb(); 
 
-reg clk,rst,en;
-reg [15:0] i_data;
+reg clk, rst, en; // need changing
+reg i_mode_sel;
+reg i_encoder_bit;
+reg [`TRACEBACK_DEPTH - 1:0] i_decoder_data_frame;
 
-wire [7:0] o_data;
-wire o_done;
+wire [`MAX_CODE_RATE - 1:0] o_encoder_data;
+wire o_encoder_done;
+wire [`DATA_FRAME_LENGTH - 1:0] o_decoder_data;
+wire o_decoder_done;
 
-reg [5:0] count;
-reg [12:0] index;
-integer file_outputs;
-reg [15:0] in_ram [0:1024];
+// reg [5:0] count;
+// reg [12:0] index;
+// integer file_outputs;
+// reg [15:0] in_ram [0:1024];
 
-viterbi_decoder V1 (.sys_clk(clk),
-                    .rst(rst),
-                    .en(en),
-                    .i_data(i_data),
-                    .o_data(o_data),
-                    .o_done(o_done));
+endec E1 (  .sys_clk(clk), // add code rate. constraint length. poly input 
+            .rst(rst),
+            .en(en),
+            .i_mode_sel(i_mode_sel),
+            .i_encoder_bit(i_encoder_bit), 
+            .i_decoder_data_frame(i_decoder_data_frame), 
+            .o_encoder_data(o_encoder_data),
+            .o_encoder_done(o_encoder_done),
+            .o_decoder_data(o_decoder_data), 
+            .o_decoder_done(o_decoder_done));
 
 always #5 clk = ~clk;
 
@@ -33,6 +42,13 @@ begin
         #10 rst = 0;
         #1 rst = 1;
         
+end
+
+initial
+begin
+    i_mode_sel = ;
+    i_encoder_bit = ;
+    i_decoder_data_frame = ;
 end
 
 // initial
@@ -61,15 +77,15 @@ end
 
 
 //direct test
-initial
-begin
-    i_data = 16'b1101101010100110;
-end
+// initial
+// begin
+//     i_data = 16'b1101101010100110;
+// end
 
-always @ (posedge o_done)
-begin
-    $display("Output data is: %b\n", o_data);
-    $finish;
-end
+// always @ (posedge o_done)
+// begin
+//     $display("Output data is: %b\n", o_data);
+//     $finish;
+// end
 
 endmodule

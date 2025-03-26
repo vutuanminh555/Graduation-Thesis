@@ -1,12 +1,12 @@
 `include "param_def.v"
 `timescale 1ns / 1ps
 
-module viterbi_decoder( sys_clk, rst, en,
-                        i_mode_sel,
-                        i_encoder_bit, 
-                        i_decoder_data_frame, 
-                        o_encoder_data, o_encoder_done,
-                        o_decoder_data, o_decoder_done); // need to change wire width 
+module endec(   sys_clk, rst, en,
+                i_mode_sel,
+                i_encoder_bit, 
+                i_decoder_data_frame, 
+                o_encoder_data, o_encoder_done,
+                o_decoder_data, o_decoder_done); // need to change wire width 
 
 input sys_clk, rst, en;
 input i_mode_sel;
@@ -46,43 +46,43 @@ control C1 (.clk(sys_clk),
             .en_m(en_m),
             .en_t(en_t));
 
-convolutional_encoder Ce1(.clk(sys_clk),
-                        .rst(rst),
-                        .en_c(en_c),
-                        .gen_poly(gen_poly),
-                        .i_bit(i_encoder_bit),
-                        .mode_sel(i_mode_sel),
-                        .o_mux(mux_data)
-                        .o_encoder_data(o_encoder_data)
-                        .o_encoder_done(o_encoder_done));
+convolutional_encoder CE1(  .clk(sys_clk),
+                            .rst(rst),
+                            .en_c(en_c),
+                            .gen_poly(gen_poly),
+                            .i_bit(i_encoder_bit),
+                            .mode_sel(i_mode_sel),
+                            .o_mux(mux_data)
+                            .o_encoder_data(o_encoder_data)
+                            .o_encoder_done(o_encoder_done));
 
-branch_metric Br1 (.clk(sys_clk),
-                    .rst(rst),
-                    .en_b(en_b),
-                    .i_Rx(rx),
-                    .i_mux(mux_data),
-                    .o_dist(dist));
-
-extract_bit Ex1 (   .rst(rst),
+extract_bit EB1 (   .rst(rst),
                     .clk(sys_clk),
                     .en_e(en_e),
                     .i_data_frame(i_decoder_data_frame),
                     .o_Rx(rx));
 
-add_compare_select Add1 (   .clk(sys_clk),
+branch_metric BM1 ( .clk(sys_clk),
+                    .rst(rst),
+                    .en_b(en_b),
+                    .i_rx(rx),
+                    .i_mux(mux_data),
+                    .o_dist(dist));
+
+add_compare_select ACS1 (   .clk(sys_clk),
                             .rst(rst),
                             .en_a(en_a),
                             .i_dist(dist),
                             .o_fwd_nxt_st(fwd_nxt_st),
                             .o_sel_node(sel_node));
 
-memory M1 (.clk(sys_clk),
+memory M1 ( .clk(sys_clk),
             .rst(rst),
             .en_m(en_m),
             .i_fwd_nxt_st(fwd_nxt_st),
             .o_bck_prv_st(bck_prv_st));
 
-traceback_output Tr1 (  .clk(sys_clk),
+traceback_output TO1 (  .clk(sys_clk),
                         .rst(rst),
                         .en_t(en_t),
                         .i_sel_node(sel_node),
