@@ -1,4 +1,4 @@
-`include "param_def.v"
+`include "param_def.sv"
 `timescale 1ns / 1ps
 
 module endec(   sys_clk, rst, en,
@@ -36,7 +36,7 @@ wire [`MAX_CONSTRAINT_LENGTH - 1:0] bck_prv_st [`MAX_STATE_NUM - 1:0];
 
 wire [31:0] mux_data; // combined data from encoder
 
-wire [2:0] dist [`MAX_TRANSITION_NUM - 1:0];
+wire [2:0] distance [`MAX_TRANSITION_NUM - 1:0];
 
 wire [`MAX_SHIFT_REG_NUM - 1:0] fwd_nxt_st [`MAX_STATE_NUM - 1:0];
 
@@ -75,12 +75,12 @@ branch_metric BM1 ( .clk(sys_clk),
                     .en_b(en_b),
                     .i_rx(rx),
                     .i_mux(mux_data),
-                    .o_dist(dist));
+                    .o_distance(distance));
 
 add_compare_select ACS1 (   .clk(sys_clk),
                             .rst(rst),
                             .en_a(en_a),
-                            .i_dist(dist),
+                            .i_distance(distance),
                             .o_fwd_nxt_st(fwd_nxt_st),
                             .o_sel_node(sel_node));
 

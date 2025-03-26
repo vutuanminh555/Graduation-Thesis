@@ -1,4 +1,4 @@
-`include "param_def.v"
+`include "param_def.sv"
 `timescale 1ns/1ps
 
 module conv_encoder(clk, rst, en_c,
