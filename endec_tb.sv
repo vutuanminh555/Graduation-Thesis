@@ -57,6 +57,7 @@ begin
     i_constr_len = 1;
     i_gen_poly[0] = 9'b000000111;
     i_gen_poly[1] = 9'b000000101;
+    i_gen_poly[2] = 9'b000000000;
     i_mode_sel = `DECODE_MODE;
     i_encoder_bit = 1'b0;
     i_decoder_data_frame = 16'b1101101010100110;
