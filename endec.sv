@@ -34,9 +34,9 @@ wire [`MAX_CONSTRAINT_LENGTH - 1:0] bck_prv_st [`MAX_STATE_NUM - 1:0];
 // encoder
 
 
-wire [31:0] mux_data; // combined data from encoder
+wire [15:0] mux_data; // combined data from encoder
 
-wire [2:0] distance [`MAX_TRANSITION_NUM - 1:0];
+wire [2:0] distance [`MAX_TRANSITION_NUM - 1:0]; // should use 2D vector
 
 wire [`MAX_SHIFT_REG_NUM - 1:0] fwd_nxt_st [`MAX_STATE_NUM - 1:0];
 
@@ -75,12 +75,12 @@ branch_metric BM1 ( .clk(sys_clk),
                     .en_bm(en_bm),
                     .i_rx(rx),
                     .i_mux(mux_data),
-                    .o_distance(distance));
+                    .o_dist(distance));
 
 add_compare_select ACS1 (   .clk(sys_clk),
                             .rst(rst),
                             .en_acs(en_acs),
-                            .i_distance(distance),
+                            .i_dist(distance),
                             .o_fwd_nxt_st(fwd_nxt_st),
                             .o_sel_node(sel_node));
 
