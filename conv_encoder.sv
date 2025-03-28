@@ -128,9 +128,9 @@ function automatic logic[`MAX_CODE_RATE - 1:0] encode ( input logic [`MAX_CONSTR
                                                         input logic [`MAX_CONSTRAINT_LENGTH - 1:0] mux_state); // state combine with input
     logic [`MAX_CODE_RATE - 1:0] encoded_data;
     encoded_data = 0;
-    for(int i = 0; i < `MAX_CODE_RATE; i = i + 1) // calculate all possible outputs
+    for(int i = 0; i < `MAX_CODE_RATE; i++) // calculate all possible outputs
     begin
-        for(int k = 0; k < `MAX_CONSTRAINT_LENGTH; k = k + 1) // scanning all reg block in polynomials
+        for(int k = 0; k < `MAX_CONSTRAINT_LENGTH; k++) // scanning all reg block in polynomials
         begin
             if(gen_poly[i][k] == 1) // output i use k block in state 
             begin

@@ -7,17 +7,17 @@
 
 `define MAX_CODE_RATE           3
 `define MAX_CONSTRAINT_LENGTH   9
-`define MAX_STATE_NUM           256 // = 2 ^ (MAX_CONSTRAINT_LENGTH - 1), must be hardcoded         
 `define RADIX                   4 // transition per state
 
 
-// derivative
+`define MAX_STATE_NUM           256 // = 2 ^ (MAX_CONSTRAINT_LENGTH - 1)        
 `define MAX_STATE_REG_NUM       `MAX_CONSTRAINT_LENGTH-1 
-`define DECODE_BIT_NUM          `RADIX/2 // = log2(`RADIX)
-`define TRACEBACK_DEPTH         5*`MAX_SHIFT_REG_NUM*`MAX_CODE_RATE/2 // equal 5*(K-1)*code rate with radix-2 and half of that with radix-4
-`define DATA_FRAME_LENGTH       `TRACEBACK_DEPTH/`MAX_CODE_RATE
-`define MAX_TRANSITION_NUM      `RADIX*`MAX_STATE_NUM  
-`define SLICED_INPUT_NUM        `MAX_CODE_RATE*DECODE_BIT_NUM     
+`define DECODE_BIT_NUM          2 //`RADIX/2 // = log2(`RADIX)
+`define TRACEBACK_DEPTH         60 //5*`MAX_STATE_REG_NUM*`MAX_CODE_RATE/2 // equal 5*(K-1)*code rate with radix-2 and half of that with radix-4
+`define DATA_FRAME_LENGTH       20 //`TRACEBACK_DEPTH/`MAX_CODE_RATE
+`define MAX_TRANSITION_NUM      1024 //`RADIX*`MAX_STATE_NUM  
+`define SLICED_INPUT_NUM        6//`MAX_CODE_RATE*DECODE_BIT_NUM  
+`define MAX_INPUT_NUM           64   
 
 // select constraint length 
 `define CONSTR_LEN_5            2'b00

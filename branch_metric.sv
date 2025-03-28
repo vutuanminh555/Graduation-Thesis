@@ -17,24 +17,23 @@ logic [2:0] bm_mem [`SLICED_INPUT_NUM - 1:0][`MAX_STATE_REG_NUM - 1:0][`DECODE_B
 logic [2:0] cal_dist [`SLICED_INPUT_NUM - 1:0];
 
 
-
 always @(posedge clk or negedge rst)
 begin
     if(rst == 0)  // add cal_dist = 0
     begin
-        for(int i = 0; i < `SLICED_INPUT_NUM; i = i + 1)
+        for(int i = 0; i < `MAX_INPUT_NUM; i++) // test index again 
         begin
-            for(int j = 0; j < `MAX_STATE_REG_NUM; j = j + 1)
+            for(int j = 0; j < `MAX_STATE_NUM; j++)
             begin
-                for(int k = 0; k < `DECODE_BIT_NUM; k = k + 1)
+                for(int k = 0; k < `RADIX; k++)
                 begin
                     bm_mem[i][j][k] <= 0; // default to 0
                 end 
             end
         end
-        for(int i = 0; i < `MAX_STATE_REG_NUM; i = i + 1)
+        for(int i = 0; i < `MAX_STATE_NUM; i++)
         begin
-            for(int j = 0; j < `DECODE_BIT_NUM; j = j + 1)
+            for(int j = 0; j < `RADIX; j++)
             begin
                 o_dist[i][j] <= 0;
             end
@@ -44,12 +43,15 @@ begin
     begin
         if (en_bm == 1)  
         begin // save to memory
-            
+            for(int i = 0; i < `MAX_INPUT_NUM; i++)  // save to memory
+            begin
+                bm_mem[i][i_mux[13:6]][i_mux[5:0]] <= cal_dist[i];
+            end
         end
         else 
-        for(int i = 0; i < `MAX_STATE_REG_NUM; i = i + 1)
+        for(int i = 0; i < `MAX_STATE_NUM; i++)
         begin
-            for(int j = 0; j < `DECODE_BIT_NUM; j = j + 1)
+            for(int j = 0; j < `RADIX; j++)
             begin
                 o_dist[i][j] <= 0;
             end
@@ -59,12 +61,12 @@ end
 
 always @(*) 
 begin 
-    for(int i = 0; i < `SLICED_INPUT_NUM; i = i + 1) // for each possible input
+    for(int i = 0; i < `MAX_INPUT_NUM; i++) // for each possible input
     begin
         logic [`SLICED_INPUT_NUM - 1:0] diff;
-        diff = `SLICED_INPUT_NUM(i);
-        diff = diff ^ i_mux[`SLICED_INPUT_NUM - 1:0];
-        cal_dist[i] = $countones(diff);
+        diff = 6'(i);
+        diff = diff ^ i_mux[`SLICED_INPUT_NUM - 1:0]; // different bits become 1
+        cal_dist[i] = $countones(diff); // count 1 and write result
     end
 end
 

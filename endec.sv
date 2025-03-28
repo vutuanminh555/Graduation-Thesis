@@ -38,9 +38,9 @@ wire [15:0] mux_data; // combined data from encoder
 
 wire [2:0] distance [`MAX_TRANSITION_NUM - 1:0]; // should use 2D vector
 
-wire [`MAX_SHIFT_REG_NUM - 1:0] fwd_nxt_st [`MAX_STATE_NUM - 1:0];
+wire [`MAX_STATE_REG_NUM - 1:0] fwd_nxt_st [`MAX_STATE_NUM - 1:0];
 
-wire [`MAX_SHIFT_REG_NUM - 1:0] sel_node;
+wire [`MAX_STATE_REG_NUM - 1:0] sel_node;
 
 control C1 (.clk(sys_clk),
             .rst(rst),

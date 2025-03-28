@@ -9,8 +9,8 @@ input clk, rst, en_t;
 input [7:0] i_sel_node; 
 input [`MAX_CONSTRAINT_LENGTH - 1:0] i_bck_prv_st [`MAX_STATE_NUM - 1:0];
 
-output reg [`DATA_FRAME_LENGTH - 1:0] o_decoder_data;
-output reg o_decoder_done;
+output logic [`DATA_FRAME_LENGTH - 1:0] o_decoder_data;
+output logic o_decoder_done;
 
 // reg [7:0] select_bit_out;
 // reg [3:0] count;
