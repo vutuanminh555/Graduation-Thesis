@@ -31,6 +31,61 @@ begin
                 end 
             end
         end
+        // for(int i = 0; i < `MAX_STATE_NUM; i++)
+        // begin
+        //     for(int j = 0; j < `RADIX; j++)
+        //     begin
+        //         o_dist[i][j] <= 0;
+        //     end
+        // end
+    end
+    else
+    begin
+        if (en_bm == 1)  
+        begin
+            for(int i = 0; i < `MAX_INPUT_NUM; i++)  // save to memory
+            begin
+                bm_mem[i][i_mux[13:6]][i_mux[5:0]] <= cal_dist[i];
+            end
+        end
+        else 
+        begin
+            // for(int i = 0; i < `MAX_STATE_NUM; i++)
+            // begin
+            //     for(int j = 0; j < `RADIX; j++)
+            //     begin
+            //         o_dist[i][j] <= 0;
+            //     end
+            // end
+        end
+    end
+end
+
+always @(*) // precalculate bm
+begin 
+    if(rst == 0)
+    begin
+        for(int i = 0; i < `MAX_INPUT_NUM; i++)
+        begin
+            cal_dist[i] = 0;
+        end
+    end
+    else
+    begin
+        for(int i = 0; i < `MAX_INPUT_NUM; i++) // for each possible input
+        begin
+            logic [`SLICED_INPUT_NUM - 1:0] diff;
+            diff = 6'(i);
+            diff = diff ^ i_mux[`SLICED_INPUT_NUM - 1:0]; // different bits become 1
+            cal_dist[i] = $countones(diff); // count 1 and write result
+        end
+    end
+end
+
+always @(*) // output bm to o_dist
+begin
+    if(rst == 0)
+    begin
         for(int i = 0; i < `MAX_STATE_NUM; i++)
         begin
             for(int j = 0; j < `RADIX; j++)
@@ -41,38 +96,14 @@ begin
     end
     else
     begin
-        if (en_bm == 1)  
-        begin // save to memory
-            for(int i = 0; i < `MAX_INPUT_NUM; i++)  // save to memory
-            begin
-                bm_mem[i][i_mux[13:6]][i_mux[5:0]] <= cal_dist[i];
-            end
-        end
-        else 
         for(int i = 0; i < `MAX_STATE_NUM; i++)
         begin
-            for(int j = 0; j < `RADIX; j++)
+            for(int k = 0; k < `RADIX; k++)
             begin
-                o_dist[i][j] <= 0;
+                o_dist[i][k] = bm_mem[i_rx][i][k]; 
             end
         end
     end
-end
-
-always @(*) 
-begin 
-    for(int i = 0; i < `MAX_INPUT_NUM; i++) // for each possible input
-    begin
-        logic [`SLICED_INPUT_NUM - 1:0] diff;
-        diff = 6'(i);
-        diff = diff ^ i_mux[`SLICED_INPUT_NUM - 1:0]; // different bits become 1
-        cal_dist[i] = $countones(diff); // count 1 and write result
-    end
-end
-
-always @(*) // output bm to o_dist
-begin
-
 end
 
 always @(*) // fsm 

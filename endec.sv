@@ -25,22 +25,22 @@ output [`DATA_FRAME_LENGTH - 1:0] o_decoder_data;
 output o_decoder_done;
 
 
-wire en_ce, en_s, en_bm, en_acs, en_td, en_t;
+logic en_ce, en_s, en_bm, en_acs, en_td, en_t;
 
-wire [`RADIX - 1:0] rx;
+logic [`SLICED_INPUT_NUM - 1:0] rx;
 
-wire [`MAX_CONSTRAINT_LENGTH - 1:0] bck_prv_st [`MAX_STATE_NUM - 1:0];
+logic [`MAX_CONSTRAINT_LENGTH - 1:0] bck_prv_st [`MAX_STATE_NUM - 1:0];
 
 // encoder
 
 
-wire [15:0] mux_data; // combined data from encoder
+logic [15:0] mux_data; // combined data from encoder
 
-wire [2:0] distance [`MAX_TRANSITION_NUM - 1:0]; // should use 2D vector
+logic [2:0] distance [`MAX_STATE_REG_NUM - 1:0][`DECODE_BIT_NUM - 1:0]; // should use 2D vector
 
-wire [`MAX_STATE_REG_NUM - 1:0] fwd_nxt_st [`MAX_STATE_NUM - 1:0];
+logic [`MAX_STATE_REG_NUM - 1:0] fwd_nxt_st [`MAX_STATE_NUM - 1:0];
 
-wire [`MAX_STATE_REG_NUM - 1:0] sel_node;
+logic [`MAX_STATE_REG_NUM - 1:0] sel_node;
 
 control C1 (.clk(sys_clk),
             .rst(rst),
