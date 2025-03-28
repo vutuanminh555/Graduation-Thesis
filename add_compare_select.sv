@@ -12,7 +12,6 @@ input logic [2:0] i_dist [`MAX_TRANSITION_NUM - 1:0];
 output logic [7:0] o_fwd_nxt_st [255:0];
 output logic [7:0] o_sel_node;
 
-logic 
 
 // reg [4:0] sum00, sum10, sum01, sum11; // dai gia tri tu 0 - 16 , phai can den 5 bit
 // reg [4:0] min_sum;
