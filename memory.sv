@@ -1,7 +1,7 @@
 `include "param_def.sv"
 `timescale 1ns / 1ps
 
-module trellis_diagr(  clk, rst, en_td,
+module memory(  clk, rst, en_td,
                 i_fwd_nxt_st,
                 o_bck_prv_st);
 

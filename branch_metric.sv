@@ -8,14 +8,14 @@ module branch_metric(clk, rst, en_bm,
                                 // calculate distance, store in memory and then output branch metric for each input
 
 input clk, rst, en_bm;
-input [15:0] i_mux; // need input bit, state, nxt_state (nxt_state 2), output to calculate distance
+input [15:0] i_mux;
 input [`RADIX - 1:0] i_rx; // change to 4 bit 
 
-output [2:0] o_dist [`MAX_STATE_REG_NUM - 1:0][`RADIX - 1:0]; // 3 bit distance, 8 bit current state, 8 bit next state
+output [2:0] o_dist [`MAX_STATE_REG_NUM - 1:0][`RADIX - 1:0]; // 3 bit distance, 8 bit current state, 2 input bit 
 
-reg [2:0] bm_mem [`MAX_CODE_RATE*DECODE_BIT_NUM - 1:0][`MAX_STATE_REG_NUM - 1:0][`RADIX - 1:0]; // memory: max 6 bits different, 6 possible input bits sequence, state value, transition value  
+reg [2:0] bm_mem [`MAX_CODE_RATE*DECODE_BIT_NUM - 1:0][`MAX_STATE_REG_NUM - 1:0][`RADIX - 1:0]; // memory: 3 bits distance, 6 possible input bits, 8 bit state, 4 input bit  
 
-always @ (posedge clk or negedge rst)
+always @(posedge clk or negedge rst)
 begin
     if(rst == 0)  
     begin
@@ -38,11 +38,9 @@ begin
             
         end
         else 
-        begin // all output default to 0
-            for(i = 0; i < 16; i = i + 1)
-            begin
-                HD[i] = 0;
-            end
+        for(int i = 0; i < `MAX_TRANSITION_NUM; i = i + 1)
+        begin
+            o_dist[i] <= 0;
         end
     end
 end

@@ -25,7 +25,7 @@ output [`DATA_FRAME_LENGTH - 1:0] o_decoder_data;
 output o_decoder_done;
 
 
-wire en_ce, en_s, en_bm, en_acs, en_td, en_t;
+wire en_ce, en_s, en_bm, en_acs, en_m, en_t;
 
 wire [`RADIX - 1:0] rx;
 
@@ -49,7 +49,7 @@ control C1 (.clk(sys_clk),
             .o_en_s(en_s),
             .o_en_bm(en_bm),
             .o_en_acs(en_acs),
-            .o_en_td(en_td),
+            .o_en_m(en_m),
             .o_en_t(en_t));
 
 conv_encoder CE1(   .clk(sys_clk),
@@ -84,11 +84,11 @@ add_compare_select ACS1 (   .clk(sys_clk),
                             .o_fwd_nxt_st(fwd_nxt_st),
                             .o_sel_node(sel_node));
 
-trellis_diagr TD1 ( .clk(sys_clk),
-                    .rst(rst),
-                    .en_td(en_td),
-                    .i_fwd_nxt_st(fwd_nxt_st),
-                    .o_bck_prv_st(bck_prv_st));
+memory M1 ( .clk(sys_clk),
+            .rst(rst),
+            .en_m(en_m),
+            .i_fwd_nxt_st(fwd_nxt_st),
+            .o_bck_prv_st(bck_prv_st));
 
 traceback T1 (  .clk(sys_clk),
                 .rst(rst),

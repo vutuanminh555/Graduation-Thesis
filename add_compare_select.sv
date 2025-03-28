@@ -2,15 +2,17 @@
 `timescale 1ns / 1ps
 
 module add_compare_select(clk, rst, en_acs,
-                        i_distance,
+                        i_dist,
                         o_fwd_nxt_st,
                         o_sel_node);
 
-input clk, rst, en_acs;
-input [2:0] i_distance [`MAX_TRANSITION_NUM - 1:0];
+input logic clk, rst, en_acs;
+input logic [2:0] i_dist [`MAX_TRANSITION_NUM - 1:0];
 
-output reg [7:0] o_fwd_nxt_st [255:0];
-output reg [7:0] o_sel_node;
+output logic [7:0] o_fwd_nxt_st [255:0];
+output logic [7:0] o_sel_node;
+
+logic 
 
 // reg [4:0] sum00, sum10, sum01, sum11; // dai gia tri tu 0 - 16 , phai can den 5 bit
 // reg [4:0] min_sum;
