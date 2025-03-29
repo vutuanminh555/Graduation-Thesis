@@ -9,7 +9,7 @@ logic [1:0] i_constr_len;
 logic [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE - 1:0];
 logic i_mode_sel;
 logic i_encoder_bit;
-logic [`TRACEBACK_DEPTH - 1:0] i_decoder_data_frame;
+logic [15:0] i_decoder_data_frame; // pseudo code
 
 
 logic [`MAX_CODE_RATE - 1:0] o_encoder_data;

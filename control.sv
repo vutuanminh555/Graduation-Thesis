@@ -59,18 +59,23 @@ begin
     s1:
     begin
         o_en_ce = 1; 
-        o_en_s = 1; 
-        o_en_bm = 1; 
-        o_en_acs = 1; 
-        o_en_td = 1; 
-        o_en_t = 1;
-        nxt_state = s1; // s2
+        o_en_s = 0; 
+        o_en_bm = 0; 
+        o_en_acs = 0; 
+        o_en_td = 0; 
+        o_en_t = 0;
+        nxt_state = s2;
     end
     
     s2:
     begin
-        // en_extract=1; en_branch=1; en_add=1; en_memory=0; en_traceback=0;
-        // nxt_state = s3;
+        o_en_ce = 1; 
+        o_en_s = 0; 
+        o_en_bm = 1; 
+        o_en_acs = 0; 
+        o_en_td = 0; 
+        o_en_t = 0;
+        nxt_state = s2;
     end
     
     s3:

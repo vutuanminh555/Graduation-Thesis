@@ -7,7 +7,7 @@ module add_compare_select(clk, rst, en_acs,
                         o_sel_node);
 
 input logic clk, rst, en_acs;
-input logic [2:0] i_dist [`MAX_STATE_REG_NUM - 1:0][`DECODE_BIT_NUM - 1:0];
+input logic [2:0] i_dist [`MAX_STATE_NUM - 1:0][`RADIX - 1:0];
 
 output logic [7:0] o_fwd_nxt_st [255:0];
 output logic [7:0] o_sel_node;
