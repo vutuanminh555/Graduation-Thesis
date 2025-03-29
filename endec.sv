@@ -55,7 +55,7 @@ control C1 (.clk(sys_clk),
 conv_encoder CE1(   .clk(sys_clk),
                     .rst(rst),
                     .en_ce(en_ce),
-                    .i_code_rate(i_code_rate),
+                    .i_code_rate(i_code_rate), // is it necessary? 
                     .i_constr_len(i_constr_len),
                     .i_gen_poly(i_gen_poly),
                     .i_encoder_bit(i_encoder_bit),
@@ -67,6 +67,7 @@ conv_encoder CE1(   .clk(sys_clk),
 slice S1 (  .rst(rst),
             .clk(sys_clk),
             .en_s(en_s),
+            .i_code_rate(i_code_rate),
             .i_data_frame(i_decoder_data_frame),
             .o_rx(rx));
 

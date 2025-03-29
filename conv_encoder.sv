@@ -17,12 +17,8 @@ output logic [`MAX_CODE_RATE - 1:0] o_encoder_data; // encoded data per bit
 output logic o_encoder_done;
 
 // temp variables for decode mode using radix-4
-//logic [`MAX_STATE_REG_NUM - 1:0] d_first_state; // state doesnt count input bit
-//logic [`MAX_STATE_REG_NUM - 1:0] d_second_state;
-//logic [`MAX_STATE_REG_NUM - 1:0] d_third_state;
 logic [`MAX_CODE_RATE - 1:0] d_o_first_data; // first to second state
-logic [`MAX_CODE_RATE - 1:0] d_o_second_data; // second to third state
-//logic [1:0] d_pair_input; // hardcoded, related to radix 
+logic [`MAX_CODE_RATE - 1:0] d_o_second_data; // second to third state 
 
 // temp variable for encode mode
 logic [`MAX_STATE_REG_NUM - 1:0] e_state; // state doesnt count input bit
@@ -60,11 +56,10 @@ begin
                 begin
                     d_state_value <= d_state_value + 1; // only increase when have gone through all 4 possible inputs
                 end
-                o_mux <= {d_pair_input_value, d_state_value, d_o_second_data, d_o_first_data}; // 1 cycle delay, can skip second_state?
+                o_mux <= {d_pair_input_value, d_state_value, d_o_second_data, d_o_first_data};
             end
             else if(i_mode_sel == `ENCODE_MODE) 
             begin
-                //o_encoder_data <= encode(i_gen_poly, {state, i_encoder_bit}); // MSB to LSB
                 o_encoder_data <= encoder_data;
                 e_state <= {e_state[`MAX_STATE_REG_NUM - 2:0], i_encoder_bit}; // shift and change state
             end 
@@ -73,7 +68,7 @@ begin
 
             end  
         end
-        else // en_ce != 0
+        else 
         begin
             o_mux <= 0;
             o_encoder_data <= 0;
@@ -86,12 +81,8 @@ always @(*) // read and calculate data from memory
 begin 
     if(rst == 0 )
     begin
-        //d_pair_input = 0;
         d_o_first_data = 0;
-        //d_first_state = 0;
-        //d_second_state = 0;
         d_o_second_data = 0;
-        //d_third_state = 0;
         e_state = 0;
         encoder_data = 0;
     end
@@ -101,12 +92,8 @@ begin
         begin 
             if(i_mode_sel == `DECODE_MODE)  // need to shift right 2 times and 2 next state
             begin
-                //d_pair_input = d_pair_input_value; // get d_pair_input_value
-                //d_first_state = d_state_value;
                 d_o_first_data = encode(i_gen_poly, {d_state_value, d_pair_input_value[0]}); // calculate the first output data
-                //d_second_state = {d_state_value[`MAX_STATE_REG_NUM - 2:0], d_pair_input_value[0]}; // combine with first bit to create new state, prepare for second bit calculation
                 d_o_second_data = encode(i_gen_poly, {d_state_value[`MAX_STATE_REG_NUM - 2:0], d_pair_input_value[0], d_pair_input_value[1]}); // calculate the second output data
-                //d_third_state = {d_second_state[`MAX_STATE_REG_NUM - 2:0], d_pair_input[1]}; // calculate third state for mux output
             end
             else if(i_mode_sel == `ENCODE_MODE) 
             begin
