@@ -16,7 +16,6 @@ output logic [2:0] o_dist [`MAX_STATE_NUM - 1:0][`RADIX - 1:0]; // 3 bit distanc
 logic [2:0] bm_mem [`MAX_INPUT_NUM - 1:0][`MAX_STATE_NUM - 1:0][`RADIX - 1:0]; // memory: 3 bits distance, 6 slice bits, 8 bits state, 2 bits input 
 logic [2:0] cal_dist [`MAX_INPUT_NUM - 1:0];
 
-
 always @(posedge clk or negedge rst)
 begin
     if(rst == 0)
@@ -27,43 +26,30 @@ begin
             begin
                 for(int k = 0; k < `RADIX; k++)
                 begin
-                    bm_mem[i][j][k] <= 0; // default to 0
+                    bm_mem[i][j][k] <= 0; 
                 end 
             end
         end
-        // for(int i = 0; i < `MAX_STATE_NUM; i++)
-        // begin
-        //     for(int j = 0; j < `RADIX; j++)
-        //     begin
-        //         o_dist[i][j] <= 0;
-        //     end
-        // end
     end
     else
     begin
         if (en_bm == 1)  
         begin
-            for(int i = 0; i < `MAX_INPUT_NUM; i++)   
+            for(int i = 0; i < `MAX_INPUT_NUM; i++)   // finish after 1024 cycle, after that can start outputing distance
             begin
-                bm_mem[i][i_mux[13:6]][i_mux[15:14]] <= cal_dist[i]; // possible input, state, input
-                $display("i_mux input value is:%b\ni_mux output value is:%b\ncal_dist with input %6b is: %d\n", i_mux[15:14], i_mux[5:0], i, cal_dist[i]); // for debug purpose
+                bm_mem[i][i_mux[13:6]][i_mux[5:0]] <= cal_dist[i]; // possible input, state, input
+                //$display("Iteration %d   bm_mem value is: %d cal_dist value is: %d", i, bm_mem[i][i_mux[13:6]][i_mux[5:0]], cal_dist[i]); // bm_mem 1 cycle slower than cal_dist
             end
 
         end
         else 
         begin
-            // for(int i = 0; i < `MAX_STATE_NUM; i++)
-            // begin
-            //     for(int j = 0; j < `RADIX; j++)
-            //     begin
-            //         o_dist[i][j] <= 0;
-            //     end
-            // end
+
         end
     end
 end
 
-always @(*) // precalculate bm
+always @(*) // precalculate bm, working
 begin 
     if(rst == 0)
     begin
@@ -74,12 +60,16 @@ begin
     end
     else
     begin
-        for(int i = 0; i < `MAX_INPUT_NUM; i++) // for each possible input
+        if(en_bm == 1)
         begin
-            logic [`SLICED_INPUT_NUM - 1:0] diff;
-            diff = 6'(i);
-            diff = diff ^ i_mux[`SLICED_INPUT_NUM - 1:0]; // different bits become 1
-            cal_dist[i] = $countones(diff); // count 1 and write result
+            for(int i = 0; i < `MAX_INPUT_NUM; i++) // for each possible input
+            begin
+                cal_dist[i] = $countones(6'(i) ^ i_mux[`SLICED_INPUT_NUM - 1:0]); // count 1 and write result
+            end
+        end
+        else
+        begin
+
         end
     end
 end
@@ -98,19 +88,21 @@ begin
     end
     else
     begin
-        for(int i = 0; i < `MAX_STATE_NUM; i++)
+        if(en_bm == 1)
         begin
-            for(int k = 0; k < `RADIX; k++)
+            for(int i = 0; i < `MAX_STATE_NUM; i++)
             begin
-                o_dist[i][k] = bm_mem[i_rx][i][k]; 
+                for(int k = 0; k < `RADIX; k++)
+                begin
+                    o_dist[i][k] = bm_mem[i_rx][i][k]; 
+                end
             end
         end
+        else 
+        begin
+
+        end
     end
-end
-
-always @(*) // fsm 
-begin
-
 end
 
 endmodule

@@ -50,7 +50,7 @@ begin
                 d_pair_input_value <= d_pair_input_value + 1; // 1 state need 4 input value
                 if(d_state_value == `MAX_STATE_NUM - 1) // control through state value, not input value
                 begin
-                    d_state_value <= d_state_value; // reach maximum possible value
+                    //d_state_value <= d_state_value; // reach maximum possible value
                 end
                 else if(d_pair_input_value == `RADIX - 1)
                 begin
