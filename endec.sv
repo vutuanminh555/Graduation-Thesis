@@ -38,7 +38,7 @@ logic [15:0] mux_data; // combined data from encoder
 
 logic [2:0] distance [`MAX_STATE_NUM][`RADIX]; // should use 2D vector
 
-logic [`MAX_STATE_REG_NUM - 1:0] fwd_nxt_st [`MAX_STATE_NUM];
+logic [`MAX_STATE_REG_NUM - 1:0] fwd_prv_st [`MAX_STATE_NUM];
 
 logic [`MAX_STATE_REG_NUM - 1:0] sel_node;
 
@@ -82,13 +82,13 @@ add_compare_select ACS1 (   .clk(sys_clk),
                             .rst(rst),
                             .en_acs(en_acs),
                             .i_dist(distance),
-                            .o_fwd_nxt_st(fwd_nxt_st),
+                            .o_fwd_prv_st(fwd_prv_st),
                             .o_sel_node(sel_node));
 
 trellis_diagr TD1 ( .clk(sys_clk),
             .rst(rst),
             .en_td(en_td),
-            .i_fwd_nxt_st(fwd_nxt_st),
+            .i_fwd_prv_st(o_fwd_prv_st),
             .o_bck_prv_st(bck_prv_st));
 
 traceback T1 (  .clk(sys_clk),
