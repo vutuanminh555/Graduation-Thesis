@@ -8,7 +8,7 @@ module conv_encoder(clk, rst, en_ce,
 input logic clk, rst, en_ce;
 input logic i_code_rate;
 input logic [1:0] i_constr_len;
-input logic [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE - 1:0]; // max K = 9, max code rate = 3
+input logic [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE]; // max K = 9, max code rate = 3
 input logic i_encoder_bit; // 1 bit at a time, radix-4 not related
 input logic i_mode_sel; 
 
@@ -111,7 +111,7 @@ begin
     end
 end
 
-function automatic logic[`MAX_CODE_RATE - 1:0] encode ( input logic [`MAX_CONSTRAINT_LENGTH - 1:0] gen_poly [`MAX_CODE_RATE - 1:0], // max k outputs 
+function automatic logic[`MAX_CODE_RATE - 1:0] encode ( input logic [`MAX_CONSTRAINT_LENGTH - 1:0] gen_poly [`MAX_CODE_RATE], // max k outputs 
                                                         input logic [`MAX_CONSTRAINT_LENGTH - 1:0] mux_state); // state combine with input
     logic [`MAX_CODE_RATE - 1:0] encoded_data;
     encoded_data = 0;

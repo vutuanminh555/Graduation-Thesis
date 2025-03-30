@@ -9,7 +9,7 @@ input clk, rst, en;
 output reg o_en_ce, o_en_s, o_en_bm, o_en_acs, o_en_td, o_en_t;
 
 reg [2:0] state, nxt_state;
-reg [3:0] count;
+reg [1023:0] count;
 
 localparam [2:0] s0 = 000; // reset 
 localparam [2:0] s1 = 001; // extract
@@ -28,7 +28,10 @@ begin
     begin
         if (en == 1)
         begin
+            if(state == s2)
+            begin
             count <= count + 1; 
+            end
             state <= nxt_state;
         end
         else 
@@ -75,16 +78,21 @@ begin
         o_en_acs = 0; 
         o_en_td = 0; 
         o_en_t = 0;
+        if(count == 1023)
+        nxt_state = s3;
+        else
         nxt_state = s2;
     end
     
     s3:
     begin
-        // en_extract=1; en_branch=1; en_add=1; en_memory=1; en_traceback=0;
-        // if(count < 11)
-        //     nxt_state = s3;
-        // else 
-        //     nxt_state = s4;
+        o_en_ce = 1; 
+        o_en_s = 1; 
+        o_en_bm = 1; 
+        o_en_acs = 0; 
+        o_en_td = 0; 
+        o_en_t = 0;
+        nxt_state = s3;
     end
     
     s4:

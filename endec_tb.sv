@@ -6,7 +6,7 @@ module endec_tb();
 logic clk, rst, en; // need changing
 logic i_code_rate;
 logic [1:0] i_constr_len;
-logic [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE - 1:0];
+logic [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE];
 logic i_mode_sel;
 logic i_encoder_bit;
 logic [15:0] i_decoder_data_frame; // pseudo code

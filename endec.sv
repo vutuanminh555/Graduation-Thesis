@@ -14,7 +14,7 @@ module endec(   sys_clk, rst, en,
 input sys_clk, rst, en;
 input i_code_rate;
 input [1:0] i_constr_len; 
-input [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE - 1:0];
+input [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE];
 input i_mode_sel;
 input i_encoder_bit;
 input [15:0] i_decoder_data_frame; // pseudo code
@@ -29,16 +29,16 @@ logic en_ce, en_s, en_bm, en_acs, en_td, en_t;
 
 logic [`SLICED_INPUT_NUM - 1:0] rx;
 
-logic [`MAX_CONSTRAINT_LENGTH - 1:0] bck_prv_st [`MAX_STATE_NUM - 1:0];
+logic [`MAX_CONSTRAINT_LENGTH - 1:0] bck_prv_st [`MAX_STATE_NUM];
 
 // encoder
 
 
 logic [15:0] mux_data; // combined data from encoder
 
-logic [2:0] distance [`MAX_STATE_NUM - 1:0][`RADIX - 1:0]; // should use 2D vector
+logic [2:0] distance [`MAX_STATE_NUM][`RADIX]; // should use 2D vector
 
-logic [`MAX_STATE_REG_NUM - 1:0] fwd_nxt_st [`MAX_STATE_NUM - 1:0];
+logic [`MAX_STATE_REG_NUM - 1:0] fwd_nxt_st [`MAX_STATE_NUM];
 
 logic [`MAX_STATE_REG_NUM - 1:0] sel_node;
 

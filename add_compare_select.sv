@@ -7,143 +7,60 @@ module add_compare_select(clk, rst, en_acs,
                         o_sel_node);
 
 input logic clk, rst, en_acs;
-input logic [2:0] i_dist [`MAX_STATE_NUM - 1:0][`RADIX - 1:0];
+input logic [2:0] i_dist [`MAX_STATE_NUM][`RADIX];
 
-output logic [7:0] o_fwd_nxt_st [255:0];
+output logic [7:0] o_fwd_nxt_st [`MAX_STATE_NUM]; // hold next state value for each state (index: current state, value: nxt state)
 output logic [7:0] o_sel_node;
 
+logic [8:0] pm_mem [`MAX_STATE_NUM]; // hold path metric for each state
 
-// reg [4:0] sum00, sum10, sum01, sum11; // dai gia tri tu 0 - 16 , phai can den 5 bit
-// reg [4:0] min_sum;
-// reg [3:0] count;
-// reg [1:0] min_node;
+logic [1:0] shortest_path [`MAX_STATE_NUM];
 
-// always @(posedge clk or negedge rst) // use radix-4 instead 
-// begin
-//     if(rst == 0)
-//     begin
-//         count <= 3'b000;
-//         sum00 <= 5'b00000;  
-//         sum10 <= 5'b00000;
-//         sum01 <= 5'b00000;
-//         sum11 <= 5'b00000;
-//         o_prv_st_00 <= 2'b00;
-//         o_prv_st_01 <= 2'b00;
-//         o_prv_st_10 <= 2'b00;
-//         o_prv_st_11 <= 2'b00;
-//         o_sel_node <= 2'b00;
-//     end
-//     else 
-//     begin
-//     if(en_a == 1)  // state should be the state of the last 2 bit, but have to compare 4 possible transition
-//     begin   
-//                 if(((HD1 + sum00) == (HD5 + sum01)) || ((HD1 + sum00) < (HD5 + sum01)))
-//                 begin
-//                     sum00 <= HD1 + sum00;
-//                     o_prv_st_00 <= 2'b00; 
-//                 end
-//                 else
-//                 begin
-//                     sum00 <= HD5 + sum01; 
-//                     o_prv_st_00 <= 2'b01;
-//                 end
-            
-            
-//                 if(((HD2 + sum00) == (HD6 + sum01)) || ((HD2 + sum00) < (HD6 + sum01)))
-//                 begin
-//                     sum10 <= HD2 + sum00;
-//                     o_prv_st_10 <= 2'b00;
-//                 end
-//                 else
-//                 begin
-//                     sum10 <= HD6 + sum01;
-//                     o_prv_st_10 <= 2'b01;
-//                 end
-            
-            
-            
-//                 if(((HD3 + sum10) == (HD7 + sum11)) || ((HD3 + sum10) < (HD7 + sum11)))
-//                 begin
-//                     sum01 <= HD3 + sum10;
-//                     o_prv_st_01 <= 2'b10;
-//                 end
-//                 else
-//                 begin
-//                     sum01 <= HD7 + sum11;
-//                     o_prv_st_01 <= 2'b11;
-//                 end
-            
-            
-            
-//                 if(((HD4 + sum10) == (HD8 + sum11)) || ((HD4 + sum10) < (HD8 + sum11)))
-//                 begin
-//                     sum11 <= HD4 + sum10; 
-//                     o_prv_st_11 <= 2'b10;
-//                 end
-//                 else
-//                 begin
-//                     sum11 <= HD8 + sum11;
-//                     o_prv_st_11 <= 2'b11;
-//                 end
+always @(posedge clk or negedge rst)
+begin
+    if(rst == 0)
+    begin
+        for(int i = 0; i < `MAX_STATE_NUM; i++)
+        begin
+            pm_mem <= 0;
+        end
+    end
+    else 
+    begin
+        if(en_acs == 1)
+        begin
+            for(int i = 0; i < `MAX_STATE_NUM; i++)
+            begin
+                for(int j = 0; j < `RADIX; j++)
+                begin
+                    pm_mem[i] = pm_mem[i] + 
+                end
+            end
+        end
+        else
+        begin
 
-//         o_select_node <= min_node;
-//         count <= count + 1;
-//     end
-//     else
-//     begin
-//         count <= count;
-//         sum00 <= sum00;  
-//         sum10 <= sum10;
-//         sum01 <= sum01;
-//         sum11 <= sum11;
-//         o_prv_st_00 <= 2'b00;
-//         o_prv_st_01 <= 2'b00;
-//         o_prv_st_10 <= 2'b00;
-//         o_prv_st_11 <= 2'b00;
-//         o_sel_node <= 2'b00;
-//     end
-// end
-// end
+        end
+    end
+end
 
+always @(*) // find path with the smallest pm and 
+begin
+    if(rst == 0)
+    begin
 
-// always @ (posedge clk or negedge rst) // combinational logic
-// begin
-//     if(rst == 0)
-//     begin 
-//         min_sum = 5'b11111;
-//         min_node = 2'b00;
-//     end
-//     else
-//     begin
-//     if(count == 8 || count > 8)  
-//         begin 
-//         if(sum00 < min_sum) // thu tu uu tien neu bang nhau: 00 > 10 > 01 > 11
-//         begin
-//             min_sum = sum00;
-//             min_node = 2'b00;
-//         end
-//         else if(sum10 < min_sum) 
-//         begin
-//             min_sum = sum10;
-//             min_node = 2'b10;
-//         end
-//         else if(sum01 < min_sum)
-//         begin
-//             min_sum = sum01;
-//             min_node = 2'b01;
-//         end
-//         else if(sum11 < min_sum)
-//         begin
-//             min_sum = sum11;
-//             min_node = 2'b11;
-//         end
-//         end
-//         else
-//         begin
-//             min_sum = 5'b11111;
-//             min_node = 2'b00;
-//         end
-//     end
-// end
+    end
+    else 
+    begin
+        if(en_acs == 1)
+        begin
+
+        end
+        else 
+        begin
+
+        end
+    end
+end
 
 endmodule

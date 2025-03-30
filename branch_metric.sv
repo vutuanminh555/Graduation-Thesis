@@ -11,10 +11,10 @@ input logic clk, rst, en_bm;
 input logic [15:0] i_mux;
 input logic [`SLICED_INPUT_NUM - 1:0] i_rx; 
 
-output logic [2:0] o_dist [`MAX_STATE_NUM - 1:0][`RADIX - 1:0]; // 3 bit distance, 8 bit current state, 2 input bit 
+output logic [2:0] o_dist [`MAX_STATE_NUM][`RADIX]; // 3 bit distance, 8 bit current state, 2 input bit 
 
-logic [2:0] bm_mem [`MAX_INPUT_NUM - 1:0][`MAX_STATE_NUM - 1:0][`RADIX - 1:0]; // memory: 3 bits distance, 6 slice bits, 8 bits state, 2 bits input 
-logic [2:0] cal_dist [`MAX_INPUT_NUM - 1:0];
+logic [2:0] bm_mem [`MAX_INPUT_NUM][`MAX_STATE_NUM][`RADIX]; // memory: 3 bits distance, 6 slice bits, 8 bits state, 2 bits input 
+logic [2:0] cal_dist [`MAX_INPUT_NUM];
 
 always @(posedge clk or negedge rst)
 begin
@@ -37,8 +37,9 @@ begin
         begin
             for(int i = 0; i < `MAX_INPUT_NUM; i++)   // finish after 1024 cycle, after that can start outputing distance
             begin
-                bm_mem[i][i_mux[13:6]][i_mux[5:0]] <= cal_dist[i]; // possible input, state, input
-                //$display("Iteration %d   bm_mem value is: %d cal_dist value is: %d", i, bm_mem[i][i_mux[13:6]][i_mux[5:0]], cal_dist[i]); // bm_mem 1 cycle slower than cal_dist
+                bm_mem[i][i_mux[13:6]][i_mux[15:14]] <= cal_dist[i]; // possible input, state, input
+                // bm_mem 1 cycle slower than cal_dist
+                //$display("Iteration %d   bm_mem value is: %d cal_dist value is: %d", i, bm_mem[i][i_mux[13:6]][i_mux[5:0]], cal_dist[i]); 
             end
 
         end
@@ -62,7 +63,7 @@ begin
     begin
         if(en_bm == 1)
         begin
-            for(int i = 0; i < `MAX_INPUT_NUM; i++) // for each possible input
+            for(int i = 0; i < `MAX_INPUT_NUM; i++) // calculate hamming distance for each possible input
             begin
                 cal_dist[i] = $countones(6'(i) ^ i_mux[`SLICED_INPUT_NUM - 1:0]); // count 1 and write result
             end
@@ -92,15 +93,21 @@ begin
         begin
             for(int i = 0; i < `MAX_STATE_NUM; i++)
             begin
-                for(int k = 0; k < `RADIX; k++)
+                for(int j = 0; j < `RADIX; j++)
                 begin
-                    o_dist[i][k] = bm_mem[i_rx][i][k]; 
+                    o_dist[i][j] = bm_mem[i_rx][i][j];
                 end
             end
         end
         else 
         begin
-
+            for(int i = 0; i < `MAX_STATE_NUM; i++)
+            begin
+                for(int j = 0; j < `RADIX; j++)
+                begin
+                    o_dist[i][j] = 0;
+                end
+            end
         end
     end
 end
