@@ -96,6 +96,10 @@ begin
                 for(int j = 0; j < `RADIX; j++)
                 begin
                     o_dist[i][j] = bm_mem[i_rx][i][j];
+                    // if(i == 3 && j == 2 && i_rx == 6'b001011)
+                    // begin
+                    //     $display("o_dist value of state %b input %b sliced_bit %b is : %d\n", i, j, i_rx, o_dist[i][j]);
+                    // end
                 end
             end
         end

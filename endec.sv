@@ -88,7 +88,7 @@ add_compare_select ACS1 (   .clk(sys_clk),
 trellis_diagr TD1 ( .clk(sys_clk),
             .rst(rst),
             .en_td(en_td),
-            .i_fwd_prv_st(o_fwd_prv_st),
+            .i_fwd_prv_st(fwd_prv_st),
             .o_bck_prv_st(bck_prv_st));
 
 traceback T1 (  .clk(sys_clk),

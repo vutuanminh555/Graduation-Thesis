@@ -17,31 +17,26 @@ logic [8:0] pm_mem [`MAX_STATE_NUM][`RADIX]; // hold path metric for each transi
 
 logic [8:0] min_node;
 
-always @(posedge clk or negedge rst)
+logic [2:0] min_pm;
+logic [7:0] min_prv_st;
+
+always @(posedge clk or negedge rst) // update and save pm value for each node, working
 begin
     if(rst == 0)
     begin
         for(int i = 0; i < `MAX_STATE_NUM; i++)
         begin
             node_mem[i] <= 0;
-            // for(int j = 0; j <`RADIX; j++)
-            // begin
-            //     pm_mem[i][j] <= 0;
-            // end
         end
     end
     else 
     begin
         if(en_acs == 1)
         begin
-            for(int i = 0; i < `MAX_STATE_NUM; i++) // calculate pm for every transition, hold value based on next state
-            begin
-                node_mem[i] <= node_mem[i] + i_dist[o_fwd_prv_st[i]][i[1:0]]; // add value from distance of the shortest path
-                // for(int j = 0; j < `RADIX; j++) // i = state, j = input
-                // begin
-                //     // delay vs node_mem value ?
-                //     //pm_mem[i][j] <= node_mem[i] +  i_dist[i][j]; // distance to transit to next state
-                // end
+            for(int i = 0; i < `MAX_STATE_NUM; i++) // add value from distance of the shortest path, node_mem has 1 cycle delay to i_dist
+            begin 
+                node_mem[i] <= node_mem[i] + i_dist[o_fwd_prv_st[i]][{i[0],i[1]}]; // input bit order is reversed
+                //$display("node_mem state=%b prv_state is: %b input is: %b", i, o_fwd_prv_st[i], {i[0], i[1]});
             end
         end
         else
@@ -51,7 +46,7 @@ begin
     end
 end
 
-always @(*) // compare all transition to next state, choose smallest distance and output value 
+always @(*) // compare all transition to next state, choose smallest distance and output value , working, need to check input bits order
 begin
     if(rst == 0)
     begin
@@ -60,9 +55,11 @@ begin
             o_fwd_prv_st[i] = 0;
             for(int j = 0; j <`RADIX; j++)
             begin
-                pm_mem[i][k] = 0;
+                pm_mem[i][j] = 0;
             end
         end
+        min_pm = 3'b111;
+        min_prv_st = 0;
     end
     else 
     begin
@@ -72,23 +69,26 @@ begin
             begin
                 for(int j = 0; j < `RADIX; j++)
                 begin
-                    pm_mem[i][k] = node_mem[i] +  i_dist[i][j];
+                    pm_mem[i][j] = node_mem[i] +  i_dist[i][j];
                 end
             end
 
-            for(int i = 0; i < `MAX_STATE_NUM; i++) // calculating min_pm
+            for(int i = 0; i < `MAX_STATE_NUM; i++) // calculating min_pm, working
             begin
-                automatic logic [2:0] min_pm = 3'b111; // can always choose at least 1 path
-                automatic logic [7:0] min_prv_st = 0; 
+                min_pm = 3'b111; // can always choose at least 1 path
+                min_prv_st = 0; // reset value for the next iteration
                 for(int j = 0; j < `RADIX; j++) // find path with smallest distance 
                 begin
-                    if(pm_mem[{j[1:0],i[7:2]}][i[1:0]] < min_pm) // state with the same input and first 6 bit will have the same nxt_state
+                    if(pm_mem[{j[1:0],i[7:2]}][{i[0],i[1]}] < min_pm) // state with the same input and first 6 bit will have the same nxt_state
                     begin
-                        min_pm = pm_mem[{j[1:0],i[7:2]}][i[1:0]]; // priority: 00 > 01 > 10 > 11
+                        min_pm = pm_mem[{j[1:0],i[7:2]}][{i[0],i[1]}]; // priority: 00 > 01 > 10 > 11
                         min_prv_st = {j[1:0],i[7:2]};
                     end
+                    //$display("min_pm value is: %b", min_pm);
+                    //$display("State with the same next state %b is: %b Input value is: %b Distance: %d\n", i,{j[1:0],i[7:2]}, {i[0],i[1]},pm_mem[{j[1:0],i[7:2]}][{i[0],i[1]}]);
                 end 
                 // all next state have next state, not all current state have next state
+                //$display("Chosen prv_st for nxt_st %b: %b\n", i ,min_prv_st);
                 o_fwd_prv_st[i] = min_prv_st ; // output address is next state, value is previous state (can be reduced)
             end
         end
@@ -102,18 +102,18 @@ begin
     end
 end
 
-always @(*) // output min_node
+always @(*) // output min_node, working
 begin
     if(rst == 0)
     begin
         o_sel_node = 0;
-        min_node = {9{1'b1}};
+        min_node = 9'b111111111;
     end
     else
     begin
         if(en_acs == 1)
         begin
-            min_node = {9{1'b1}};
+            min_node = 9'b111111111;
             for(int i = 0; i < `MAX_STATE_NUM; i++)
             begin
                 if(node_mem[i] < min_node)
@@ -125,6 +125,7 @@ begin
         end
         else
         begin
+            min_node = 9'b111111111;
             o_sel_node = 0;
         end
     end

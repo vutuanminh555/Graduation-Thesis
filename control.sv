@@ -92,13 +92,18 @@ begin
         o_en_acs = 0; 
         o_en_td = 0; 
         o_en_t = 0;
-        nxt_state = s3;
+        nxt_state = s4;
     end
     
     s4:
     begin
-        // en_extract=0; en_branch=0; en_add=0; en_memory=1; en_traceback=1; // tat cac module khong dung den
-        // nxt_state = s4;
+        o_en_ce = 1; 
+        o_en_s = 1; 
+        o_en_bm = 1; 
+        o_en_acs = 1; 
+        o_en_td = 0; 
+        o_en_t = 0;
+        nxt_state = s4;
     end
 
     default:
