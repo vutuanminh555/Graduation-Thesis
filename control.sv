@@ -2,14 +2,18 @@
 `timescale 1ns / 1ps
 
 module control( clk, rst, en,
+                i_ood, i_cal_done, i_td_full,
                 o_en_ce, o_en_s, o_en_bm, o_en_acs, o_en_td, o_en_t);
 
-input clk, rst, en;
+input logic clk, rst, en;
+input logic i_ood;
+input logic i_cal_done;
+input logic i_td_full;
 
-output reg o_en_ce, o_en_s, o_en_bm, o_en_acs, o_en_td, o_en_t;
+output logic o_en_ce, o_en_s, o_en_bm, o_en_acs, o_en_td, o_en_t;
 
-reg [2:0] state, nxt_state;
-reg [1023:0] count;
+logic [2:0] state, nxt_state;
+logic [1023:0] count;
 
 localparam [2:0] s0 = 000; // reset 
 localparam [2:0] s1 = 001; // extract

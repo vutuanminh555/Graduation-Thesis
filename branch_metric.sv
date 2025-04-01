@@ -4,7 +4,8 @@
 module branch_metric(clk, rst, en_bm, 
                     i_rx,
                     i_mux,
-                    o_dist);    // use 3 bit (8 levels) to quantize, from 0 to 3.3V (not implemented yet)
+                    o_dist,
+                    o_cal_done);    // use 3 bit (8 levels) to quantize, from 0 to 3.3V (not implemented yet)
                                 // calculate distance, store in memory and then output branch metric for each input
 
 input logic clk, rst, en_bm;
@@ -12,6 +13,7 @@ input logic [15:0] i_mux;
 input logic [`SLICED_INPUT_NUM - 1:0] i_rx; 
 
 output logic [2:0] o_dist [`MAX_STATE_NUM][`RADIX]; // 3 bit distance, 8 bit current state, 2 input bit 
+output logic o_cal_done;
 
 logic [2:0] bm_mem [`MAX_INPUT_NUM][`MAX_STATE_NUM][`RADIX]; // memory: 3 bits distance, 6 slice bits, 8 bits state, 2 bits input 
 logic [2:0] cal_dist [`MAX_INPUT_NUM];

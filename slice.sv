@@ -3,13 +3,15 @@
 
 module slice(   rst, clk, en_s, 
                 i_code_rate ,i_data_frame, 
-                o_rx); // need to sync with bm to only output data after finish calculating all possible bm
+                o_rx,
+                o_ood); // need to sync with bm to only output data after finish calculating all possible bm
 
 input logic rst, clk, en_s;
 input logic i_code_rate;
 input logic [15:0] i_data_frame; // should be divided by 4 and 6, close to traceback_depth*sliced_input_num, choose 276
 
-output logic [`SLICED_INPUT_NUM - 1:0] o_rx;   
+output logic [`SLICED_INPUT_NUM - 1:0] o_rx;
+output logic o_ood; // detect end of file or file pointer  
 
 logic [3:0] count;
 

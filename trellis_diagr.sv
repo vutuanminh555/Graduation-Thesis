@@ -1,59 +1,68 @@
 `include "param_def.sv"
 `timescale 1ns / 1ps
 
-module trellis_diagr(  clk, rst, en_td, // change name
-                i_fwd_prv_st,
-                o_bck_prv_st);
+module trellis_diagr(   clk, rst, en_td, 
+                        i_fwd_prv_st,
+                        o_bck_prv_st, o_td_full);
 
 input logic clk, rst, en_td;
 input logic [7:0] i_fwd_prv_st [255:0];
 
 output logic [`MAX_CONSTRAINT_LENGTH - 1:0] o_bck_prv_st [`MAX_STATE_NUM - 1:0];
+output logic o_td_full;
 
+logic [7:0] td_mem [255:0][44:0]; // 256 node, traceback depth = 45 (5*K)
+logic [5:0] depth;
 
-// reg [3:0] count; 
-// reg [1:0] trellis_diagr[0:3][0:7];
-// reg [2:0] trace;
+logic wrk_mode; // create diagram / output data to traceback
 
-// integer i;
-// integer k;
+always @(posedge clk or negedge rst) // save data to memory 
+begin
+    if(rst == 0)
+    begin
+        for(int i = 0; i < 256; i++)
+        begin
+            for(int j = 0; j < 45; j++)
+            begin
+                td_mem[i][j] <= 0;
+            end
+        end
+        depth <= 0; 
+    end
+    else
+    begin
+        if(en_td == 1)
+        begin
+            for(int i = 0; i < 256; i++)
+            begin
+                td_mem[i][depth] <= i_fwd_prv_st[i]; 
+            end
+            depth <= depth + 1;
+        end
+        else
+        begin
 
-// always @ (posedge clk or negedge rst) // need to consider memory depth of 5 times the constraint length with radix-2 (5 x K x k) and half of that with radix-4
-// begin
-//     if (rst == 0)
-//     begin 
-//         count <= 0; 
-//         trace <= 7;
-//         for(i = 0; i < 4; i = i + 1)begin // tuong duong voi 4 x 8 phep gan 32 phan tu 
-//             for(k = 0; k < 8; k = k + 1)begin
-//                 trellis_diagr[i][k] <= 2'b00; // quy ve nut 00
-//             end
-//         end
-//     end
-//     else 
-//     begin
-//         if (en_memory == 1)  
-//         begin
-//             if(count < 8)
-//             begin
-//             trellis_diagr[0][count] <= i_prv_st_00; 
-//             trellis_diagr[2][count] <= i_prv_st_10; 
-//             trellis_diagr[1][count] <= i_prv_st_01;
-//             trellis_diagr[3][count] <= i_prv_st_11;
-//             count <= count + 1;
-//             end
+        end
+    end
+end
 
-//             if(count == 8 || count > 8)
-//             begin
-//                 o_bck_prv_st_00 <= trellis_diagr[0][trace]; 
-//                 o_bck_prv_st_10 <= trellis_diagr[2][trace]; 
-//                 o_bck_prv_st_01 <= trellis_diagr[1][trace]; 
-//                 o_bck_prv_st_11 <= trellis_diagr[3][trace];
-//                 if(trace != 0)
-//                 trace <= trace - 1;
-//             end
-//         end
-//     end
-// end
+always @(*) // change working mode
+begin
+    if(rst == 0)
+    begin
+        wrk_mode = 0;
+    end
+    else
+    begin
+        if(en_td == 1)
+        begin 
+
+        end
+        else
+        begin
+
+        end
+    end
+end
 
 endmodule

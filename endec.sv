@@ -11,19 +11,22 @@ module endec(   sys_clk, rst, en,
                 o_encoder_data, o_encoder_done,
                 o_decoder_data, o_decoder_done);  
 
-input sys_clk, rst, en;
-input i_code_rate;
-input [1:0] i_constr_len; 
-input [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE];
-input i_mode_sel;
-input i_encoder_bit;
-input [15:0] i_decoder_data_frame; // pseudo code
+input logic sys_clk, rst, en;
+input logic i_code_rate;
+input logic [1:0] i_constr_len; 
+input logic [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE];
+input logic i_mode_sel;
+input logic i_encoder_bit;
+input logic [15:0] i_decoder_data_frame; // pseudo code
 
-output [`MAX_CODE_RATE - 1:0] o_encoder_data;
-output o_encoder_done;
-output [`DATA_FRAME_LENGTH - 1:0] o_decoder_data;
-output o_decoder_done;
+output logic [`MAX_CODE_RATE - 1:0] o_encoder_data;
+output logic o_encoder_done;
+output logic [`DATA_FRAME_LENGTH - 1:0] o_decoder_data;
+output logic o_decoder_done;
 
+logic ood;
+logic cal_done;
+logic td_full;
 
 logic en_ce, en_s, en_bm, en_acs, en_td, en_t;
 
@@ -45,6 +48,9 @@ logic [`MAX_STATE_REG_NUM - 1:0] sel_node;
 control C1 (.clk(sys_clk),
             .rst(rst),
             .en(en),
+            .i_ood(ood),
+            .i_cal_done(cal_done),
+            .i_td_full(td_full),
             .o_en_ce(en_ce),
             .o_en_s(en_s),
             .o_en_bm(en_bm),
@@ -69,14 +75,16 @@ slice S1 (  .rst(rst),
             .en_s(en_s),
             .i_code_rate(i_code_rate),
             .i_data_frame(i_decoder_data_frame),
-            .o_rx(rx));
+            .o_rx(rx),
+            .o_ood(ood));
 
 branch_metric BM1 ( .clk(sys_clk),
                     .rst(rst),
                     .en_bm(en_bm),
                     .i_rx(rx),
                     .i_mux(mux_data),
-                    .o_dist(distance));
+                    .o_dist(distance),
+                    .o_cal_done(cal_done));
 
 add_compare_select ACS1 (   .clk(sys_clk),
                             .rst(rst),
@@ -86,10 +94,10 @@ add_compare_select ACS1 (   .clk(sys_clk),
                             .o_sel_node(sel_node));
 
 trellis_diagr TD1 ( .clk(sys_clk),
-            .rst(rst),
-            .en_td(en_td),
-            .i_fwd_prv_st(fwd_prv_st),
-            .o_bck_prv_st(bck_prv_st));
+                    .rst(rst),
+                    .en_td(en_td),
+                    .i_fwd_prv_st(fwd_prv_st),
+                    .o_bck_prv_st(bck_prv_st));
 
 traceback T1 (  .clk(sys_clk),
                 .rst(rst),
@@ -97,6 +105,7 @@ traceback T1 (  .clk(sys_clk),
                 .i_sel_node(sel_node),
                 .i_bck_prv_st(bck_prv_st),
                 .o_decoder_data(o_decoder_data),
-                .o_decoder_done(o_decoder_done));
+                .o_decoder_done(o_decoder_done),
+                .o_td_full(td_full));
 
 endmodule
