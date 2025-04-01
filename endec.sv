@@ -21,18 +21,19 @@ input logic [15:0] i_decoder_data_frame; // pseudo code
 
 output logic [`MAX_CODE_RATE - 1:0] o_encoder_data;
 output logic o_encoder_done;
-output logic [`DATA_FRAME_LENGTH - 1:0] o_decoder_data;
+output logic [7:0] o_decoder_data; // testing
 output logic o_decoder_done;
 
 logic ood;
 logic cal_done;
 logic td_full;
+logic td_empty;
 
 logic en_ce, en_s, en_bm, en_acs, en_td, en_t;
 
 logic [`SLICED_INPUT_NUM - 1:0] rx;
 
-logic [`MAX_CONSTRAINT_LENGTH - 1:0] bck_prv_st [`MAX_STATE_NUM];
+logic [7:0] bck_prv_st [256];
 
 // encoder
 
@@ -97,14 +98,17 @@ trellis_diagr TD1 ( .clk(sys_clk),
                     .rst(rst),
                     .en_td(en_td),
                     .i_fwd_prv_st(fwd_prv_st),
+                    .i_ood(ood),
                     .o_bck_prv_st(bck_prv_st),
-                    .o_td_full(td_full));
+                    .o_td_full(td_full),
+                    .o_td_empty(td_empty));
 
 traceback T1 (  .clk(sys_clk),
                 .rst(rst),
                 .en_t(en_t),
                 .i_sel_node(sel_node),
                 .i_bck_prv_st(bck_prv_st),
+                .i_td_empty(td_empty),
                 .o_decoder_data(o_decoder_data),
                 .o_decoder_done(o_decoder_done));
 

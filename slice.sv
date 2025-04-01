@@ -14,6 +14,9 @@ output logic [`SLICED_INPUT_NUM - 1:0] o_rx;
 output logic o_ood; // detect end of file or file pointer  
 
 logic [3:0] count;
+logic [3:0] count_delay_1;
+logic [3:0] count_delay_2;
+logic [3:0] count_delay_3;
 
 // pseudo code, need to implement later with PS
 always @ (posedge clk or negedge rst)  // need to differentiate between k = 2 and k = 3
@@ -23,11 +26,17 @@ begin
         o_rx <= 0;
         count <= 4'b1111;
         o_ood <= 0;
+        count_delay_1 <= 0;
+        count_delay_2 <= 0;
+        count_delay_3 <= 0;
     end
     else 
     begin
         if (en_s == 1)
         begin 
+            count_delay_1 <= count;
+            count_delay_2 <= count_delay_1;
+            count_delay_3 <= count_delay_2;
             if(i_code_rate == `CODE_RATE_2)
             begin
                 o_rx[1:0] <= {i_data_frame[count - 1], i_data_frame[count]};
@@ -40,9 +49,9 @@ begin
                 o_rx[5:3] <= {i_data_frame[count - 3], i_data_frame[count - 5]};
                 count <= count - 6;
             end
-            if(count == 3) // testing
+            if(count_delay_2 == 3) // testing
             begin
-                o_ood <= 1; // simulating end of file
+                o_ood <= 1; // simulating end of file, should turn on 2 cycle after for delay between modules 
             end
             else
             begin
