@@ -28,6 +28,7 @@ begin
             end
         end
         depth <= 0; 
+        o_td_full <= 0;
     end
     else
     begin
@@ -38,6 +39,10 @@ begin
                 td_mem[i][depth] <= i_fwd_prv_st[i]; 
             end
             depth <= depth + 1;
+            if(depth == 44)
+            begin
+                o_td_full <= 1;
+            end
         end
         else
         begin

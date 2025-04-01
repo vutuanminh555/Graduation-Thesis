@@ -97,7 +97,8 @@ trellis_diagr TD1 ( .clk(sys_clk),
                     .rst(rst),
                     .en_td(en_td),
                     .i_fwd_prv_st(fwd_prv_st),
-                    .o_bck_prv_st(bck_prv_st));
+                    .o_bck_prv_st(bck_prv_st),
+                    .o_td_full(td_full));
 
 traceback T1 (  .clk(sys_clk),
                 .rst(rst),
@@ -105,7 +106,6 @@ traceback T1 (  .clk(sys_clk),
                 .i_sel_node(sel_node),
                 .i_bck_prv_st(bck_prv_st),
                 .o_decoder_data(o_decoder_data),
-                .o_decoder_done(o_decoder_done),
-                .o_td_full(td_full));
+                .o_decoder_done(o_decoder_done));
 
 endmodule

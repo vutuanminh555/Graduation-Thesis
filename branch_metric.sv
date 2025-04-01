@@ -32,6 +32,7 @@ begin
                 end 
             end
         end
+        o_cal_done <= 0;
     end
     else
     begin
@@ -43,11 +44,14 @@ begin
                 // bm_mem 1 cycle slower than cal_dist
                 //$display("Iteration %d   bm_mem value is: %d cal_dist value is: %d", i, bm_mem[i][i_mux[13:6]][i_mux[5:0]], cal_dist[i]); 
             end
-
+            if(i_mux[15:6] == '1)
+            begin
+                o_cal_done <= 1; // sync with bm_mem update
+            end
         end
         else 
         begin
-
+            //o_cal_done <= 1; // can turn off module to save energy
         end
     end
 end
@@ -98,10 +102,6 @@ begin
                 for(int j = 0; j < `RADIX; j++)
                 begin
                     o_dist[i][j] = bm_mem[i_rx][i][j];
-                    // if(i == 3 && j == 2 && i_rx == 6'b001011)
-                    // begin
-                    //     $display("o_dist value of state %b input %b sliced_bit %b is : %d\n", i, j, i_rx, o_dist[i][j]);
-                    // end
                 end
             end
         end

@@ -22,6 +22,7 @@ begin
     begin
         o_rx <= 0;
         count <= 4'b1111;
+        o_ood <= 0;
     end
     else 
     begin
@@ -29,8 +30,8 @@ begin
         begin 
             if(i_code_rate == `CODE_RATE_2)
             begin
-                o_rx[1:0] <= {i_data_frame[count], i_data_frame[count - 1]};
-                o_rx[4:3] <= {i_data_frame[count - 2], i_data_frame[count - 3]};
+                o_rx[1:0] <= {i_data_frame[count - 1], i_data_frame[count]};
+                o_rx[4:3] <= {i_data_frame[count - 3], i_data_frame[count - 2]};
                 count <= count - 4;
             end
             else if(i_code_rate == `CODE_RATE_3) // not tested yet
@@ -38,6 +39,10 @@ begin
                 o_rx[2:0] <= {i_data_frame[count], i_data_frame[count - 2]};
                 o_rx[5:3] <= {i_data_frame[count - 3], i_data_frame[count - 5]};
                 count <= count - 6;
+            end
+            if(count == 3) // testing
+            begin
+                o_ood <= 1; // simulating end of file
             end
             else
             begin

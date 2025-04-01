@@ -5,9 +5,9 @@ module traceback(   clk, rst, en_t,
                     i_sel_node, i_bck_prv_st,
                     o_decoder_data, o_decoder_done);
 
-input clk, rst, en_t;
-input [7:0] i_sel_node; 
-input [`MAX_CONSTRAINT_LENGTH - 1:0] i_bck_prv_st [`MAX_STATE_NUM - 1:0];
+input logic clk, rst, en_t;
+input logic [7:0] i_sel_node; 
+input logic [`MAX_CONSTRAINT_LENGTH - 1:0] i_bck_prv_st [`MAX_STATE_NUM - 1:0];
 
 output logic [`DATA_FRAME_LENGTH - 1:0] o_decoder_data;
 output logic o_decoder_done;
