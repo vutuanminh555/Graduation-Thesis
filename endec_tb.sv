@@ -14,7 +14,7 @@ logic [15:0] i_decoder_data_frame; // pseudo code
 
 logic [`MAX_CODE_RATE - 1:0] o_encoder_data;
 logic o_encoder_done;
-logic [`DATA_FRAME_LENGTH - 1:0] o_decoder_data;
+logic [7:0] o_decoder_data;
 logic o_decoder_done;
 
 endec E1 (  .sys_clk(clk), // add code rate. constraint length. poly input 
@@ -55,7 +55,7 @@ begin
     i_gen_poly[2] = 9'b000000000;
     i_mode_sel = `DECODE_MODE;
     i_encoder_bit = 1'b0;
-    i_decoder_data_frame = 16'b1101101010100110;
+    i_decoder_data_frame = 16'b0011100001011000;
 end
 
 endmodule

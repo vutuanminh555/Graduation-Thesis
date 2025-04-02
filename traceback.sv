@@ -35,6 +35,7 @@ begin
             o_decoder_data[count] <= pair_bit[1];
             o_decoder_data[count + 1] <= pair_bit[0];
             count <= count + 2;
+            $display("o_decoder_data value is: %b\n", o_decoder_data);
         end
         else
         begin
@@ -57,7 +58,7 @@ begin
         begin
             nxt_chosen_node = i_bck_prv_st[chosen_node];
             pair_bit = chosen_node[1:0];
-            if(count == 6)
+            if(count == 8)
             begin
                 o_decoder_done = 1;
             end

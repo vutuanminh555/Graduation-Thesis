@@ -19,6 +19,7 @@ logic [8:0] min_node;
 
 logic [2:0] min_pm;
 logic [7:0] min_prv_st;
+logic [8:0] count;
 
 always @(posedge clk or negedge rst) // update and save pm value for each node, working
 begin
@@ -28,16 +29,29 @@ begin
         begin
             node_mem[i] <= 0;
         end
+        count <= 0;
     end
     else 
     begin
         if(en_acs == 1)
         begin
+            if(count < 5)
+            begin
             for(int i = 0; i < `MAX_STATE_NUM; i++) // add value from distance of the shortest path, node_mem has 1 cycle delay to i_dist
             begin 
                 node_mem[i] <= node_mem[i] + i_dist[o_fwd_prv_st[i]][{i[0],i[1]}]; // input bit order is reversed
-                //$display("node_mem state=%b prv_state is: %b input is: %b", i, o_fwd_prv_st[i], {i[0], i[1]});
+                if(i<4)
+                begin
+                $display("node_mem state=%b prv_state is: %b input is: %b", i, o_fwd_prv_st[i], {i[0], i[1]});
+                $display("node_mem %b value is: %d", i, node_mem[i]);
+                end
             end
+            end
+            if(count < 5)
+            count <= count + 1;
+            else
+            count <= count;
+            //$display("o_sel_node value is: %b\n", o_sel_node);
         end
         else
         begin
@@ -84,11 +98,16 @@ begin
                         min_pm = pm_mem[{j[1:0],i[7:2]}][{i[0],i[1]}]; // priority: 00 > 01 > 10 > 11
                         min_prv_st = {j[1:0],i[7:2]};
                     end
-                    //$display("min_pm value is: %b", min_pm);
-                    //$display("State with the same next state %b is: %b Input value is: %b Distance: %d\n", i,{j[1:0],i[7:2]}, {i[0],i[1]},pm_mem[{j[1:0],i[7:2]}][{i[0],i[1]}]);
+                    // if(i < 4)
+                    // begin
+                    // $display("value of i_dist is: %d", i_dist[i][j]);
+                    // $display("min_pm value is: %b", min_pm);
+                    // $display("State with the same next state %b is: %b Input value is: %b Distance: %d\n", i,{j[1:0],i[7:2]}, {i[0],i[1]},pm_mem[{j[1:0],i[7:2]}][{i[0],i[1]}]);
+                    // end
                 end 
                 // all next state have next state, not all current state have next state
-                //$display("Chosen prv_st for nxt_st %b: %b\n", i ,min_prv_st);
+                // if(i < 4)
+                // $display("Chosen prv_st for nxt_st %b: %b\n", i ,min_prv_st);
                 o_fwd_prv_st[i] = min_prv_st ; // output address is next state, value is previous state (can be reduced)
             end
         end
@@ -114,7 +133,7 @@ begin
         if(en_acs == 1)
         begin
             min_node = 9'b111111111;
-            for(int i = 0; i < `MAX_STATE_NUM; i++)
+            for(int i = 0; i < 4; i++) // used `MAX_STATE_NUM
             begin
                 if(node_mem[i] < min_node)
                 begin
@@ -122,6 +141,7 @@ begin
                     o_sel_node = i;
                 end
             end
+
         end
         else
         begin

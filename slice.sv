@@ -34,14 +34,15 @@ begin
     begin
         if (en_s == 1)
         begin 
-            count_delay_1 <= count;
-            count_delay_2 <= count_delay_1;
-            count_delay_3 <= count_delay_2;
+            // count_delay_1 <= count;
+            // count_delay_2 <= count_delay_1;
+            // count_delay_3 <= count_delay_2;
+            count <= count - 4;
             if(i_code_rate == `CODE_RATE_2)
             begin
                 o_rx[1:0] <= {i_data_frame[count - 1], i_data_frame[count]};
                 o_rx[4:3] <= {i_data_frame[count - 3], i_data_frame[count - 2]};
-                count <= count - 4;
+                //count <= count - 4;
             end
             else if(i_code_rate == `CODE_RATE_3) // not tested yet
             begin
@@ -49,14 +50,14 @@ begin
                 o_rx[5:3] <= {i_data_frame[count - 3], i_data_frame[count - 5]};
                 count <= count - 6;
             end
-            if(count_delay_2 == 3) // testing
-            begin
-                o_ood <= 1; // simulating end of file, should turn on 2 cycle after for delay between modules 
-            end
-            else
-            begin
-                o_rx <= 0;
-            end
+            // if(count_delay_2 == 3) // testing
+            // begin
+            //     o_ood <= 1; // simulating end of file, should turn on 2 cycle after for delay between modules 
+            // end
+            // else
+            // begin
+            //     o_rx <= 0;
+            // end
         end
         else
         begin

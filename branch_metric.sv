@@ -42,6 +42,7 @@ begin
             begin
                 bm_mem[i][i_mux[13:6]][i_mux[15:14]] <= cal_dist[i]; // possible input, state, input
                 // bm_mem 1 cycle slower than cal_dist
+                //if(i < 4)
                 //$display("Iteration %d   bm_mem value is: %d cal_dist value is: %d", i, bm_mem[i][i_mux[13:6]][i_mux[5:0]], cal_dist[i]); 
             end
             if(i_mux[15:6] == '1)
@@ -102,6 +103,8 @@ begin
                 for(int j = 0; j < `RADIX; j++)
                 begin
                     o_dist[i][j] = bm_mem[i_rx][i][j];
+                    //if(i < 4)
+                    //$display("received bits are: %b state is: %b input is: %b distance is: %d", i_rx, i, j, o_dist[i][j]);
                 end
             end
         end

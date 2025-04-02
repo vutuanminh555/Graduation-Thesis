@@ -45,7 +45,7 @@ begin
                     td_mem[i][depth] <= i_fwd_prv_st[i]; 
                 end
                 depth <= depth + 1;
-                if(depth == 44)
+                if(depth == 4)
                 begin
                     o_td_full <= 1;
                 end
@@ -86,7 +86,8 @@ begin
         begin
             for(int i = 0; i < 256; i++)
             begin
-                o_bck_prv_st[i] = td_mem[i][depth];
+                o_bck_prv_st[i] = td_mem[i][depth]; // has problems
+                //$display("o_bck_prv_st %b value is: %b", i, o_bck_prv_st[i]);
             end
         end
         else
