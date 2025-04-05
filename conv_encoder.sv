@@ -20,8 +20,6 @@ logic [`MAX_CODE_RATE - 1:0] d_o_second_data; // second to third state
 
 // temp variable for encode mode
 logic [`MAX_STATE_REG_NUM - 1:0] e_state; // state doesnt count input bit
-logic [`MAX_STATE_REG_NUM - 1:0] e_state_delay;
-logic [`MAX_CODE_RATE - 1:0] encoder_data;
 
 // variables to use with decode mode value scanning
 logic [`DECODE_BIT_NUM - 1:0] d_pair_input_value; // all possible input
@@ -36,7 +34,6 @@ begin
         d_state_value <= 0;
         d_pair_input_value <= 0;
         e_state <= 0;
-        e_state_delay <= 0;
     end
     else
     begin
@@ -53,7 +50,6 @@ begin
             if(i_mode_sel == `ENCODE_MODE)  // encoder working, weird interaction with sequential assignment, have to be 1 cycle delay compared to en signal
             begin
                 e_state <= {e_state[`MAX_STATE_REG_NUM - 2:0], i_encoder_bit}; // shift and change state
-                e_state_delay <= e_state;
             end 
         end
         else 
@@ -97,17 +93,17 @@ begin
     begin
         if(en_ce == 1) 
         begin 
-            if(i_mode_sel == `DECODE_MODE)  // need to shift right 2 times and 2 next state
+            if(i_mode_sel == `DECODE_MODE)  
             begin
                 d_o_first_data = encode(i_gen_poly, {d_state_value, d_pair_input_value[0]}); // calculate the first output data
                 d_o_second_data = encode(i_gen_poly, {d_state_value[`MAX_STATE_REG_NUM - 2:0], d_pair_input_value[0], d_pair_input_value[1]}); // calculate the second output data
-                o_encoder_data = 0; // avoid infer latch
+                o_encoder_data = 0; 
             end
             else if(i_mode_sel == `ENCODE_MODE) 
             begin
-                d_o_first_data = 0; // avoid infer latch 
+                d_o_first_data = 0;
                 d_o_second_data = 0;
-                o_encoder_data = encode(i_gen_poly, {e_state_delay, i_encoder_bit}); 
+                o_encoder_data = encode(i_gen_poly, {e_state, i_encoder_bit}); 
             end 
             else 
             begin
@@ -129,9 +125,9 @@ function automatic logic[`MAX_CODE_RATE - 1:0] encode ( input logic [`MAX_CONSTR
                                                         input logic [`MAX_CONSTRAINT_LENGTH - 1:0] mux_state); // state combine with input
     logic [`MAX_CODE_RATE - 1:0] encoded_data;
     encoded_data = 0;
-    for(int i = 0; i < `MAX_CODE_RATE; i++) // calculate all possible outputs
+    for(int i = 0; i < `MAX_CODE_RATE; i++) 
     begin
-        for(int k = 0; k < `MAX_CONSTRAINT_LENGTH; k++) // scanning all reg block in polynomials
+        for(int k = 0; k < `MAX_CONSTRAINT_LENGTH; k++) 
         begin
             // gen_poly[i][k] == 1 // output i use k block in state 
             encoded_data[i] ^= (mux_state[k] & gen_poly[i][k]); // flip bit if state[k] == 1
