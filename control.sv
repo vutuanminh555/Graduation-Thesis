@@ -2,10 +2,11 @@
 `timescale 1ns / 1ps
 
 module control( clk, rst, en,
-                i_ood, i_cal_done, i_td_full,
+                i_mode_sel, i_ood, i_cal_done, i_td_full,
                 o_en_ce, o_en_s, o_en_bm, o_en_acs, o_en_td, o_en_t);
 
 input logic clk, rst, en;
+input logic i_mode_sel;
 input logic i_ood;
 input logic i_cal_done;
 input logic i_td_full;
@@ -13,7 +14,6 @@ input logic i_td_full;
 output logic o_en_ce, o_en_s, o_en_bm, o_en_acs, o_en_td, o_en_t;
 
 logic [2:0] state, nxt_state;
-//logic [1023:0] count;
 
 localparam [2:0] s0 = 000; 
 localparam [2:0] s1 = 001; 
@@ -23,38 +23,134 @@ localparam [2:0] s4 = 100;
 localparam [2:0] s5 = 101; 
 localparam [2:0] s6 = 110;
 
-always @ (posedge clk or negedge rst) 
+always @(posedge clk or negedge rst) 
 begin
     if (rst == 0)
     begin
-        //count <= 0;
         state <= s0;
     end
     else
     begin
         if (en == 1)
         begin
-            if(state == s2)
-            begin
-            //count <= count + 1; 
-            end
             state <= nxt_state;
         end
         else 
         begin
-            //count <= count;
             state <= state; 
         end
     end
     
 end
 
-always @ (*) // optimize for radix-4
+always @ (*) 
 begin
     if(en == 1)
     begin
-    case(state)
-    s0: // reset 
+        case(state)
+        s0: // reset 
+        begin
+            o_en_ce = 0; 
+            o_en_s = 0; 
+            o_en_bm = 0; 
+            o_en_acs = 0; 
+            o_en_td = 0; 
+            o_en_t = 0;
+            nxt_state = s1;
+        end
+        
+        s1: // encoder
+        begin
+            o_en_ce = 1; 
+            o_en_s = 0; 
+            o_en_bm = 0; 
+            o_en_acs = 0; 
+            o_en_td = 0; 
+            o_en_t = 0;
+            if (i_mode_sel == `DECODE_MODE)
+            nxt_state = s2;
+            else // encode mode
+            nxt_state = s1;
+        end
+        
+        s2: // precalculating branch metric
+        begin
+            o_en_ce = 1; 
+            o_en_s = 0; 
+            o_en_bm = 1; 
+            o_en_acs = 0; 
+            o_en_td = 0; 
+            o_en_t = 0;
+            if(i_cal_done == 1)
+            nxt_state = s3;
+            else
+            nxt_state = s2;
+        end
+        
+        s3: // finished all possible branch metric, start receiving bits
+        begin
+            o_en_ce = 1; 
+            o_en_s = 1; 
+            o_en_bm = 1; 
+            o_en_acs = 0; 
+            o_en_td = 0; 
+            o_en_t = 0;
+            nxt_state = s4;
+        end
+        
+        s4: // start processing received bits
+        begin
+            o_en_ce = 1; 
+            o_en_s = 1; 
+            o_en_bm = 1; 
+            o_en_acs = 1; 
+            o_en_td = 0; 
+            o_en_t = 0;
+            nxt_state = s5;
+        end
+
+        s5: // start saving processed data to trellis diagram
+        begin
+            o_en_ce = 1; 
+            o_en_s = 1; 
+            o_en_bm = 1; 
+            o_en_acs = 1; 
+            o_en_td = 1; 
+            o_en_t = 0;
+            if(i_ood == 1 || i_td_full == 1) 
+            begin
+                nxt_state = s6;
+            end
+            else
+            begin
+                nxt_state = s5;
+            end
+        end
+
+        s6: // start tracing back 
+        begin
+            o_en_ce = 1; 
+            o_en_s = 1; 
+            o_en_bm = 1; 
+            o_en_acs = 1; 
+            o_en_td = 1; 
+            o_en_t = 1;
+            nxt_state = s6;
+        end
+
+        default:
+        begin
+            o_en_ce = 0; 
+            o_en_s = 0; 
+            o_en_bm = 0; 
+            o_en_acs = 0; 
+            o_en_td = 0; 
+            o_en_t = 0;
+            nxt_state = s0;
+        end
+        endcase
+    end
+    else
     begin
         o_en_ce = 0; 
         o_en_s = 0; 
@@ -62,96 +158,7 @@ begin
         o_en_acs = 0; 
         o_en_td = 0; 
         o_en_t = 0;
-        nxt_state = s1;
-    end
-    
-    s1: // encoder
-    begin
-        o_en_ce = 1; 
-        o_en_s = 0; 
-        o_en_bm = 0; 
-        o_en_acs = 0; 
-        o_en_td = 0; 
-        o_en_t = 0;
-        nxt_state = s2;
-    end
-    
-    s2: // precalculating branch metric
-    begin
-        o_en_ce = 1; 
-        o_en_s = 0; 
-        o_en_bm = 1; 
-        o_en_acs = 0; 
-        o_en_td = 0; 
-        o_en_t = 0;
-        if(i_cal_done == 1)
-        nxt_state = s3;
-        else
-        nxt_state = s2;
-    end
-    
-    s3: // finished all possible branch metric, start processing received bits
-    begin
-        o_en_ce = 1; 
-        o_en_s = 1; 
-        o_en_bm = 1; 
-        o_en_acs = 0; 
-        o_en_td = 0; 
-        o_en_t = 0;
-        nxt_state = s4;
-    end
-    
-    s4: // start acs
-    begin
-        o_en_ce = 1; 
-        o_en_s = 1; 
-        o_en_bm = 1; 
-        o_en_acs = 1; 
-        o_en_td = 0; 
-        o_en_t = 0;
-        nxt_state = s5;
-    end
-
-    s5: // start trellis
-    begin
-        o_en_ce = 1; 
-        o_en_s = 1; 
-        o_en_bm = 1; 
-        o_en_acs = 1; 
-        o_en_td = 1; 
-        o_en_t = 0;
-        if(i_ood == 1 || i_td_full == 1)
-        begin
-            nxt_state = s6;
-        end
-        else
-        begin
-            nxt_state = s5;
-        end
-    end
-
-    s6: // start traceback
-    begin
-        o_en_ce = 1; 
-        o_en_s = 1; 
-        o_en_bm = 1; 
-        o_en_acs = 1; 
-        o_en_td = 1; 
-        o_en_t = 1;
-        nxt_state = s6;
-    end
-
-    default:
-    begin
-        // en_extract=0; en_branch=0; en_add=0; en_memory=0; en_traceback=0;
-        // nxt_state = s0;
-    end
-    endcase
-    end
-    else
-    begin
-        // en_extract=0; en_branch=0; en_add=0; en_memory=0; en_traceback=0;
-        // nxt_state = s0;
+        nxt_state = s0;
     end
 end
 

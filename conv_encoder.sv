@@ -33,9 +33,6 @@ always @(posedge clk or negedge rst) // write memory on clock edge
 begin
     if(rst == 0) // default all output and temp signal to 0
     begin
-        o_mux <= 0;
-        o_encoder_data <= 0;
-        o_encoder_done <= 0;
         d_state_value <= 0;
         d_pair_input_value <= 0;
         e_state <= 0;
@@ -48,17 +45,12 @@ begin
             if(i_mode_sel == `DECODE_MODE)  
             begin
                 d_pair_input_value <= d_pair_input_value + 1; // 1 state need 4 input value
-                if(d_state_value == `MAX_STATE_NUM - 1) // control through state value, not input value
-                begin
-                    //d_state_value <= d_state_value; // reach maximum possible value
-                end
-                else if(d_pair_input_value == `RADIX - 1)
+                if(d_pair_input_value == `RADIX - 1)
                 begin
                     d_state_value <= d_state_value + 1; // only increase when have gone through all 4 possible inputs
                 end
-                o_mux <= {d_pair_input_value, d_state_value, d_o_second_data, d_o_first_data}; // can switch to combinational
             end
-            else if(i_mode_sel == `ENCODE_MODE)  // encoder working, weird interaction with sequential assignment, have to be 1 cycle delay compared to en signal
+            if(i_mode_sel == `ENCODE_MODE)  // encoder working, weird interaction with sequential assignment, have to be 1 cycle delay compared to en signal
             begin
                 e_state <= {e_state[`MAX_STATE_REG_NUM - 2:0], i_encoder_bit}; // shift and change state
                 e_state_delay <= e_state;
@@ -66,8 +58,29 @@ begin
         end
         else 
         begin
-            o_mux <= 0;
-            o_encoder_done <= 0; // can switch to combinational
+
+        end
+    end
+end
+
+always @(*) // output data
+begin
+    if(rst == 0)
+    begin
+        o_mux = 0;
+        o_encoder_done = 0;
+    end
+    else
+    begin
+        if(en_ce == 1)
+        begin
+            o_mux = {d_pair_input_value, d_state_value, d_o_second_data, d_o_first_data};
+            o_encoder_done = 0; // implement later
+        end
+        else
+        begin
+            o_mux = 0;
+            o_encoder_done = 0;
         end
     end
 end
@@ -96,7 +109,7 @@ begin
                 d_o_second_data = 0;
                 o_encoder_data = encode(i_gen_poly, {e_state_delay, i_encoder_bit}); 
             end 
-            else // unknown and high impedance 
+            else 
             begin
                 d_o_first_data = 0;
                 d_o_second_data = 0;

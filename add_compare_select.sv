@@ -1,10 +1,9 @@
 `include "param_def.sv"
 `timescale 1ns / 1ps
 
-module add_compare_select(clk, rst, en_acs,
-                        i_dist,
-                        o_fwd_prv_st,
-                        o_sel_node);
+module add_compare_select(  clk, rst, en_acs,
+                            i_dist,
+                            o_fwd_prv_st, o_sel_node);
 
 input logic clk, rst, en_acs;
 input logic [2:0] i_dist [`MAX_STATE_NUM][`RADIX]; // distance per transition

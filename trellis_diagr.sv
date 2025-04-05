@@ -24,15 +24,12 @@ begin
     begin
         for(int i = 0; i < `MAX_STATE_NUM; i++)
         begin
-            o_bck_prv_st[i] <= 0;
             for(int j = 0; j < `TRACEBACK_DEPTH; j++)
             begin
                 td_mem[i][j] <= 0;
             end
         end
         depth <= 0; 
-        o_td_full <= 0;
-        o_td_empty <= 0;
     end
     else
     begin
@@ -45,18 +42,10 @@ begin
                     td_mem[i][depth] <= i_fwd_prv_st[i]; 
                 end
                 depth <= depth + 1;
-                if(depth == `TRACEBACK_DEPTH - 1)
-                begin
-                    o_td_full <= 1;
-                end
             end
             else if(wrk_mode == 1) // output transition to traceback
             begin
                 depth <= depth - 1; 
-                if(depth == 0)
-                begin
-                    o_td_empty <= 1; // could use combinational logic
-                end
             end
         end
         else
@@ -74,6 +63,8 @@ begin
         begin
             o_bck_prv_st[i] = 0;
         end
+        o_td_empty = 0;
+        o_td_full = 0;
     end
     else
     begin
@@ -84,6 +75,37 @@ begin
                 o_bck_prv_st[i] = td_mem[i][depth]; // has problems
                 //$display("o_bck_prv_st %b value is: %b", i, o_bck_prv_st[i]);
             end
+            if(wrk_mode == 0)
+            begin
+                if(depth == `TRACEBACK_DEPTH - 1)
+                begin
+                    o_td_empty = 0; 
+                    o_td_full = 1;
+                end
+                else
+                begin
+                    o_td_empty = 0; 
+                    o_td_full = 0;
+                end
+            end
+            else if(wrk_mode == 1)
+            begin
+                if(depth == 0)
+                begin
+                    o_td_empty = 1; 
+                    o_td_full = 0;
+                end
+                else
+                begin
+                    o_td_empty = 0; 
+                    o_td_full = 0;
+                end
+            end
+            else
+            begin
+                o_td_empty = 0;
+                o_td_full = 0;
+            end
         end
         else
         begin
@@ -91,6 +113,8 @@ begin
             begin
                 o_bck_prv_st[i] = 0;
             end
+            o_td_empty = 0;
+            o_td_full = 0;
         end
     end
 end

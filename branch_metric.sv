@@ -2,10 +2,8 @@
 `timescale 1ns / 1ps
 
 module branch_metric(clk, rst, en_bm, 
-                    i_rx,
-                    i_mux,
-                    o_dist,
-                    o_cal_done);    // use 3 bit (8 levels) to quantize, from 0 to 3.3V (not implemented yet)
+                    i_rx, i_mux,
+                    o_dist, o_cal_done);    // use 3 bit (8 levels) to quantize, from 0 to 3.3V (not implemented yet)
                                 // calculate distance, store in memory and then output branch metric for each input
 
 input logic clk, rst, en_bm;
@@ -32,7 +30,6 @@ begin
                 end 
             end
         end
-        o_cal_done <= 0;
     end
     else
     begin
@@ -45,14 +42,10 @@ begin
                 //if(i < 4)
                 //$display("Iteration %d   bm_mem value is: %d cal_dist value is: %d", i, bm_mem[i][i_mux[13:6]][i_mux[5:0]], cal_dist[i]); 
             end
-            if(i_mux[15:6] == '1) // last possible state
-            begin
-                o_cal_done <= 1; // sync with bm_mem update
-            end
         end
         else 
         begin
-            //o_cal_done <= 1; // can turn off module to save energy
+        
         end
     end
 end
@@ -96,6 +89,7 @@ begin
                 o_dist[i][j] = 0;
             end
         end
+        o_cal_done = 0;
     end
     else
     begin
@@ -110,6 +104,10 @@ begin
                     //$display("received bits are: %b state is: %b input is: %b distance is: %d", i_rx, i, j, o_dist[i][j]);
                 end
             end
+            if(i_mux[15:6] == '1) // last possible state with last possible input
+                o_cal_done = 1; // sync with bm_mem update
+            else
+                o_cal_done = 0;
         end
         else 
         begin
@@ -120,6 +118,7 @@ begin
                     o_dist[i][j] = 0;
                 end
             end
+            o_cal_done = 0;
         end
     end
 end

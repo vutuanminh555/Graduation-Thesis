@@ -20,11 +20,6 @@
 `define SLICED_INPUT_NUM        6//`MAX_CODE_RATE*DECODE_BIT_NUM  
 `define MAX_INPUT_NUM           64
 
-// select constraint length 
-`define CONSTR_LEN_5            2'b00
-`define CONSTR_LEN_7            2'b01
-`define CONSTR_LEN_9            2'b10
-
 // select code rate
 `define CODE_RATE_2             1'b0 // 1/2
 `define CODE_RATE_3             1'b1 // 1/3
