@@ -9,8 +9,8 @@ module add_compare_select(clk, rst, en_acs,
 input logic clk, rst, en_acs;
 input logic [2:0] i_dist [`MAX_STATE_NUM][`RADIX]; // distance per transition
 
-output logic [7:0] o_fwd_prv_st [`MAX_STATE_NUM]; // hold next state value for each state (index: current state, value: nxt state)
-output logic [7:0] o_sel_node;
+output logic [`MAX_STATE_REG_NUM - 1:0] o_fwd_prv_st [`MAX_STATE_NUM]; // hold next state value for each state (index: current state, value: nxt state)
+output logic [`MAX_STATE_REG_NUM - 1:0] o_sel_node;
 
 logic [8:0] node_mem [`MAX_STATE_NUM]; // node value
 logic [8:0] pm_mem [`MAX_STATE_NUM][`RADIX]; // hold path metric for each transition = node value + distance
@@ -18,8 +18,8 @@ logic [8:0] pm_mem [`MAX_STATE_NUM][`RADIX]; // hold path metric for each transi
 logic [8:0] min_node;
 
 logic [2:0] min_pm;
-logic [7:0] min_prv_st;
-logic [8:0] count;
+logic [`MAX_STATE_REG_NUM - 1:0] min_prv_st;
+//logic [8:0] count;
 
 always @(posedge clk or negedge rst) // update and save pm value for each node, working
 begin
@@ -29,28 +29,28 @@ begin
         begin
             node_mem[i] <= 0;
         end
-        count <= 0;
+        //count <= 0;
     end
     else 
     begin
         if(en_acs == 1)
         begin
-            if(count < 5)
-            begin
+            //if(count < 6)  // how to generalize?
+            //begin
             for(int i = 0; i < `MAX_STATE_NUM; i++) // add value from distance of the shortest path, node_mem has 1 cycle delay to i_dist
             begin 
                 node_mem[i] <= node_mem[i] + i_dist[o_fwd_prv_st[i]][{i[0],i[1]}]; // input bit order is reversed
-                if(i<4)
-                begin
-                $display("node_mem state=%b prv_state is: %b input is: %b", i, o_fwd_prv_st[i], {i[0], i[1]});
-                $display("node_mem %b value is: %d", i, node_mem[i]);
-                end
+                // if(i<4)
+                // begin
+                // $display("node_mem state=%b prv_state is: %b input is: %b", i, o_fwd_prv_st[i], {i[0], i[1]});
+                // $display("node_mem %b value is: %d", i, node_mem[i]);
+                // end
             end
-            end
-            if(count < 5)
-            count <= count + 1;
-            else
-            count <= count;
+            //end
+            // if(count < 6)
+            // count <= count + 1;
+            // else
+            // count <= count;
             //$display("o_sel_node value is: %b\n", o_sel_node);
         end
         else
@@ -116,17 +116,23 @@ begin
             for(int i = 0; i < `MAX_STATE_NUM; i++)
             begin
                 o_fwd_prv_st[i] = 0;
+                for(int j = 0; j <`RADIX; j++)
+                begin
+                    pm_mem[i][j] = 0;
+                end
             end
+            min_pm = 3'b111;
+            min_prv_st = 0;
         end
     end
 end
 
-always @(*) // output min_node, working
+always @(*) // output min_node
 begin
     if(rst == 0)
     begin
-        o_sel_node = 0;
         min_node = 9'b111111111;
+        o_sel_node = 0;
     end
     else
     begin

@@ -7,13 +7,13 @@ module trellis_diagr(   clk, rst, en_td,
 
 input logic clk, rst, en_td;
 input i_ood;
-input logic [7:0] i_fwd_prv_st [256];
+input logic [`MAX_STATE_REG_NUM - 1:0] i_fwd_prv_st [`MAX_STATE_NUM];
 
-output logic [7:0] o_bck_prv_st [256];
+output logic [`MAX_STATE_REG_NUM - 1:0] o_bck_prv_st [`MAX_STATE_NUM];
 output logic o_td_full;
 output logic o_td_empty;
 
-logic [7:0] td_mem [256][45]; // 256 node, traceback depth = 45 (5*K)
+logic [`MAX_STATE_REG_NUM - 1:0] td_mem [`MAX_STATE_NUM][`TRACEBACK_DEPTH]; // 256 node, traceback depth = 45 (5*K)
 logic [5:0] depth;
 
 logic wrk_mode; // create diagram / output data to traceback
@@ -22,10 +22,10 @@ always @(posedge clk or negedge rst) // save data to memory
 begin
     if(rst == 0)
     begin
-        for(int i = 0; i < 256; i++)
+        for(int i = 0; i < `MAX_STATE_NUM; i++)
         begin
             o_bck_prv_st[i] <= 0;
-            for(int j = 0; j < 45; j++)
+            for(int j = 0; j < `TRACEBACK_DEPTH; j++)
             begin
                 td_mem[i][j] <= 0;
             end
@@ -40,23 +40,18 @@ begin
         begin
             if(wrk_mode == 0) // creating trellis diagram
             begin
-                for(int i = 0; i < 256; i++)
+                for(int i = 0; i < `MAX_STATE_NUM; i++)
                 begin
                     td_mem[i][depth] <= i_fwd_prv_st[i]; 
                 end
                 depth <= depth + 1;
-                if(depth == 4)
+                if(depth == `TRACEBACK_DEPTH - 1)
                 begin
                     o_td_full <= 1;
                 end
             end
             else if(wrk_mode == 1) // output transition to traceback
             begin
-                // for(int i = 0; i < 256; i++)
-                // begin
-                //     o_bck_prv_st[i] <= td_mem[i][depth];
-
-                // end
                 depth <= depth - 1; 
                 if(depth == 0)
                 begin
@@ -75,7 +70,7 @@ always @(*) // output data
 begin
     if(rst == 0)
     begin
-        for(int i = 0; i < 256; i++)
+        for(int i = 0; i < `MAX_STATE_NUM; i++)
         begin
             o_bck_prv_st[i] = 0;
         end
@@ -84,7 +79,7 @@ begin
     begin
         if(en_td == 1)
         begin
-            for(int i = 0; i < 256; i++)
+            for(int i = 0; i < `MAX_STATE_NUM; i++)
             begin
                 o_bck_prv_st[i] = td_mem[i][depth]; // has problems
                 //$display("o_bck_prv_st %b value is: %b", i, o_bck_prv_st[i]);
@@ -92,7 +87,7 @@ begin
         end
         else
         begin
-            for(int i = 0; i < 256; i++)
+            for(int i = 0; i < `MAX_STATE_NUM; i++)
             begin
                 o_bck_prv_st[i] = 0;
             end

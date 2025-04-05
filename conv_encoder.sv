@@ -2,12 +2,10 @@
 `timescale 1ns/1ps
 
 module conv_encoder(clk, rst, en_ce,
-                    i_code_rate, i_constr_len, i_gen_poly, i_encoder_bit, i_mode_sel,
+                    i_gen_poly, i_encoder_bit, i_mode_sel,
                     o_mux, o_encoder_data, o_encoder_done); // encode and output all possible output for each transition
 
 input logic clk, rst, en_ce;
-input logic i_code_rate;
-input logic [1:0] i_constr_len;
 input logic [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE]; // max K = 9, max code rate = 3
 input logic i_encoder_bit; // 1 bit at a time, radix-4 not related
 input logic i_mode_sel; 
@@ -22,10 +20,11 @@ logic [`MAX_CODE_RATE - 1:0] d_o_second_data; // second to third state
 
 // temp variable for encode mode
 logic [`MAX_STATE_REG_NUM - 1:0] e_state; // state doesnt count input bit
+logic [`MAX_STATE_REG_NUM - 1:0] e_state_delay;
 logic [`MAX_CODE_RATE - 1:0] encoder_data;
 
 // variables to use with decode mode value scanning
-logic [1:0] d_pair_input_value; // all possible input
+logic [`DECODE_BIT_NUM - 1:0] d_pair_input_value; // all possible input
 logic [`MAX_STATE_REG_NUM - 1:0] d_state_value;  // all possible state for given K  
 
 
@@ -40,6 +39,7 @@ begin
         d_state_value <= 0;
         d_pair_input_value <= 0;
         e_state <= 0;
+        e_state_delay <= 0;
     end
     else
     begin
@@ -56,23 +56,18 @@ begin
                 begin
                     d_state_value <= d_state_value + 1; // only increase when have gone through all 4 possible inputs
                 end
-                o_mux <= {d_pair_input_value, d_state_value, d_o_second_data, d_o_first_data};
+                o_mux <= {d_pair_input_value, d_state_value, d_o_second_data, d_o_first_data}; // can switch to combinational
             end
-            else if(i_mode_sel == `ENCODE_MODE) 
+            else if(i_mode_sel == `ENCODE_MODE)  // encoder working, weird interaction with sequential assignment, have to be 1 cycle delay compared to en signal
             begin
-                o_encoder_data <= encoder_data;
                 e_state <= {e_state[`MAX_STATE_REG_NUM - 2:0], i_encoder_bit}; // shift and change state
+                e_state_delay <= e_state;
             end 
-            else 
-            begin
-
-            end  
         end
         else 
         begin
             o_mux <= 0;
-            o_encoder_data <= 0;
-            o_encoder_done <= 0;
+            o_encoder_done <= 0; // can switch to combinational
         end
     end
 end
@@ -83,8 +78,7 @@ begin
     begin
         d_o_first_data = 0;
         d_o_second_data = 0;
-        e_state = 0;
-        encoder_data = 0;
+        o_encoder_data = 0;
     end
     else
     begin
@@ -94,19 +88,26 @@ begin
             begin
                 d_o_first_data = encode(i_gen_poly, {d_state_value, d_pair_input_value[0]}); // calculate the first output data
                 d_o_second_data = encode(i_gen_poly, {d_state_value[`MAX_STATE_REG_NUM - 2:0], d_pair_input_value[0], d_pair_input_value[1]}); // calculate the second output data
+                o_encoder_data = 0; // avoid infer latch
             end
             else if(i_mode_sel == `ENCODE_MODE) 
             begin
-                encoder_data = encode(i_gen_poly, {e_state, i_encoder_bit});
+                d_o_first_data = 0; // avoid infer latch 
+                d_o_second_data = 0;
+                o_encoder_data = encode(i_gen_poly, {e_state_delay, i_encoder_bit}); 
             end 
-            else 
+            else // unknown and high impedance 
             begin
-
+                d_o_first_data = 0;
+                d_o_second_data = 0;
+                o_encoder_data = 0;
             end  
         end
         else 
         begin
-
+            d_o_first_data = 0;
+            d_o_second_data = 0;
+            o_encoder_data = 0;
         end
     end
 end
@@ -119,14 +120,8 @@ function automatic logic[`MAX_CODE_RATE - 1:0] encode ( input logic [`MAX_CONSTR
     begin
         for(int k = 0; k < `MAX_CONSTRAINT_LENGTH; k++) // scanning all reg block in polynomials
         begin
-            if(gen_poly[i][k] == 1) // output i use k block in state 
-            begin
-                encoded_data[i] ^= mux_state[k]; // flip bit if state[k] == 1
-            end
-            else
-            begin
-
-            end
+            // gen_poly[i][k] == 1 // output i use k block in state 
+            encoded_data[i] ^= (mux_state[k] & gen_poly[i][k]); // flip bit if state[k] == 1
         end
     end
     return encoded_data;

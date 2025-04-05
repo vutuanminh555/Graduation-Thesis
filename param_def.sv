@@ -14,6 +14,7 @@
 `define MAX_STATE_REG_NUM       `MAX_CONSTRAINT_LENGTH-1 
 `define DECODE_BIT_NUM          2 //`RADIX/2 // = log2(`RADIX)
 `define TRACEBACK_DEPTH         45 // equal 5*K with radix-2 and half of that with radix-4
+`define MAX_OUTPUT_BIT_NUM      90 // = traceback_depth*decode_bit_num
 `define DATA_FRAME_LENGTH       20 //`TRACEBACK_DEPTH/`MAX_CODE_RATE
 `define MAX_TRANSITION_NUM      1024 //`RADIX*`MAX_STATE_NUM  
 `define SLICED_INPUT_NUM        6//`MAX_CODE_RATE*DECODE_BIT_NUM  

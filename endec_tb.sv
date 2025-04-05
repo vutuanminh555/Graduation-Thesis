@@ -37,13 +37,9 @@ initial
 begin
         // Khởi tạo tín hiệu
         clk = 0;
-        rst = 1;
         en = 1;
-        
-        // Reset
-        #10 rst = 0;
+        rst = 0;
         #1 rst = 1;
-        
 end
 
 initial
@@ -54,8 +50,15 @@ begin
     i_gen_poly[1] = 9'b000000101;
     i_gen_poly[2] = 9'b000000000;
     i_mode_sel = `DECODE_MODE;
-    i_encoder_bit = 1'b0;
-    i_decoder_data_frame = 16'b0011100001011000;
+    i_decoder_data_frame = 16'b1110111110010000;
+    #15 i_encoder_bit = 1'b1; // 15
+    #10 i_encoder_bit = 1'b1;
+    #10 i_encoder_bit = 1'b0;
+    #10 i_encoder_bit = 1'b1;
+    #10 i_encoder_bit = 1'b0;
+    #10 i_encoder_bit = 1'b0;
+    #10 i_encoder_bit = 1'b1;
+    #10 i_encoder_bit = 1'b0;
 end
 
 endmodule

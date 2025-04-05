@@ -45,7 +45,7 @@ begin
                 //if(i < 4)
                 //$display("Iteration %d   bm_mem value is: %d cal_dist value is: %d", i, bm_mem[i][i_mux[13:6]][i_mux[5:0]], cal_dist[i]); 
             end
-            if(i_mux[15:6] == '1)
+            if(i_mux[15:6] == '1) // last possible state
             begin
                 o_cal_done <= 1; // sync with bm_mem update
             end
@@ -77,7 +77,10 @@ begin
         end
         else
         begin
-
+            for(int i = 0; i < `MAX_INPUT_NUM; i++)
+            begin
+                cal_dist[i] = 0;
+            end
         end
     end
 end

@@ -8,15 +8,12 @@ module slice(   rst, clk, en_s,
 
 input logic rst, clk, en_s;
 input logic i_code_rate;
-input logic [15:0] i_data_frame; // should be divided by 4 and 6, close to traceback_depth*sliced_input_num, choose 276
+input logic [275:0] i_data_frame; // should be divided by 4 and 6, close to traceback_depth*sliced_input_num, choose 276
 
 output logic [`SLICED_INPUT_NUM - 1:0] o_rx;
 output logic o_ood; // detect end of file or file pointer  
 
-logic [3:0] count;
-logic [3:0] count_delay_1;
-logic [3:0] count_delay_2;
-logic [3:0] count_delay_3;
+logic [3:0] count; // pseudo code, need to change later
 
 // pseudo code, need to implement later with PS
 always @ (posedge clk or negedge rst)  // need to differentiate between k = 2 and k = 3
@@ -26,23 +23,17 @@ begin
         o_rx <= 0;
         count <= 4'b1111;
         o_ood <= 0;
-        count_delay_1 <= 0;
-        count_delay_2 <= 0;
-        count_delay_3 <= 0;
     end
     else 
     begin
         if (en_s == 1)
         begin 
-            // count_delay_1 <= count;
-            // count_delay_2 <= count_delay_1;
-            // count_delay_3 <= count_delay_2;
-            count <= count - 4;
+            //count <= count - 4;
             if(i_code_rate == `CODE_RATE_2)
             begin
                 o_rx[1:0] <= {i_data_frame[count - 1], i_data_frame[count]};
                 o_rx[4:3] <= {i_data_frame[count - 3], i_data_frame[count - 2]};
-                //count <= count - 4;
+                count <= count - 4;
             end
             else if(i_code_rate == `CODE_RATE_3) // not tested yet
             begin
@@ -50,19 +41,20 @@ begin
                 o_rx[5:3] <= {i_data_frame[count - 3], i_data_frame[count - 5]};
                 count <= count - 6;
             end
-            // if(count_delay_2 == 3) // testing
-            // begin
-            //     o_ood <= 1; // simulating end of file, should turn on 2 cycle after for delay between modules 
-            // end
-            // else
-            // begin
-            //     o_rx <= 0;
-            // end
+            if(count == 3) // testing
+            begin
+                o_ood <= 1; // simulating end of file, should turn on 2 cycle after for delay between modules 
+            end
+            else
+            begin
+                o_ood <= 0;
+            end
         end
         else
         begin
             o_rx <= 0;
             count <= count;
+            o_ood <= 0;
         end
     end
 end
