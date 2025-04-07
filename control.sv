@@ -67,7 +67,7 @@ begin
         s1: // encoder mode
         begin
             o_en_ce = 1; 
-            o_en_s = 0; 
+            o_en_s = 1; // 0 
             o_en_bm = 0; 
             o_en_acs = 0; 
             o_en_td = 0; 

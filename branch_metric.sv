@@ -8,7 +8,7 @@ module branch_metric(clk, rst, en_bm,
 
 input logic clk, rst, en_bm;
 input logic [15:0] i_mux;
-input logic [`SLICED_INPUT_NUM - 1:0] i_rx; 
+input logic  i_rx;  // [`SLICED_INPUT_NUM - 1:0]
 
 output logic [2:0] o_dist [`MAX_STATE_NUM][`RADIX]; // 3 bit distance, 8 bit current state, 2 input bit 
 output logic o_cal_done;

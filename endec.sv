@@ -19,7 +19,7 @@ input logic i_mode_sel;
 input logic i_encoder_bit;
 input logic [275:0] i_decoder_data_frame; // pseudo code
 
-output logic [`MAX_CODE_RATE - 1:0] o_encoder_data;
+output logic [255:0] o_encoder_data; //[`MAX_CODE_RATE - 1:0]
 output logic o_encoder_done;
 output logic [7:0] o_decoder_data;
 output logic o_decoder_done;
@@ -31,7 +31,7 @@ logic td_empty;
 
 logic en_ce, en_s, en_bm, en_acs, en_td, en_t;
 
-logic [`SLICED_INPUT_NUM - 1:0] rx;
+logic rx; //[`SLICED_INPUT_NUM - 1:0]
 
 logic [7:0] bck_prv_st [256];
 
@@ -65,7 +65,7 @@ conv_encoder CE1(   .clk(sys_clk),
                     .rst(rst),
                     .en_ce(en_ce), 
                     .i_gen_poly(i_gen_poly),
-                    .i_encoder_bit(i_encoder_bit),
+                    .i_encoder_bit(rx), // i_encoder_bit
                     .i_mode_sel(i_mode_sel),
                     .o_mux(mux_data),
                     .o_encoder_data(o_encoder_data),

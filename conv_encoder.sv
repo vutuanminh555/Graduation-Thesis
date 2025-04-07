@@ -11,7 +11,7 @@ input logic i_encoder_bit; // 1 bit at a time, radix-4 not related
 input logic i_mode_sel; 
 
 output logic [15:0] o_mux; // 2 bit input, 8 bit current state, 6 bit output
-output logic [`MAX_CODE_RATE - 1:0] o_encoder_data; // encoded data per bit
+output logic [255:0] o_encoder_data; // encoded data per bit [`MAX_CODE_RATE - 1:0]
 output logic o_encoder_done;
 
 // temp variables for decode mode using radix-4
@@ -25,7 +25,7 @@ logic [`MAX_STATE_REG_NUM - 1:0] e_state; // state doesnt count input bit
 logic [`DECODE_BIT_NUM - 1:0] d_pair_input_value; // all possible input
 logic [`MAX_STATE_REG_NUM - 1:0] d_state_value;  // all possible state for given K  
 
-
+logic [7:0] count;
 
 always @(posedge clk or negedge rst) // write memory on clock edge 
 begin
@@ -34,11 +34,16 @@ begin
         d_state_value <= 0;
         d_pair_input_value <= 0;
         e_state <= 0;
+        count <= '1;
+        o_encoder_data <= 0;
     end
     else
     begin
         if(en_ce == 1)
         begin 
+            count <= count - 2;
+            o_encoder_data[count] <= encode(i_gen_poly, {e_state, i_encoder_bit})[1];
+            o_encoder_data[count - 1] <= encode(i_gen_poly, {e_state, i_encoder_bit})[0];
             if(i_mode_sel == `DECODE_MODE)  
             begin
                 if({d_pair_input_value, d_state_value} != '1) // maximum possible value for state and input
@@ -57,7 +62,8 @@ begin
         end
         else 
         begin
-
+            count <= '1;
+            o_encoder_data <= 0;
         end
     end
 end
@@ -74,7 +80,8 @@ begin
         if(en_ce == 1)
         begin
             o_mux = {d_pair_input_value, d_state_value, d_o_second_data, d_o_first_data};
-            o_encoder_done = 0; // implement later
+            if(count == 1)
+            o_encoder_done = 1; // implement later
         end
         else
         begin
@@ -90,7 +97,7 @@ begin
     begin
         d_o_first_data = 0;
         d_o_second_data = 0;
-        o_encoder_data = 0;
+        //o_encoder_data = 0;
     end
     else
     begin
@@ -100,26 +107,26 @@ begin
             begin
                 d_o_first_data = encode(i_gen_poly, {d_state_value, d_pair_input_value[0]}); // calculate the first output data
                 d_o_second_data = encode(i_gen_poly, {d_state_value[`MAX_STATE_REG_NUM - 2:0], d_pair_input_value[0], d_pair_input_value[1]}); // calculate the second output data
-                o_encoder_data = 0; 
+                //o_encoder_data = 0; 
             end
             else if(i_mode_sel == `ENCODE_MODE) 
             begin
                 d_o_first_data = 0;
                 d_o_second_data = 0;
-                o_encoder_data = encode(i_gen_poly, {e_state, i_encoder_bit}); 
+                //o_encoder_data = encode(i_gen_poly, {e_state, i_encoder_bit}); 
             end 
             else 
             begin
                 d_o_first_data = 0;
                 d_o_second_data = 0;
-                o_encoder_data = 0;
+                //o_encoder_data = 0;
             end  
         end
         else 
         begin
             d_o_first_data = 0;
             d_o_second_data = 0;
-            o_encoder_data = 0;
+            //o_encoder_data = 0;
         end
     end
 end

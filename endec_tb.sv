@@ -12,7 +12,7 @@ logic i_encoder_bit;
 logic [275:0] i_decoder_data_frame; // pseudo code
 
 
-logic [`MAX_CODE_RATE - 1:0] o_encoder_data; // [`MAX_CODE_RATE - 1:0]
+logic [255:0] o_encoder_data; // [`MAX_CODE_RATE - 1:0]
 logic o_encoder_done;
 logic [7:0] o_decoder_data;
 logic o_decoder_done;
@@ -58,8 +58,8 @@ begin
     i_gen_poly[0] = 9'b000000111;
     i_gen_poly[1] = 9'b000000101;
     i_gen_poly[2] = 9'b000000000;
-    i_mode_sel = `DECODE_MODE;
-    i_decoder_data_frame = 16'b1101101010100110;  //40'b1101010010001000100001010010111101010010;
+    i_mode_sel = `ENCODE_MODE;
+    i_decoder_data_frame = 128'b01101110001111111000110100101010000111001001101101011110011101001111000010100111110101101100010010110010000010011110000101010011;
     #5 i_encoder_bit = 1'b1; // en_ce = 1
     #11 i_encoder_bit = 1'b1;
     #10 i_encoder_bit = 1'b0;
@@ -74,6 +74,12 @@ end
 always @(posedge o_decoder_done)
 begin
     $display("Decoder output data is: %b", o_decoder_data);
+    $finish;
+end
+
+always @(posedge o_encoder_done)
+begin
+    $display("Encoder output data is: %b", o_encoder_data);
     $finish;
 end
 
