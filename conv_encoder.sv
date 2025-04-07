@@ -41,10 +41,13 @@ begin
         begin 
             if(i_mode_sel == `DECODE_MODE)  
             begin
+                if({d_pair_input_value, d_state_value} != '1) // maximum possible value for state and input
+                begin
                 d_pair_input_value <= d_pair_input_value + 1; // 1 state need 4 input value
                 if(d_pair_input_value == `RADIX - 1)
                 begin
                     d_state_value <= d_state_value + 1; // only increase when have gone through all 4 possible inputs
+                end
                 end
             end
             if(i_mode_sel == `ENCODE_MODE)  // encoder working, weird interaction with sequential assignment, have to be 1 cycle delay compared to en signal

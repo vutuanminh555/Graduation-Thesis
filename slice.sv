@@ -1,11 +1,11 @@
 `include "param_def.sv"
 `timescale 1ns / 1ps
 
-module slice(   rst, clk, en_s, 
+module slice(   clk, rst, en_s, 
                 i_code_rate ,i_data_frame, 
                 o_rx, o_ood); 
 
-input logic rst, clk, en_s;
+input logic clk, rst, en_s;
 input logic i_code_rate;
 input logic [275:0] i_data_frame; // should be divided by 4 and 6, close to traceback_depth*sliced_input_num, choose 276
 
@@ -45,12 +45,38 @@ begin
     end
 end
 
-always @(*)
+always @(posedge clk or negedge rst) // o_ood
+begin
+    if(rst == 0)
+    begin
+        o_ood <= 0;
+    end
+    else 
+    begin
+        if(en_s == 1)
+        begin
+            if(count == 3 || count == 5) // testing
+            begin
+                o_ood <= 1; // simulating end of file, should turn on 2 cycle after for delay between modules 
+            end
+            else
+            begin
+                o_ood <= 0;
+            end
+        end
+        else
+        begin
+            o_ood <= 0;
+        end
+    end
+end
+
+always @(*) // o_rx
 begin
     if(rst == 0)
     begin
         o_rx = 0;
-        o_ood = 0;
+        //o_ood = 0;
     end
     else
     begin
@@ -69,22 +95,22 @@ begin
             else
             begin
                 o_rx = 0;
-                o_ood = 0;
+                //o_ood = 0;
             end
 
-            if(count == 3 || count == 5) // testing
-            begin
-                o_ood = 1; // simulating end of file, should turn on 2 cycle after for delay between modules 
-            end
-            else
-            begin
-                o_ood = 0;
-            end
+            // if(count == 3 || count == 5) // testing
+            // begin
+            //     o_ood = 1; // simulating end of file, should turn on 2 cycle after for delay between modules 
+            // end
+            // else
+            // begin
+            //     o_ood = 0;
+            // end
         end
         else
         begin
             o_rx = 0;
-            o_ood = 0;
+            //o_ood = 0;
         end
     end
 end

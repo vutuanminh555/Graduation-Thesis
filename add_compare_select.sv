@@ -16,7 +16,7 @@ logic [8:0] pm_mem [`MAX_STATE_NUM][`RADIX]; // hold path metric for each transi
 
 logic [8:0] min_node;
 
-logic [2:0] min_pm;
+logic [9:0] min_pm;
 logic [`MAX_STATE_REG_NUM - 1:0] min_prv_st;
 //logic [8:0] count;
 
@@ -71,7 +71,7 @@ begin
                 pm_mem[i][j] = 0;
             end
         end
-        min_pm = 3'b111;
+        min_pm = 10'b1111111111;
         min_prv_st = 0;
     end
     else 
@@ -88,7 +88,7 @@ begin
 
             for(int i = 0; i < `MAX_STATE_NUM; i++) // calculating min_pm, working
             begin
-                min_pm = 3'b111; // can always choose at least 1 path
+                min_pm = 10'b1111111111; // can always choose at least 1 path
                 min_prv_st = 0; // reset value for the next iteration
                 for(int j = 0; j < `RADIX; j++) // find path with smallest distance 
                 begin
@@ -99,12 +99,12 @@ begin
                     end
                     // if(i < 4)
                     // begin
-                    // $display("value of i_dist is: %d", i_dist[i][j]);
+                    // //$display("value of i_dist is: %d", i_dist[i][j]);
                     // $display("min_pm value is: %b", min_pm);
-                    // $display("State with the same next state %b is: %b Input value is: %b Distance: %d\n", i,{j[1:0],i[7:2]}, {i[0],i[1]},pm_mem[{j[1:0],i[7:2]}][{i[0],i[1]}]);
+                    // $display("State with the same next state %b is: %b Input value is: %b Distance: %d\n", i, {j[1:0],i[7:2]}, {i[0],i[1]}, pm_mem[{j[1:0],i[7:2]}][{i[0],i[1]}]);
                     // end
                 end 
-                // all next state have next state, not all current state have next state
+                //all next state have next state, not all current state have next state
                 // if(i < 4)
                 // $display("Chosen prv_st for nxt_st %b: %b\n", i ,min_prv_st);
                 o_fwd_prv_st[i] = min_prv_st ; // output address is next state, value is previous state (can be reduced)
@@ -120,13 +120,13 @@ begin
                     pm_mem[i][j] = 0;
                 end
             end
-            min_pm = 3'b111;
+            min_pm = 10'b1111111111;
             min_prv_st = 0;
         end
     end
 end
 
-always @(*) // output min_node
+always @(*) // calculate and output min_node
 begin
     if(rst == 0)
     begin
@@ -138,7 +138,7 @@ begin
         if(en_acs == 1)
         begin
             min_node = 9'b111111111;
-            for(int i = 0; i < 4; i++) // used `MAX_STATE_NUM
+            for(int i = 0; i < `MAX_STATE_NUM; i++) // `MAX_STATE_NUM
             begin
                 if(node_mem[i] < min_node)
                 begin
@@ -146,7 +146,6 @@ begin
                     o_sel_node = i;
                 end
             end
-
         end
         else
         begin

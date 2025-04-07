@@ -107,7 +107,7 @@ begin
             if(i_mux[15:6] == '1) // last possible state with last possible input
                 o_cal_done = 1; // sync with bm_mem update
             else
-                o_cal_done = 0;
+                o_cal_done = 0; // turn off when conv_encoder turn off
         end
         else 
         begin

@@ -2,10 +2,11 @@
 `timescale 1ns / 1ps
 
 module control( clk, rst, en,
-                i_mode_sel, i_ood, i_cal_done, i_td_full,
+                i_constr_len, i_mode_sel, i_ood, i_cal_done, i_td_full,
                 o_en_ce, o_en_s, o_en_bm, o_en_acs, o_en_td, o_en_t);
 
 input logic clk, rst, en;
+input logic [1:0] i_constr_len;
 input logic i_mode_sel;
 input logic i_ood;
 input logic i_cal_done;
@@ -22,6 +23,7 @@ localparam [2:0] s3 = 011;
 localparam [2:0] s4 = 100; 
 localparam [2:0] s5 = 101; 
 localparam [2:0] s6 = 110;
+localparam [2:0] s7 = 111;
 
 always @(posedge clk or negedge rst) 
 begin
@@ -55,11 +57,14 @@ begin
             o_en_bm = 0; 
             o_en_acs = 0; 
             o_en_td = 0; 
-            o_en_t = 0;
-            nxt_state = s1;
+            o_en_t = 0; 
+            if (i_mode_sel == `DECODE_MODE)
+                nxt_state = s2;
+            else // encode mode
+                nxt_state = s1;
         end
         
-        s1: // encoder
+        s1: // encoder mode
         begin
             o_en_ce = 1; 
             o_en_s = 0; 
@@ -67,13 +72,10 @@ begin
             o_en_acs = 0; 
             o_en_td = 0; 
             o_en_t = 0;
-            if (i_mode_sel == `DECODE_MODE)
-            nxt_state = s2;
-            else // encode mode
             nxt_state = s1;
         end
         
-        s2: // precalculating branch metric
+        s2: // decoder mode, precalculating branch metric
         begin
             o_en_ce = 1; 
             o_en_s = 0; 
@@ -81,37 +83,20 @@ begin
             o_en_acs = 0; 
             o_en_td = 0; 
             o_en_t = 0;
-            if(i_cal_done == 1)
-            nxt_state = s3;
+            if(i_cal_done == 1) // only need enable pulse
+            begin
+                if(i_constr_len == `CONSTR_LEN_3)
+                    nxt_state = s5;
+                else
+                    nxt_state = s3;
+            end
             else
             nxt_state = s2;
         end
         
-        s3: // finished all possible branch metric, start receiving bits
+        s3: // finished all possible branch metric, start processing received bits and saving to memory
         begin
-            o_en_ce = 1; 
-            o_en_s = 1; 
-            o_en_bm = 1; 
-            o_en_acs = 0; 
-            o_en_td = 0; 
-            o_en_t = 0;
-            nxt_state = s4;
-        end
-        
-        s4: // start processing received bits
-        begin
-            o_en_ce = 1; 
-            o_en_s = 1; 
-            o_en_bm = 1; 
-            o_en_acs = 1; 
-            o_en_td = 0; 
-            o_en_t = 0;
-            nxt_state = s5;
-        end
-
-        s5: // start saving processed data to trellis diagram
-        begin
-            o_en_ce = 1; 
+            o_en_ce = 0;  // turn off to save energy 
             o_en_s = 1; 
             o_en_bm = 1; 
             o_en_acs = 1; 
@@ -119,21 +104,43 @@ begin
             o_en_t = 0;
             if(i_ood == 1 || i_td_full == 1) 
             begin
-                nxt_state = s6;
+                nxt_state = s4;
             end
             else
             begin
-                nxt_state = s5;
+                nxt_state = s3;
             end
         end
-
-        s6: // start tracing back 
+        
+        s4: // start tracing back
         begin
-            o_en_ce = 1; 
+            o_en_ce = 0; 
+            o_en_s = 0; 
+            o_en_bm = 0; 
+            o_en_acs = 0; 
+            o_en_td = 1; 
+            o_en_t = 1;
+            nxt_state = s4;
+        end
+
+        s5: // constraint length = 3, skip trellis diagram
+        begin
+            o_en_ce = 0; 
             o_en_s = 1; 
             o_en_bm = 1; 
             o_en_acs = 1; 
-            o_en_td = 1; 
+            o_en_td = 0; 
+            o_en_t = 0;
+            nxt_state = s6;
+        end
+
+        s6: // traceback have 1 cycle delay comprared to acs
+        begin
+            o_en_ce = 0; 
+            o_en_s = 1; 
+            o_en_bm = 1; 
+            o_en_acs = 1; 
+            o_en_td = 0; 
             o_en_t = 1;
             nxt_state = s6;
         end

@@ -41,6 +41,7 @@ begin
                 begin
                     td_mem[i][depth] <= i_fwd_prv_st[i]; 
                 end
+                if(depth < 3) // how to generalize?
                 depth <= depth + 1;
             end
             else if(wrk_mode == 1) // output transition to traceback
@@ -119,11 +120,11 @@ begin
     end
 end
 
-always @(*) // change working mode
+always @(posedge clk or negedge rst) // change working mode, use sequential to sync with traceback module
 begin
     if(rst == 0)
     begin
-        wrk_mode = 0;
+        wrk_mode <= 0;
     end
     else
     begin
@@ -131,14 +132,14 @@ begin
         begin 
             if(o_td_full == 1 || i_ood == 1)
             begin
-                wrk_mode = 1;
+                wrk_mode <= 1;
             end
             else
-            wrk_mode = 0;
+            wrk_mode <= 0;
         end
         else
         begin
-            wrk_mode = 0;
+            wrk_mode <= 0;
         end
     end
 end
