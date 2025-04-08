@@ -12,9 +12,9 @@ logic i_encoder_bit;
 logic [275:0] i_decoder_data_frame; // pseudo code
 
 
-logic [255:0] o_encoder_data; // [`MAX_CODE_RATE - 1:0]
+logic [`MAX_CODE_RATE - 1:0] o_encoder_data; // [`MAX_CODE_RATE - 1:0]
 logic o_encoder_done;
-logic [7:0] o_decoder_data;
+logic [127:0] o_decoder_data;
 logic o_decoder_done;
 
 
@@ -54,12 +54,12 @@ end
 initial
 begin
     i_code_rate = `CODE_RATE_2;
-    i_constr_len = `CONSTR_LEN_3;
-    i_gen_poly[0] = 9'b000000111;
-    i_gen_poly[1] = 9'b000000101;
+    i_constr_len = `CONSTR_LEN_9;
+    i_gen_poly[0] = 9'b111101011;
+    i_gen_poly[1] = 9'b101110001;
     i_gen_poly[2] = 9'b000000000;
-    i_mode_sel = `ENCODE_MODE;
-    i_decoder_data_frame = 128'b01101110001111111000110100101010000111001001101101011110011101001111000010100111110101101100010010110010000010011110000101010011;
+    i_mode_sel = `DECODE_MODE;
+    i_decoder_data_frame = 256'b1101100111111100011100000100111000110111010000001101010110100101000100101001001111111101100001111000000010010000011000111111101101011000000000011000101001010110100101100101101000101101111111101100111000011001011101100111110000010000101011101001110111111110;
     #5 i_encoder_bit = 1'b1; // en_ce = 1
     #11 i_encoder_bit = 1'b1;
     #10 i_encoder_bit = 1'b0;

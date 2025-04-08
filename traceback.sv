@@ -12,7 +12,7 @@ input logic [`MAX_STATE_REG_NUM - 1:0] i_bck_prv_st [`MAX_STATE_NUM];
 input logic i_td_empty;
 input logic i_ood;
 
-output logic [7:0] o_decoder_data;
+output logic [127:0] o_decoder_data;
 output logic o_decoder_done;
 
 logic [`MAX_STATE_REG_NUM - 1:0] chosen_node;
@@ -28,7 +28,7 @@ begin
         chosen_node <= 0;
         o_decoder_data <= 0;
         if(i_constr_len == `CONSTR_LEN_3)
-            count <= 7; //89
+            count <= 127; //89
         else
             count <= 0;
     end

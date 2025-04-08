@@ -39,18 +39,18 @@ begin
             for(int i = 0; i < `MAX_STATE_NUM; i++) // add value from distance of the shortest path, node_mem has 1 cycle delay to i_dist
             begin 
                 node_mem[i] <= node_mem[i] + i_dist[o_fwd_prv_st[i]][{i[0],i[1]}]; // input bit order is reversed
-                if(i<4)
-                begin
-                $display("node_mem state=%b prv_state is: %b input is: %b", i, o_fwd_prv_st[i], {i[0], i[1]});
-                $display("node_mem %b value is: %d", i, node_mem[i]);
-                end
+                // if(i<4)
+                // begin
+                // $display("node_mem state=%b prv_state is: %b input is: %b", i, o_fwd_prv_st[i], {i[0], i[1]});
+                // $display("node_mem %b value is: %d", i, node_mem[i]);
+                // end
             end
             //end
             // if(count < 6)
             // count <= count + 1;
             // else
             // count <= count;
-            $display("o_sel_node value is: %b\n", o_sel_node);
+            //$display("o_sel_node value is: %b\n", o_sel_node);
         end
         else
         begin
