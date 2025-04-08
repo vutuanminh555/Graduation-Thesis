@@ -6,7 +6,7 @@ module trellis_diagr(   clk, rst, en_td,
                         o_bck_prv_st, o_td_full, o_td_empty);
 
 input logic clk, rst, en_td;
-input i_ood;
+input logic i_ood;
 input logic [`MAX_STATE_REG_NUM - 1:0] i_fwd_prv_st [`MAX_STATE_NUM];
 
 output logic [`MAX_STATE_REG_NUM - 1:0] o_bck_prv_st [`MAX_STATE_NUM];
@@ -41,7 +41,7 @@ begin
                 begin
                     td_mem[i][depth] <= i_fwd_prv_st[i]; 
                 end
-                if(depth < 3) // how to generalize?
+                if(depth < `TRACEBACK_DEPTH - 1) 
                 depth <= depth + 1;
             end
             else if(wrk_mode == 1) // output transition to traceback
@@ -130,12 +130,8 @@ begin
     begin
         if(en_td == 1)
         begin 
-            if(o_td_full == 1 || i_ood == 1)
-            begin
+            if(o_td_full == 1 || i_ood == 1) // only need enable pulse
                 wrk_mode <= 1;
-            end
-            else
-            wrk_mode <= 0;
         end
         else
         begin

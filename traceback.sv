@@ -10,7 +10,7 @@ input logic [1:0] i_constr_len;
 input logic [`MAX_STATE_REG_NUM - 1:0] i_sel_node; 
 input logic [`MAX_STATE_REG_NUM - 1:0] i_bck_prv_st [`MAX_STATE_NUM];
 input logic i_td_empty;
-input logic i_ood;
+input logic i_ood; // unneccessary
 
 output logic [127:0] o_decoder_data;
 output logic o_decoder_done;
@@ -45,8 +45,8 @@ begin
             else // constraint length 5-7-9
             begin
                 chosen_node <= nxt_chosen_node;
-                o_decoder_data[count] <= pair_bit[1]; 
-                o_decoder_data[count + 1] <= pair_bit[0];
+                o_decoder_data[count] <= pair_bit[0]; 
+                o_decoder_data[count + 1] <= pair_bit[1];
                 count <= count + 2;
                 //$display("o_decoder_data value is: %b\n", o_decoder_data);
             end
@@ -69,10 +69,8 @@ begin
     begin
         if(en_t == 1)
         begin
-            if(i_ood == 1)
-            o_decoder_done <= 1;
-            else
-            o_decoder_done <= 0;
+            if(i_td_empty == 1) // only need enable pulse
+                o_decoder_done <= 1;
         end
         else
         begin   

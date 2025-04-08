@@ -19,7 +19,7 @@ always @ (posedge clk or negedge rst)  // need to differentiate between k = 2 an
 begin
     if (rst == 0)
     begin
-        count <= 255; // for testing 
+        count <= 15; // for testing 
     end
     else 
     begin
