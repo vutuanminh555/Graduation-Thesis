@@ -166,46 +166,6 @@ begin
     end
 end
 
-// always @(posedge clk or negedge rst) // delay pm_mem and o_fwd_prv_st
-// begin
-//     if(rst == 0)
-//     begin
-//         for(int i = 0; i < `MAX_STATE_NUM; i++)
-//         begin
-//             o_fwd_prv_st[i] <= 0;
-//             for(int j = 0; j <`RADIX; j++)
-//             begin
-//                 pm_mem[i][j] <= 0;
-//             end
-//         end
-//     end
-//     else
-//     begin
-//         if(en_acs == 1)
-//         begin
-//             for(int i = 0; i < `MAX_STATE_NUM; i++) // need to calculate pm_mem first
-//             begin
-//                 for(int j = 0; j < `RADIX; j++)
-//                 begin
-//                     pm_mem[i][j] <= node_mem[i] +  i_dist[i][j];
-//                 end
-//                 o_fwd_prv_st[i] <= min_prv_st[i];
-//             end
-//         end
-//         else
-//         begin
-//             for(int i = 0; i < `MAX_STATE_NUM; i++)
-//             begin
-//                 o_fwd_prv_st[i] <= 0;
-//                 for(int j = 0; j <`RADIX; j++)
-//                 begin
-//                     pm_mem[i][j] <= 0;
-//                 end
-//             end
-//         end
-//     end
-// end
-
 always @(*) // calculate and output min_node
 begin
     if(rst == 0)
@@ -220,9 +180,9 @@ begin
             min_node = 9'b111111111;
             for(int i = 0; i < `MAX_STATE_NUM; i++) // `MAX_STATE_NUM
             begin
-                if(node_mem[i] < min_node)
+                if(node_mem[o_fwd_prv_st[i]] + i_dist[o_fwd_prv_st[i]][{i[0],i[1]}] < min_node) // compare to node_mem[i], avoid 1 cycle delay
                 begin
-                    min_node = node_mem[i];
+                    min_node = node_mem[o_fwd_prv_st[i]] + i_dist[o_fwd_prv_st[i]][{i[0],i[1]}];
                     o_sel_node = i;
                 end
             end
