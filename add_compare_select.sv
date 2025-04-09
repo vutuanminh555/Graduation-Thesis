@@ -2,10 +2,11 @@
 `timescale 1ns / 1ps
 
 module add_compare_select(  clk, rst, en_acs,
-                            i_dist,
-                            o_fwd_prv_st, o_sel_node);
+                            i_constr_len, i_dist, 
+                            o_fwd_prv_st, o_sel_node); // need constraint length input
 
 input logic clk, rst, en_acs;
+input logic [1:0] i_constr_len;
 input logic [2:0] i_dist [`MAX_STATE_NUM][`RADIX]; // distance per transition
 
 output logic [`MAX_STATE_REG_NUM - 1:0] o_fwd_prv_st [`MAX_STATE_NUM]; // hold next state value for each state (index: current state, value: nxt state)
@@ -90,21 +91,59 @@ begin
                 min_prv_st = 0; // reset value for the next iteration
                 for(int j = 0; j < `RADIX; j++) // find path with smallest distance 
                 begin
-                    if(pm_mem[{j[1:0],i[7:2]}][{i[0],i[1]}] < min_pm) // state with the same input and first 6 bit will have the same nxt_state
+                    if(i_constr_len == `CONSTR_LEN_3) // 2 last bits have problems
                     begin
-                        min_pm = pm_mem[{j[1:0],i[7:2]}][{i[0],i[1]}]; // priority: 00 > 01 > 10 > 11
-                        min_prv_st = {j[1:0],i[7:2]};
+                        if(pm_mem[{i[7:2],j[1:0]}][{i[0],i[1]}] < min_pm) // nxt_state have the same input but different previous state
+                        begin
+                            min_pm = pm_mem[{i[7:2],j[1:0]}][{i[0],i[1]}];
+                            min_prv_st = {i[7:2],j[1:0]};
+                        end
+                    end
+                    else if(i_constr_len == `CONSTR_LEN_5)
+                    begin
+                        // if(pm_mem < min_pm)
+                        // begin
+                        //     //min_pm = 
+                        //     //min_prv_st = 
+                        // end
+                    end
+                    else if(i_constr_len == `CONSTR_LEN_7)
+                    begin
+                        // if(pm_mem < min_pm)
+                        // begin
+                        //     //min_pm = 
+                        //     //min_prv_st = 
+                        // end
+                    end
+                    else if(i_constr_len == `CONSTR_LEN_9) // not tested
+                    begin
+                        if(pm_mem[{j[1:0],i[7:2]}][{i[0],i[1]}] < min_pm) // state with the same input and first 6 bit will have the same nxt_state
+                        begin
+                            min_pm = pm_mem[{j[1:0],i[7:2]}][{i[0],i[1]}]; // priority: 00 > 01 > 10 > 11
+                            min_prv_st = {j[1:0],i[7:2]};
+                        end
+                    end
+                    else
+                    begin
+                        min_pm = 0;
+                        min_prv_st = 0;
                     end
                     if($realtime > 10200ns)
                     begin
                     //$display("value of i_dist is: %d", i_dist[i][j]);
+                    if(i<4)
+                    begin
                     $display("min_pm value is: %b", min_pm);
-                    $display("State with the same next state %b is: %b Input value is: %b Distance: %d", i, {j[1:0],i[7:2]}, {i[0],i[1]}, pm_mem[{j[1:0],i[7:2]}][{i[0],i[1]}]);
+                    $display("State with the same next state %b is: %b Input value is: %b Distance: %d", i, {i[7:2],j[1:0]}, {i[0],i[1]}, pm_mem[{i[7:2],j[1:0]}][{i[0],i[1]}]);
+                    end
                     end
                 end 
                 //all next state have next state, not all current state have next state
                 if($realtime > 10200ns)
+                begin
+                if(i<4)
                 $display("Chosen prv_st for nxt_st %b: %b\n", i ,min_prv_st);
+                end
                 o_fwd_prv_st[i] = min_prv_st ; // output address is next state, value is previous state (can be reduced)
             end
         end

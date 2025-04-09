@@ -84,14 +84,9 @@ begin
             o_en_td = 0; 
             o_en_t = 0;
             if(i_cal_done == 1) // only need enable pulse
-            begin
-                if(i_constr_len == `CONSTR_LEN_3)
-                    nxt_state = s5;
-                else
-                    nxt_state = s3;
-            end
+                nxt_state = s3;
             else
-            nxt_state = s2;
+                nxt_state = s2;
         end
         
         s3: // finished all possible branch metric, start processing received bits and saving to memory

@@ -90,6 +90,7 @@ branch_metric BM1 ( .clk(sys_clk),
 add_compare_select ACS1 (   .clk(sys_clk),
                             .rst(rst),
                             .en_acs(en_acs),
+                            .i_constr_len(i_constr_len),
                             .i_dist(distance),
                             .o_fwd_prv_st(fwd_prv_st),
                             .o_sel_node(sel_node));

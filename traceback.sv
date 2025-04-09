@@ -27,29 +27,17 @@ begin
     begin
         chosen_node <= 0;
         o_decoder_data <= 0;
-        if(i_constr_len == `CONSTR_LEN_3)
-            count <= 127; //89
-        else
-            count <= 0;
+        count <= 0;
     end
     else
     begin
         if(en_t == 1)
         begin
-            if(i_constr_len == `CONSTR_LEN_3) 
-            begin
-                o_decoder_data[count] <= i_sel_node[0];
-                o_decoder_data[count - 1] <= i_sel_node[1];
-                count <= count - 2;
-            end
-            else // constraint length 5-7-9
-            begin
-                chosen_node <= nxt_chosen_node;
-                o_decoder_data[count] <= pair_bit[0]; 
-                o_decoder_data[count + 1] <= pair_bit[1];
-                count <= count + 2;
-                //$display("o_decoder_data value is: %b\n", o_decoder_data);
-            end
+            chosen_node <= nxt_chosen_node;
+            o_decoder_data[count] <= pair_bit[0]; 
+            o_decoder_data[count + 1] <= pair_bit[1];
+            count <= count + 2;
+            //$display("o_decoder_data value is: %b\n", o_decoder_data);
         end
         else
         begin
@@ -91,21 +79,14 @@ begin
     begin
         if(en_t == 1)
         begin
-            if(i_constr_len == `CONSTR_LEN_3)
-            begin
-                //if(count == 1 || i_ood)
-            end
-            else
-            begin
-                nxt_chosen_node = i_bck_prv_st[chosen_node];
-                pair_bit = chosen_node[1:0];
-                // if(count == `MAX_OUTPUT_BIT_NUM - 2 || i_td_empty == 1)
-                // begin
-                //     o_decoder_done = 1;
-                // end
-                // else
-                //     o_decoder_done = 0;
-            end
+            nxt_chosen_node = i_bck_prv_st[chosen_node];
+            pair_bit = chosen_node[1:0];
+            // if(count == `MAX_OUTPUT_BIT_NUM - 2 || i_td_empty == 1)
+            // begin
+            //     o_decoder_done = 1;
+            // end
+            // else
+            //     o_decoder_done = 0;
         end
         else
         begin

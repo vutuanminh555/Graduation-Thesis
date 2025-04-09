@@ -54,12 +54,12 @@ end
 initial
 begin
     i_code_rate = `CODE_RATE_2;
-    i_constr_len = `CONSTR_LEN_9; // doesnt matter
+    i_constr_len = `CONSTR_LEN_3; // doesnt matter
     i_gen_poly[0] = 9'b000000111;
     i_gen_poly[1] = 9'b000000101;
     i_gen_poly[2] = 9'b000000000;
     i_mode_sel = `DECODE_MODE;
-    i_decoder_data_frame = 16'b1101101010100110;
+    i_decoder_data_frame = 256'b0011101100001101011111100001011100111011000000001101010010111101010010000110101001111110111101100111001110000101110000001110111110111110000110010010000110010010110000000000111000011001110011010100011010011111010111000000001110000110101001001000010111001101;
     #5 i_encoder_bit = 1'b1; // en_ce = 1
     #11 i_encoder_bit = 1'b1;
     #10 i_encoder_bit = 1'b0;
