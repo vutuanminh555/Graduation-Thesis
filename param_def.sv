@@ -25,8 +25,8 @@
 `define CODE_RATE_3             1'b1 // 1/3
 
 // select constraint length
-`define CONSTR_LEN_3            2'b00
-`define CONSTR_LEN_5            2'b01
+`define CONSTR_LEN_3            2'b00 
+`define CONSTR_LEN_5            2'b01 
 `define CONSTR_LEN_7            2'b10
 `define CONSTR_LEN_9            2'b11
 
