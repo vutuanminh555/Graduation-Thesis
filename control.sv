@@ -2,11 +2,10 @@
 `timescale 1ns / 1ps
 
 module control( clk, rst, en,
-                i_constr_len, i_mode_sel, i_ood, i_cal_done, i_td_full,
+                i_mode_sel, i_ood, i_cal_done, i_td_full,
                 o_en_ce, o_en_s, o_en_bm, o_en_acs, o_en_td, o_en_t);
 
 input logic clk, rst, en;
-input logic [1:0] i_constr_len;
 input logic i_mode_sel;
 input logic i_ood;
 input logic i_cal_done;
@@ -16,14 +15,11 @@ output logic o_en_ce, o_en_s, o_en_bm, o_en_acs, o_en_td, o_en_t;
 
 logic [2:0] state, nxt_state;
 
-localparam [2:0] s0 = 000; 
-localparam [2:0] s1 = 001; 
-localparam [2:0] s2 = 010; 
-localparam [2:0] s3 = 011; 
-localparam [2:0] s4 = 100; 
-localparam [2:0] s5 = 101; 
-localparam [2:0] s6 = 110;
-localparam [2:0] s7 = 111;
+localparam [2:0] s0 = 000;
+localparam [2:0] s1 = 001;
+localparam [2:0] s2 = 010;
+localparam [2:0] s3 = 011;
+localparam [2:0] s4 = 100;
 
 always @(posedge clk or negedge rst) 
 begin
@@ -75,7 +71,7 @@ begin
             nxt_state = s1;
         end
         
-        s2: // decoder mode, precalculating branch metric
+        s2: // decoder mode, precalculate branch metric
         begin
             o_en_ce = 1; 
             o_en_s = 0; 
@@ -116,28 +112,6 @@ begin
             o_en_td = 1; 
             o_en_t = 1;
             nxt_state = s4;
-        end
-
-        s5: // constraint length = 3, skip trellis diagram
-        begin
-            o_en_ce = 0; 
-            o_en_s = 1; 
-            o_en_bm = 1; 
-            o_en_acs = 1; 
-            o_en_td = 0; 
-            o_en_t = 0;
-            nxt_state = s6;
-        end
-
-        s6: // traceback have 1 cycle delay comprared to acs
-        begin
-            o_en_ce = 0; 
-            o_en_s = 1; 
-            o_en_bm = 1; 
-            o_en_acs = 1; 
-            o_en_td = 0; 
-            o_en_t = 1;
-            nxt_state = s6;
         end
 
         default:

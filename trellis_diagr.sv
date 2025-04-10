@@ -13,10 +13,10 @@ output logic [`MAX_STATE_REG_NUM - 1:0] o_bck_prv_st [`MAX_STATE_NUM];
 output logic o_td_full;
 output logic o_td_empty;
 
-logic [`MAX_STATE_REG_NUM - 1:0] td_mem [`MAX_STATE_NUM][`TRACEBACK_DEPTH]; // 256 node, traceback depth = 45 (5*K)
-logic [5:0] depth;
+logic [`MAX_STATE_REG_NUM - 1:0] td_mem [`MAX_STATE_NUM][`TRACEBACK_DEPTH];
+logic [6:0] depth;
 
-logic wrk_mode; // create diagram / output data to traceback
+logic wrk_mode;
 
 always @(posedge clk or negedge rst) // save data to memory 
 begin
@@ -41,8 +41,8 @@ begin
                 begin
                     td_mem[i][depth] <= i_fwd_prv_st[i]; 
                 end
-                if(depth < `TRACEBACK_DEPTH - 1) 
-                depth <= depth + 1;
+                if(i_ood == 0)
+                    depth <= depth + 1;
             end
             else if(wrk_mode == 1) // output transition to traceback
             begin
@@ -73,8 +73,7 @@ begin
         begin
             for(int i = 0; i < `MAX_STATE_NUM; i++)
             begin
-                o_bck_prv_st[i] = td_mem[i][depth]; // has problems
-                //$display("o_bck_prv_st %b value is: %b", i, o_bck_prv_st[i]);
+                o_bck_prv_st[i] = td_mem[i][depth];
             end
             if(wrk_mode == 0)
             begin
@@ -120,7 +119,7 @@ begin
     end
 end
 
-always @(posedge clk or negedge rst) // change working mode, use sequential to sync with traceback module
+always @(posedge clk or negedge rst) // change working mode, use sequential logic to sync with traceback module
 begin
     if(rst == 0)
     begin

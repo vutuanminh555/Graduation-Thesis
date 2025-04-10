@@ -7,7 +7,7 @@ module conv_encoder(clk, rst, en_ce,
 
 input logic clk, rst, en_ce;
 input logic [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE]; // max K = 9, max code rate = 3
-input logic i_encoder_bit; // 1 bit at a time, radix-4 not related
+input logic i_encoder_bit;
 input logic i_mode_sel; 
 
 output logic [15:0] o_mux; // 2 bit input, 8 bit current state, 6 bit output
@@ -50,7 +50,7 @@ begin
                 end
                 end
             end
-            if(i_mode_sel == `ENCODE_MODE)  // encoder working, weird interaction with sequential assignment, have to be 1 cycle delay compared to en signal
+            if(i_mode_sel == `ENCODE_MODE) 
             begin
                 e_state <= {e_state[`MAX_STATE_REG_NUM - 2:0], i_encoder_bit}; // shift and change state
             end 
@@ -132,7 +132,6 @@ function automatic logic[`MAX_CODE_RATE - 1:0] encode ( input logic [`MAX_CONSTR
     begin
         for(int k = 0; k < `MAX_CONSTRAINT_LENGTH; k++) 
         begin
-            // gen_poly[i][k] == 1 // output i use k block in state 
             encoded_data[i] ^= (mux_state[k] & gen_poly[i][k]); // flip bit if state[k] == 1
         end
     end

@@ -17,11 +17,11 @@ input logic [1:0] i_constr_len;
 input logic [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE];
 input logic i_mode_sel;
 input logic i_encoder_bit;
-input logic [275:0] i_decoder_data_frame; // pseudo code
+input logic [383:0] i_decoder_data_frame; // pseudo code
 
 output logic [`MAX_CODE_RATE - 1:0] o_encoder_data;
 output logic o_encoder_done;
-output logic [127:0] o_decoder_data;
+output logic [191:0] o_decoder_data;
 output logic o_decoder_done;
 
 logic ood;
@@ -35,12 +35,9 @@ logic [`SLICED_INPUT_NUM - 1:0] rx;
 
 logic [7:0] bck_prv_st [256];
 
-// encoder
+logic [15:0] mux_data;
 
-
-logic [15:0] mux_data; // combined data from encoder
-
-logic [2:0] distance [`MAX_STATE_NUM][`RADIX]; // should use 2D vector
+logic [2:0] distance [`MAX_STATE_NUM][`RADIX];
 
 logic [`MAX_STATE_REG_NUM - 1:0] fwd_prv_st [`MAX_STATE_NUM];
 
@@ -49,7 +46,6 @@ logic [`MAX_STATE_REG_NUM - 1:0] sel_node;
 control C1 (.clk(sys_clk),
             .rst(rst),
             .en(en),
-            .i_constr_len(i_constr_len),
             .i_mode_sel(i_mode_sel),
             .i_ood(ood),
             .i_cal_done(cal_done),
@@ -107,11 +103,9 @@ trellis_diagr TD1 ( .clk(sys_clk),
 traceback T1 (  .clk(sys_clk),
                 .rst(rst),
                 .en_t(en_t),
-                .i_constr_len(i_constr_len),
                 .i_sel_node(sel_node),
                 .i_bck_prv_st(bck_prv_st),
                 .i_td_empty(td_empty),
-                .i_ood(ood),
                 .o_decoder_data(o_decoder_data),
                 .o_decoder_done(o_decoder_done));
 
