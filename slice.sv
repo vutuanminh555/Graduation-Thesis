@@ -19,7 +19,7 @@ always_ff @(posedge clk)
 begin
     if (rst == 0)
     begin
-        count <= 384; 
+        count <= 15; 
     end
     else 
     begin

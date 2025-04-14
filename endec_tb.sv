@@ -48,7 +48,7 @@ begin
         en = 1;
         rst = 0;
         i_encoder_bit = 0;
-        #15 rst = 1;
+        #16 rst = 1;
 end
 
 initial
@@ -66,7 +66,7 @@ begin
     // i_gen_poly[2] = 9'b000000000;
 
     i_mode_sel = `DECODE_MODE;
-    i_decoder_data_frame = 16'b1101101010100110;
+    i_decoder_data_frame = 16'b1101010011011100;
 end
 
 always_ff @(posedge o_decoder_done)
