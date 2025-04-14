@@ -1,7 +1,7 @@
 `include "param_def.sv"
 `timescale 1ns / 1ps
 
-module traceback(   clk, rst, en_t,
+module traceback(   clk, rst, en_t, // use BRAM with AXI DMA
                     i_sel_node, i_bck_prv_st, i_td_empty,
                     o_decoder_data, o_decoder_done); 
 
@@ -19,7 +19,7 @@ logic [`MAX_STATE_REG_NUM - 1:0] nxt_chosen_node;
 logic [8:0] count;
 logic [`DECODE_BIT_NUM - 1:0] pair_bit;
 
-always @(posedge clk or negedge rst)
+always_ff @(posedge clk)
 begin
     if(rst == 0)
     begin
@@ -44,7 +44,7 @@ begin
     end
 end
 
-always @(posedge clk or negedge rst)
+always_ff @(posedge clk)
 begin
     if(rst == 0)
     begin
@@ -64,7 +64,7 @@ begin
     end
 end
 
-always @(*)
+always_comb
 begin
     if(rst == 0)
     begin

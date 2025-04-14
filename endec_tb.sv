@@ -48,27 +48,34 @@ begin
         en = 1;
         rst = 0;
         i_encoder_bit = 0;
-        #1 rst = 1;
+        #15 rst = 1;
 end
 
 initial
 begin
-    i_code_rate = `CODE_RATE_3; 
-    i_constr_len = `CONSTR_LEN_9; 
-    i_gen_poly[0] = 9'b111101101; // matlab polynomial is reversed
-    i_gen_poly[1] = 9'b110011011; 
-    i_gen_poly[2] = 9'b100100111;
+    i_code_rate = `CODE_RATE_2; 
+    i_constr_len = `CONSTR_LEN_3; 
+
+    i_gen_poly[0] = 9'b000000111; // matlab polynomial is reversed
+    i_gen_poly[1] = 9'b000000101; 
+    i_gen_poly[2] = 9'b000000000;
+
+    // constraint length 9: 557, 663
+    // i_gen_poly[0] = 9'b111101101; // matlab polynomial is reversed
+    // i_gen_poly[1] = 9'b110011011; 
+    // i_gen_poly[2] = 9'b000000000;
+
     i_mode_sel = `DECODE_MODE;
-    i_decoder_data_frame = 384'b111100110011100000101100010100011000101100000000100110110001110010100010110111000000101111101100111100101110111000010110100010111011011100110101100101010011000000001100011011000111111100100101000010101100011101101101010100011111011110011110110001001110101010000010101100100110000011000001000101010010100011101000101100101101010110101100101000111000101111111000111001100001101100101111;
+    i_decoder_data_frame = 16'b1101101010100110;
 end
 
-always @(posedge o_decoder_done)
+always_ff @(posedge o_decoder_done)
 begin
     $display("Decoder output data is: %b", o_decoder_data);
     $finish;
 end
 
-always @(posedge o_encoder_done)
+always_ff @(posedge o_encoder_done)
 begin
     $display("Encoder output data is: %b", o_encoder_data);
     $finish;

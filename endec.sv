@@ -1,7 +1,7 @@
 `include "param_def.sv"
 `timescale 1ns / 1ps
 
-module endec(   sys_clk, rst, en,
+module endec(   sys_clk, rst, en, // need to switch to verilog wrapper, need to flattern interfaces
                 i_code_rate,
                 i_constr_len,
                 i_gen_poly,
@@ -25,7 +25,6 @@ output logic [191:0] o_decoder_data;
 output logic o_decoder_done;
 
 logic ood;
-logic cal_done;
 logic td_full;
 logic td_empty;
 
@@ -33,9 +32,9 @@ logic en_ce, en_s, en_bm, en_acs, en_td, en_t;
 
 logic [`SLICED_INPUT_NUM - 1:0] rx;
 
-logic [7:0] bck_prv_st [256];
+logic [`MAX_STATE_REG_NUM - 1:0] bck_prv_st [`MAX_STATE_NUM];
 
-logic [15:0] mux_data;
+logic [`SLICED_INPUT_NUM - 1:0] trans_data [`MAX_STATE_NUM][`RADIX];
 
 logic [2:0] distance [`MAX_STATE_NUM][`RADIX];
 
@@ -48,7 +47,6 @@ control C1 (.clk(sys_clk),
             .en(en),
             .i_mode_sel(i_mode_sel),
             .i_ood(ood),
-            .i_cal_done(cal_done),
             .i_td_full(td_full),
             .o_en_ce(en_ce),
             .o_en_s(en_s),
@@ -63,7 +61,7 @@ conv_encoder CE1(   .clk(sys_clk),
                     .i_gen_poly(i_gen_poly),
                     .i_encoder_bit(i_encoder_bit), 
                     .i_mode_sel(i_mode_sel),
-                    .o_mux(mux_data),
+                    .o_trans_data(trans_data),
                     .o_encoder_data(o_encoder_data),
                     .o_encoder_done(o_encoder_done)); 
 
@@ -75,13 +73,11 @@ slice S1 (  .clk(sys_clk), // need to implement with PS
             .o_rx(rx),
             .o_ood(ood));
 
-branch_metric BM1 ( .clk(sys_clk),
-                    .rst(rst),
+branch_metric BM1 ( .rst(rst),
                     .en_bm(en_bm),
                     .i_rx(rx),
-                    .i_mux(mux_data),
-                    .o_dist(distance),
-                    .o_cal_done(cal_done));
+                    .i_trans_data(trans_data),
+                    .o_dist(distance));
 
 add_compare_select ACS1 (   .clk(sys_clk),
                             .rst(rst),

@@ -3,57 +3,69 @@
 
 module conv_encoder(clk, rst, en_ce,
                     i_gen_poly, i_encoder_bit, i_mode_sel,
-                    o_mux, o_encoder_data, o_encoder_done); // encode and output all possible output for each transition
+                    o_trans_data, o_encoder_data, o_encoder_done); // encode and output all possible output for each transition
 
 input logic clk, rst, en_ce;
 input logic [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE]; // max K = 9, max code rate = 3
 input logic i_encoder_bit;
 input logic i_mode_sel; 
 
-output logic [15:0] o_mux; // 2 bit input, 8 bit current state, 6 bit output
+output logic [`SLICED_INPUT_NUM - 1:0] o_trans_data [`MAX_STATE_NUM][`RADIX]; // 6 bit output
 output logic [`MAX_CODE_RATE - 1:0] o_encoder_data; // encoded data per bit [`MAX_CODE_RATE - 1:0]
-output logic o_encoder_done;
-
-// temp variables for decode mode using radix-4
-logic [`MAX_CODE_RATE - 1:0] d_o_first_data; // first to second state
-logic [`MAX_CODE_RATE - 1:0] d_o_second_data; // second to third state 
+output logic o_encoder_done; // need to implement later
 
 // temp variable for encode mode
 logic [`MAX_STATE_REG_NUM - 1:0] e_state; // state doesnt count input bit
 
-// variables to use with decode mode value scanning
-logic [`DECODE_BIT_NUM - 1:0] d_pair_input_value; // all possible input
-logic [`MAX_STATE_REG_NUM - 1:0] d_state_value;  // all possible state for given K  
-
-
-
-always @(posedge clk or negedge rst) // write memory on clock edge 
+always_comb // output all 1024 transitions to branch metric modules to calculate
 begin
-    if(rst == 0) // default all output and temp signal to 0
+    if(rst == 0)
     begin
-        d_state_value <= 0;
-        d_pair_input_value <= 0;
+        for(int i = 0; i < `MAX_STATE_NUM; i++)
+        begin
+            for(int j = 0; j < `RADIX; j++)
+            begin
+                o_trans_data[i][j] = 0;
+            end
+        end
+    end
+    else
+    begin
+        if(en_ce == 1)
+        begin
+            for(int i = 0; i < `MAX_STATE_NUM; i++)
+            begin
+                for(int j = 0; j < `RADIX; j++)
+                begin
+                    o_trans_data[i][j] = {encode(i_gen_poly, {i[`MAX_STATE_REG_NUM - 2:0], j[0], j[1]}), 
+                                    encode(i_gen_poly, {i[`MAX_STATE_REG_NUM - 1:0], j[0]})}; // second data, first data
+                end
+            end
+        end
+        else
+        begin
+            for(int i = 0; i < `MAX_STATE_NUM; i++)
+            begin
+                for(int j = 0; j < `RADIX; j++)
+                begin
+                    o_trans_data[i][j] = 0;
+                end
+            end
+        end
+    end
+end
+
+always_ff @(posedge clk) // write memory 
+begin
+    if(rst == 0)
+    begin
         e_state <= 0;
     end
     else
     begin
         if(en_ce == 1)
         begin 
-            if(i_mode_sel == `DECODE_MODE)  
-            begin
-                if({d_pair_input_value, d_state_value} != '1) // maximum possible value for state and input
-                begin
-                d_pair_input_value <= d_pair_input_value + 1; // 1 state need 4 input value
-                if(d_pair_input_value == `RADIX - 1)
-                begin
-                    d_state_value <= d_state_value + 1; // only increase when have gone through all 4 possible inputs
-                end
-                end
-            end
-            if(i_mode_sel == `ENCODE_MODE) 
-            begin
-                e_state <= {e_state[`MAX_STATE_REG_NUM - 2:0], i_encoder_bit}; // shift and change state
-            end 
+            e_state <= {e_state[`MAX_STATE_REG_NUM - 2:0], i_encoder_bit}; // shift and change state
         end
         else 
         begin
@@ -62,34 +74,10 @@ begin
     end
 end
 
-always @(*) // output data
-begin
-    if(rst == 0)
-    begin
-        o_mux = 0;
-        o_encoder_done = 0;
-    end
-    else
-    begin
-        if(en_ce == 1)
-        begin
-            o_mux = {d_pair_input_value, d_state_value, d_o_second_data, d_o_first_data};
-            o_encoder_done = 0; // implement later
-        end
-        else
-        begin
-            o_mux = 0;
-            o_encoder_done = 0;
-        end
-    end
-end
-
-always @(*) // read and calculate data from memory
+always_comb // read and calculate data from memory
 begin 
     if(rst == 0 )
     begin
-        d_o_first_data = 0;
-        d_o_second_data = 0;
         o_encoder_data = 0;
     end
     else
@@ -98,41 +86,33 @@ begin
         begin 
             if(i_mode_sel == `DECODE_MODE)  
             begin
-                d_o_first_data = encode(i_gen_poly, {d_state_value, d_pair_input_value[0]}); // calculate the first output data
-                d_o_second_data = encode(i_gen_poly, {d_state_value[`MAX_STATE_REG_NUM - 2:0], d_pair_input_value[0], d_pair_input_value[1]}); // calculate the second output data
                 o_encoder_data = 0; 
             end
             else if(i_mode_sel == `ENCODE_MODE) 
             begin
-                d_o_first_data = 0;
-                d_o_second_data = 0;
                 o_encoder_data = encode(i_gen_poly, {e_state, i_encoder_bit}); 
             end 
             else 
             begin
-                d_o_first_data = 0;
-                d_o_second_data = 0;
                 o_encoder_data = 0;
             end  
         end
         else 
         begin
-            d_o_first_data = 0;
-            d_o_second_data = 0;
             o_encoder_data = 0;
         end
     end
 end
 
-function automatic logic[`MAX_CODE_RATE - 1:0] encode ( input logic [`MAX_CONSTRAINT_LENGTH - 1:0] gen_poly [`MAX_CODE_RATE], // max k outputs 
+function logic[`MAX_CODE_RATE - 1:0] encode ( input logic [`MAX_CONSTRAINT_LENGTH - 1:0] gen_poly [`MAX_CODE_RATE], // max k outputs 
                                                         input logic [`MAX_CONSTRAINT_LENGTH - 1:0] mux_state); // state combine with input
-    logic [`MAX_CODE_RATE - 1:0] encoded_data;
+    automatic logic [`MAX_CODE_RATE - 1:0] encoded_data;
     encoded_data = 0;
     for(int i = 0; i < `MAX_CODE_RATE; i++) 
     begin
         for(int k = 0; k < `MAX_CONSTRAINT_LENGTH; k++) 
         begin
-            encoded_data[i] ^= (mux_state[k] & gen_poly[i][k]); // flip bit if state[k] == 1
+            encoded_data[i] ^= (mux_state[k] & gen_poly[i][k]); // flip bit if state[k] == 1 and gen_poly[i][k] == 1
         end
     end
     return encoded_data;

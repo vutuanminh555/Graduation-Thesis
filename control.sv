@@ -2,13 +2,12 @@
 `timescale 1ns / 1ps
 
 module control( clk, rst, en,
-                i_mode_sel, i_ood, i_cal_done, i_td_full,
+                i_mode_sel, i_ood, i_td_full,
                 o_en_ce, o_en_s, o_en_bm, o_en_acs, o_en_td, o_en_t);
 
 input logic clk, rst, en;
 input logic i_mode_sel;
 input logic i_ood;
-input logic i_cal_done;
 input logic i_td_full;
 
 output logic o_en_ce, o_en_s, o_en_bm, o_en_acs, o_en_td, o_en_t;
@@ -19,9 +18,8 @@ localparam [2:0] s0 = 000;
 localparam [2:0] s1 = 001;
 localparam [2:0] s2 = 010;
 localparam [2:0] s3 = 011;
-localparam [2:0] s4 = 100;
 
-always @(posedge clk or negedge rst) 
+always_ff @(posedge clk) 
 begin
     if (rst == 0)
     begin
@@ -41,7 +39,7 @@ begin
     
 end
 
-always @ (*) 
+always_comb 
 begin
     if(en == 1)
     begin
@@ -71,39 +69,25 @@ begin
             nxt_state = s1;
         end
         
-        s2: // decoder mode, precalculate branch metric
+        s2: // decoder mode, creating trellis diagram
         begin
             o_en_ce = 1; 
-            o_en_s = 0; 
-            o_en_bm = 1; 
-            o_en_acs = 0; 
-            o_en_td = 0; 
-            o_en_t = 0;
-            if(i_cal_done == 1) // only need enable pulse
-                nxt_state = s3;
-            else
-                nxt_state = s2;
-        end
-        
-        s3: // finished all possible branch metric, start processing received bits and saving to memory
-        begin
-            o_en_ce = 0;  // turn off to save energy 
-            o_en_s = 1; 
+            o_en_s = 1;
             o_en_bm = 1; 
             o_en_acs = 1; 
             o_en_td = 1; 
             o_en_t = 0;
             if(i_ood == 1 || i_td_full == 1) 
             begin
-                nxt_state = s4;
+                nxt_state = s3;
             end
             else
             begin
-                nxt_state = s3;
+                nxt_state = s2;
             end
         end
         
-        s4: // start tracing back
+        s3: // start tracing back
         begin
             o_en_ce = 0; 
             o_en_s = 0; 
@@ -111,7 +95,7 @@ begin
             o_en_acs = 0; 
             o_en_td = 1; 
             o_en_t = 1;
-            nxt_state = s4;
+            nxt_state = s3;
         end
 
         default:
