@@ -2,22 +2,21 @@
 `timescale 1ns / 1ps
 
 module traceback(   clk, rst, en_t, // use BRAM with AXI DMA
-                    i_sel_node, i_bck_prv_st, i_td_empty,
+                    i_sel_node, i_bck_prv_st,
                     o_decoder_data, o_decoder_done); 
 
 input logic clk, rst, en_t;
 input logic [`MAX_STATE_REG_NUM - 1:0] i_sel_node; 
 input logic [`MAX_STATE_REG_NUM - 1:0] i_bck_prv_st [`MAX_STATE_NUM];
-input logic i_td_empty;
 
-output logic [191:0] o_decoder_data;
+output logic [127:0] o_decoder_data;
 output logic o_decoder_done;
 
 logic [`MAX_STATE_REG_NUM - 1:0] chosen_node;
 logic [`MAX_STATE_REG_NUM - 1:0] nxt_chosen_node;
 
-logic [8:0] count;
-logic [`DECODE_BIT_NUM - 1:0] pair_bit;
+logic [6:0] count;
+logic [`OUTPUT_BIT_NUM - 1:0] pair_bit;
 
 always_ff @(posedge clk)
 begin
@@ -54,7 +53,7 @@ begin
     begin
         if(en_t == 1)
         begin
-            if(i_td_empty == 1) // only need enable pulse
+            if(count == 126) // only need enable pulse
                 o_decoder_done <= 1;
         end
         else

@@ -5,8 +5,8 @@ module endec_tb();
 
 logic clk, rst, en;
 logic i_code_rate;
-logic [1:0] i_constr_len;
-logic [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE];
+logic i_constr_len;
+logic [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
 logic i_mode_sel;
 logic i_encoder_bit;
 logic [383:0] i_decoder_data_frame; // pseudo code
@@ -14,30 +14,30 @@ logic [383:0] i_decoder_data_frame; // pseudo code
 
 logic [`MAX_CODE_RATE - 1:0] o_encoder_data;
 logic o_encoder_done;
-logic [191:0] o_decoder_data;
+logic [127:0] o_decoder_data;
 logic o_decoder_done;
 
 
-reg [5:0] count;
-reg [12:0] index;
-integer file_outputs;
-reg [15:0] in_ram [0:1024];
+// reg [5:0] count;
+// reg [12:0] index;
+// integer file_outputs;
+// reg [15:0] in_ram [0:1024];
 
 
 
-endec E1 (  .sys_clk(clk),
-            .rst(rst),
-            .en(en),
-            .i_code_rate(i_code_rate),
-            .i_constr_len(i_constr_len),
-            .i_gen_poly(i_gen_poly),
-            .i_mode_sel(i_mode_sel),
-            .i_encoder_bit(i_encoder_bit), 
-            .i_decoder_data_frame(i_decoder_data_frame), 
-            .o_encoder_data(o_encoder_data),
-            .o_encoder_done(o_encoder_done),
-            .o_decoder_data(o_decoder_data), 
-            .o_decoder_done(o_decoder_done));
+endec_wrapper EW1 ( .sys_clk(clk),
+                    .rst(rst),
+                    .en(en),
+                    .i_code_rate(i_code_rate),
+                    .i_constr_len(i_constr_len),
+                    .i_gen_poly_flat(i_gen_poly_flat),
+                    .i_mode_sel(i_mode_sel),
+                    .i_encoder_bit(i_encoder_bit), 
+                    .i_decoder_data_frame(i_decoder_data_frame), 
+                    .o_encoder_data(o_encoder_data),
+                    .o_encoder_done(o_encoder_done),
+                    .o_decoder_data(o_decoder_data), 
+                    .o_decoder_done(o_decoder_done));
 
 always #5 clk = ~clk;
 
@@ -53,20 +53,21 @@ end
 
 initial
 begin
-    i_code_rate = `CODE_RATE_2; 
-    i_constr_len = `CONSTR_LEN_3; 
+    i_code_rate = `CODE_RATE_3; 
+    i_constr_len = `CONSTR_LEN_9; 
 
-    i_gen_poly[0] = 9'b000000111; // matlab polynomial is reversed
-    i_gen_poly[1] = 9'b000000101; 
-    i_gen_poly[2] = 9'b000000000;
+    // i_gen_poly_flat[8:0] = 9'b000000111; // matlab polynomial is reversed
+    // i_gen_poly_flat[17:9] = 9'b000000101; 
+    // i_gen_poly_flat[26:18] = 9'b000000000;
 
-    // constraint length 9: 557, 663
-    // i_gen_poly[0] = 9'b111101101; // matlab polynomial is reversed
-    // i_gen_poly[1] = 9'b110011011; 
-    // i_gen_poly[2] = 9'b000000000;
+    // constraint length 9: 557, 663, 711
+    i_gen_poly_flat[8:0] = 9'b111101101; // matlab polynomial is reversed
+    i_gen_poly_flat[17:9] = 9'b110011011; 
+    i_gen_poly_flat[26:18] = 9'b100100111;
 
     i_mode_sel = `DECODE_MODE;
-    i_decoder_data_frame = 16'b1101010011011100;
+    //i_decoder_data_frame = 16'b0010100001100111;
+    i_decoder_data_frame = 384'b111011101001110011111010000110001011010000000011101110111101010000101011001100010111100111010101001011100111001010110011001000001110111110010011100110000110000111110111001100011100100001100000011100010011010100011101010001011100010110000110101010111100111111010100111011011100011010110010111010101001110100110011110110001110010011110111111001110101010101010011101010100110010010010110;
 end
 
 always_ff @(posedge o_decoder_done)
@@ -106,3 +107,6 @@ end
 // end
 
 endmodule
+
+
+// vsim -L unisims_ver endec.endec_tb endec.glbl

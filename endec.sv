@@ -1,10 +1,10 @@
 `include "param_def.sv"
 `timescale 1ns / 1ps
 
-module endec(   sys_clk, rst, en, // need to switch to verilog wrapper, need to flattern interfaces
+module endec(   sys_clk, rst, en,
                 i_code_rate,
                 i_constr_len,
-                i_gen_poly,
+                i_gen_poly_flat,
                 i_mode_sel,
                 i_encoder_bit, 
                 i_decoder_data_frame, 
@@ -13,22 +13,28 @@ module endec(   sys_clk, rst, en, // need to switch to verilog wrapper, need to 
 
 input logic sys_clk, rst, en;
 input logic i_code_rate; 
-input logic [1:0] i_constr_len;
-input logic [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE];
+input logic i_constr_len;
+input logic [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
 input logic i_mode_sel;
 input logic i_encoder_bit;
 input logic [383:0] i_decoder_data_frame; // pseudo code
 
 output logic [`MAX_CODE_RATE - 1:0] o_encoder_data;
 output logic o_encoder_done;
-output logic [191:0] o_decoder_data;
+output logic [127:0] o_decoder_data;
 output logic o_decoder_done;
 
-logic ood;
-logic td_full;
-logic td_empty;
+logic [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE];
+generate
+    genvar i;
+    for (i = 0; i < `MAX_CODE_RATE; i = i + 1) begin : gen_poly_reconstruct
+        assign i_gen_poly[i] = i_gen_poly_flat[i*`MAX_CONSTRAINT_LENGTH +: `MAX_CONSTRAINT_LENGTH];
+    end
+endgenerate
 
-logic en_ce, en_s, en_bm, en_acs, en_td, en_t;
+logic sync;
+
+logic en_ce, en_s, en_bm, en_acs, en_m, en_t;
 
 logic [`SLICED_INPUT_NUM - 1:0] rx;
 
@@ -46,13 +52,12 @@ control C1 (.clk(sys_clk),
             .rst(rst),
             .en(en),
             .i_mode_sel(i_mode_sel),
-            .i_ood(ood),
-            .i_td_full(td_full),
+            .i_sync(sync),
             .o_en_ce(en_ce),
             .o_en_s(en_s),
             .o_en_bm(en_bm),
             .o_en_acs(en_acs),
-            .o_en_td(en_td),
+            .o_en_m(en_m),
             .o_en_t(en_t));
 
 conv_encoder CE1(   .clk(sys_clk),
@@ -70,10 +75,10 @@ slice S1 (  .clk(sys_clk), // need to implement with PS
             .en_s(en_s),
             .i_code_rate(i_code_rate),
             .i_data_frame(i_decoder_data_frame),
-            .o_rx(rx),
-            .o_ood(ood));
+            .o_rx(rx));
 
-branch_metric BM1 ( .rst(rst),
+branch_metric BM1 ( .clk(sys_clk),
+                    .rst(rst),
                     .en_bm(en_bm),
                     .i_rx(rx),
                     .i_trans_data(trans_data),
@@ -87,21 +92,18 @@ add_compare_select ACS1 (   .clk(sys_clk),
                             .o_fwd_prv_st(fwd_prv_st),
                             .o_sel_node(sel_node));
 
-trellis_diagr TD1 ( .clk(sys_clk),
-                    .rst(rst),
-                    .en_td(en_td),
-                    .i_fwd_prv_st(fwd_prv_st),
-                    .i_ood(ood),
-                    .o_bck_prv_st(bck_prv_st),
-                    .o_td_full(td_full),
-                    .o_td_empty(td_empty));
+memory M1 ( .clk(sys_clk),
+            .rst(rst),
+            .en_m(en_m),
+            .i_fwd_prv_st(fwd_prv_st),
+            .o_bck_prv_st(bck_prv_st),
+            .o_sync(sync));
 
 traceback T1 (  .clk(sys_clk),
                 .rst(rst),
                 .en_t(en_t),
                 .i_sel_node(sel_node),
                 .i_bck_prv_st(bck_prv_st),
-                .i_td_empty(td_empty),
                 .o_decoder_data(o_decoder_data),
                 .o_decoder_done(o_decoder_done));
 

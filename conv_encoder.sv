@@ -6,7 +6,7 @@ module conv_encoder(clk, rst, en_ce,
                     o_trans_data, o_encoder_data, o_encoder_done); // encode and output all possible output for each transition
 
 input logic clk, rst, en_ce;
-input logic [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE]; // max K = 9, max code rate = 3
+input logic [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE]; 
 input logic i_encoder_bit;
 input logic i_mode_sel; 
 
@@ -17,7 +17,7 @@ output logic o_encoder_done; // need to implement later
 // temp variable for encode mode
 logic [`MAX_STATE_REG_NUM - 1:0] e_state; // state doesnt count input bit
 
-always_comb // output all 1024 transitions to branch metric modules to calculate
+always_ff @(posedge clk) // output all 1024 transitions to branch metric modules to calculate
 begin
     if(rst == 0)
     begin
@@ -25,7 +25,7 @@ begin
         begin
             for(int j = 0; j < `RADIX; j++)
             begin
-                o_trans_data[i][j] = 0;
+                o_trans_data[i][j] <= 0;
             end
         end
     end
@@ -37,8 +37,8 @@ begin
             begin
                 for(int j = 0; j < `RADIX; j++)
                 begin
-                    o_trans_data[i][j] = {encode(i_gen_poly, {i[`MAX_STATE_REG_NUM - 2:0], j[0], j[1]}), 
-                                    encode(i_gen_poly, {i[`MAX_STATE_REG_NUM - 1:0], j[0]})}; // second data, first data
+                    o_trans_data[i][j] <= {encode(i_gen_poly, {i[`MAX_STATE_REG_NUM - 2:0], j[0], j[1]}), 
+                                            encode(i_gen_poly, {i[`MAX_STATE_REG_NUM - 1:0], j[0]})}; // second data, first data
                 end
             end
         end
@@ -48,7 +48,7 @@ begin
             begin
                 for(int j = 0; j < `RADIX; j++)
                 begin
-                    o_trans_data[i][j] = 0;
+                    o_trans_data[i][j] <= 0;
                 end
             end
         end
@@ -74,11 +74,12 @@ begin
     end
 end
 
-always_comb // read and calculate data from memory
+always_ff @(posedge clk) // read and calculate data from memory
 begin 
     if(rst == 0 )
     begin
-        o_encoder_data = 0;
+        o_encoder_data <= 0;
+        o_encoder_done <= 0;
     end
     else
     begin
@@ -86,26 +87,27 @@ begin
         begin 
             if(i_mode_sel == `DECODE_MODE)  
             begin
-                o_encoder_data = 0; 
+                o_encoder_data <= 0; 
             end
             else if(i_mode_sel == `ENCODE_MODE) 
             begin
-                o_encoder_data = encode(i_gen_poly, {e_state, i_encoder_bit}); 
+                o_encoder_data <= encode(i_gen_poly, {e_state, i_encoder_bit}); 
             end 
             else 
             begin
-                o_encoder_data = 0;
+                o_encoder_data <= 0;
             end  
         end
         else 
         begin
-            o_encoder_data = 0;
+            o_encoder_data <= 0;
+            o_encoder_done <= 0;
         end
     end
 end
 
-function logic[`MAX_CODE_RATE - 1:0] encode ( input logic [`MAX_CONSTRAINT_LENGTH - 1:0] gen_poly [`MAX_CODE_RATE], // max k outputs 
-                                                        input logic [`MAX_CONSTRAINT_LENGTH - 1:0] mux_state); // state combine with input
+function logic [`MAX_CODE_RATE - 1:0] encode (  input logic [`MAX_CONSTRAINT_LENGTH - 1:0] gen_poly [`MAX_CODE_RATE], // max k outputs 
+                                                input logic [`MAX_CONSTRAINT_LENGTH - 1:0] mux_state); // state combine with input
     automatic logic [`MAX_CODE_RATE - 1:0] encoded_data;
     encoded_data = 0;
     for(int i = 0; i < `MAX_CODE_RATE; i++) 
