@@ -6,7 +6,7 @@ module endec(   sys_clk, rst, en,
                 i_constr_len,
                 i_gen_poly_flat,
                 i_mode_sel,
-                i_encoder_bit, 
+                i_encoder_data_frame, 
                 i_decoder_data_frame, 
                 o_encoder_data, o_encoder_done,
                 o_decoder_data, o_decoder_done);  
@@ -16,10 +16,10 @@ input logic i_code_rate;
 input logic i_constr_len;
 input logic [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
 input logic i_mode_sel;
-input logic i_encoder_bit;
-input logic [383:0] i_decoder_data_frame; // pseudo code
+input logic [127:0] i_encoder_data_frame;
+input logic [383:0] i_decoder_data_frame;
 
-output logic [`MAX_CODE_RATE - 1:0] o_encoder_data;
+output logic [383:0] o_encoder_data;
 output logic o_encoder_done;
 output logic [127:0] o_decoder_data;
 output logic o_decoder_done;
@@ -36,7 +36,8 @@ logic sync;
 
 logic en_ce, en_s, en_bm, en_acs, en_m, en_t;
 
-logic [`SLICED_INPUT_NUM - 1:0] rx;
+logic tx_data;
+logic [`SLICED_INPUT_NUM - 1:0] rx_data;
 
 logic [`MAX_STATE_REG_NUM - 1:0] bck_prv_st [`MAX_STATE_NUM];
 
@@ -64,7 +65,8 @@ conv_encoder CE1(   .clk(sys_clk),
                     .rst(rst),
                     .en_ce(en_ce), 
                     .i_gen_poly(i_gen_poly),
-                    .i_encoder_bit(i_encoder_bit), 
+                    .i_code_rate(i_code_rate),
+                    .i_tx_data(tx_data), 
                     .i_mode_sel(i_mode_sel),
                     .o_trans_data(trans_data),
                     .o_encoder_data(o_encoder_data),
@@ -74,13 +76,16 @@ slice S1 (  .clk(sys_clk), // need to implement with PS
             .rst(rst), // should add encode mode
             .en_s(en_s),
             .i_code_rate(i_code_rate),
-            .i_data_frame(i_decoder_data_frame),
-            .o_rx(rx));
+            .i_mode_sel(i_mode_sel),
+            .i_encoder_data_frame(i_encoder_data_frame),
+            .i_decoder_data_frame(i_decoder_data_frame),
+            .o_tx_data(tx_data),
+            .o_rx_data(rx_data));
 
 branch_metric BM1 ( .clk(sys_clk),
                     .rst(rst),
                     .en_bm(en_bm),
-                    .i_rx(rx),
+                    .i_rx_data(rx_data),
                     .i_trans_data(trans_data),
                     .o_dist(distance));
 

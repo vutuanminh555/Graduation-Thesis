@@ -2,25 +2,29 @@
 `timescale 1ns/1ps
 
 module conv_encoder(clk, rst, en_ce,
-                    i_gen_poly, i_encoder_bit, i_mode_sel,
-                    o_trans_data, o_encoder_data, o_encoder_done); // encode and output all possible output for each transition
+                    i_gen_poly, i_code_rate, i_tx_data, i_mode_sel,
+                    o_trans_data, o_encoder_data, o_encoder_done); 
 
 input logic clk, rst, en_ce;
 input logic [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE]; 
-input logic i_encoder_bit;
+input logic i_code_rate;
+input logic i_tx_data;
 input logic i_mode_sel; 
 
 output logic [`SLICED_INPUT_NUM - 1:0] o_trans_data [`MAX_STATE_NUM][`RADIX]; // 6 bit output
-output logic [`MAX_CODE_RATE - 1:0] o_encoder_data; // encoded data per bit [`MAX_CODE_RATE - 1:0]
-output logic o_encoder_done; // need to implement later
+output logic [383:0] o_encoder_data; 
+output logic o_encoder_done; 
 
-// temp variable for encode mode
-logic [`MAX_STATE_REG_NUM - 1:0] e_state; // state doesnt count input bit
+logic [8:0] count_tx;
+logic [`MAX_STATE_REG_NUM - 1:0] encoder_state; 
 
 always_ff @(posedge clk) // output all 1024 transitions to branch metric modules to calculate
 begin
     if(rst == 0)
     begin
+        count_tx <= 383;
+        o_encoder_data <= 0;
+        o_encoder_done <= 0;
         for(int i = 0; i < `MAX_STATE_NUM; i++)
         begin
             for(int j = 0; j < `RADIX; j++)
@@ -33,17 +37,45 @@ begin
     begin
         if(en_ce == 1)
         begin
-            for(int i = 0; i < `MAX_STATE_NUM; i++)
+            if(i_mode_sel == `ENCODE_MODE) // need to pad 0 at the end of file
             begin
-                for(int j = 0; j < `RADIX; j++)
+                if(i_code_rate == `CODE_RATE_2)
                 begin
-                    o_trans_data[i][j] <= {encode(i_gen_poly, {i[`MAX_STATE_REG_NUM - 2:0], j[0], j[1]}), 
-                                            encode(i_gen_poly, {i[`MAX_STATE_REG_NUM - 1:0], j[0]})}; // second data, first data
+                    count_tx <= count_tx - 2;
+                    // o_encoder_data[count_tx] <= encode(i_gen_poly, {encoder_state, i_tx_data})[0];
+                    // o_encoder_data[count_tx - 1] <= encode(i_gen_poly, {encoder_state, i_tx_data})[1];
+                    {o_encoder_data[count_tx - 1], o_encoder_data[count_tx]} <= encode(i_gen_poly, {encoder_state, i_tx_data});
+                    if(count_tx == 129)
+                        o_encoder_done <= 1;
+                end
+                else if(i_code_rate == `CODE_RATE_3)
+                begin
+                    count_tx <= count_tx - 3;
+                    // o_encoder_data[count_tx] <= encode(i_gen_poly, {encoder_state, i_tx_data})[0];
+                    // o_encoder_data[count_tx - 1] <= encode(i_gen_poly, {encoder_state, i_tx_data})[1];
+                    // o_encoder_data[count_tx - 2] <= encode(i_gen_poly, {encoder_state, i_tx_data})[2];
+                    {o_encoder_data[count_tx - 2], o_encoder_data[count_tx - 1], o_encoder_data[count_tx]} <= encode(i_gen_poly, {encoder_state, i_tx_data});
+                    if(count_tx == 2)
+                        o_encoder_done <= 1;
+                end
+                encoder_state <= {encoder_state[`MAX_STATE_REG_NUM - 2:0], i_tx_data}; // shift and change state
+            end
+
+            else if(i_mode_sel == `DECODE_MODE)
+            begin
+                for(int i = 0; i < `MAX_STATE_NUM; i++)
+                begin
+                    for(int j = 0; j < `RADIX; j++)
+                    begin
+                        o_trans_data[i][j] <= {encode(i_gen_poly, {i[`MAX_STATE_REG_NUM - 2:0], j[0], j[1]}), 
+                                                encode(i_gen_poly, {i[`MAX_STATE_REG_NUM - 1:0], j[0]})}; // second data, first data
+                    end
                 end
             end
         end
         else
         begin
+            o_encoder_data <= 0;
             for(int i = 0; i < `MAX_STATE_NUM; i++)
             begin
                 for(int j = 0; j < `RADIX; j++)
@@ -51,57 +83,6 @@ begin
                     o_trans_data[i][j] <= 0;
                 end
             end
-        end
-    end
-end
-
-always_ff @(posedge clk) // write memory 
-begin
-    if(rst == 0)
-    begin
-        e_state <= 0;
-    end
-    else
-    begin
-        if(en_ce == 1)
-        begin 
-            e_state <= {e_state[`MAX_STATE_REG_NUM - 2:0], i_encoder_bit}; // shift and change state
-        end
-        else 
-        begin
-
-        end
-    end
-end
-
-always_ff @(posedge clk) // read and calculate data from memory
-begin 
-    if(rst == 0 )
-    begin
-        o_encoder_data <= 0;
-        o_encoder_done <= 0;
-    end
-    else
-    begin
-        if(en_ce == 1) 
-        begin 
-            if(i_mode_sel == `DECODE_MODE)  
-            begin
-                o_encoder_data <= 0; 
-            end
-            else if(i_mode_sel == `ENCODE_MODE) 
-            begin
-                o_encoder_data <= encode(i_gen_poly, {e_state, i_encoder_bit}); 
-            end 
-            else 
-            begin
-                o_encoder_data <= 0;
-            end  
-        end
-        else 
-        begin
-            o_encoder_data <= 0;
-            o_encoder_done <= 0;
         end
     end
 end

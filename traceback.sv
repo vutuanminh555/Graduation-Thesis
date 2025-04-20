@@ -9,7 +9,7 @@ input logic clk, rst, en_t;
 input logic [`MAX_STATE_REG_NUM - 1:0] i_sel_node; 
 input logic [`MAX_STATE_REG_NUM - 1:0] i_bck_prv_st [`MAX_STATE_NUM];
 
-output logic [127:0] o_decoder_data;
+output logic [`TRACEBACK_DEPTH*2 - 1:0] o_decoder_data;
 output logic o_decoder_done;
 
 logic [`MAX_STATE_REG_NUM - 1:0] chosen_node;
@@ -53,7 +53,7 @@ begin
     begin
         if(en_t == 1)
         begin
-            if(count == 126) // only need enable pulse
+            if(count == `TRACEBACK_DEPTH*2 - 2) 
                 o_decoder_done <= 1;
         end
         else

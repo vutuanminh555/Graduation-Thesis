@@ -12,7 +12,6 @@ input logic i_sync;
 output logic o_en_ce, o_en_s, o_en_bm, o_en_acs, o_en_m, o_en_t;
 
 logic [3:0] state, nxt_state;
-
 logic [2:0] mem_delay; 
 
 localparam [3:0] s0  = 4'b0000;
@@ -133,7 +132,7 @@ begin
             o_en_acs = 0; 
             o_en_m = 1; 
             o_en_t = 0;
-            if(mem_delay == 3)
+            if(mem_delay == 5)
                 nxt_state = s7;
             else
                 nxt_state = s6;

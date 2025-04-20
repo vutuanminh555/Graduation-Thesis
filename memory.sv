@@ -25,6 +25,7 @@ localparam NUM_BRAMS = 32;
 logic [BRAM_ADDR_WIDTH - 1:0] bram_addr [2] [NUM_BRAMS]; 
 logic [BRAM_DATA_WIDTH - 1:0] bram_din [2] [NUM_BRAMS]; 
 logic [BRAM_DATA_WIDTH - 1:0] bram_dout [2] [NUM_BRAMS]; 
+logic [BRAM_DATA_WIDTH - 1:0] bram_dout_reg [2] [NUM_BRAMS];
 
 logic sbiterra [NUM_BRAMS];
 logic sbiterrb [NUM_BRAMS];
@@ -50,8 +51,8 @@ begin
         .MESSAGE_CONTROL(0),
         .READ_DATA_WIDTH_A(BRAM_DATA_WIDTH),
         .READ_DATA_WIDTH_B(BRAM_DATA_WIDTH),
-        .READ_LATENCY_A(1),
-        .READ_LATENCY_B(1),
+        .READ_LATENCY_A(2),
+        .READ_LATENCY_B(2),
         .READ_RESET_VALUE_A("1"), // default read value when read data is invalid
         .READ_RESET_VALUE_B("2"),
         .RST_MODE_A("SYNC"),
@@ -94,6 +95,15 @@ begin
 end
 endgenerate
 
+always_ff @(posedge clk) 
+begin
+    for(int i = 0; i < NUM_BRAMS; i++)
+    begin
+        bram_dout_reg[0][i] <= bram_dout[0][i];
+        bram_dout_reg[1][i] <= bram_dout[1][i];
+    end
+end
+
 always_ff @(posedge clk) // Input and output data
 begin
     if (rst == 0) 
@@ -135,15 +145,15 @@ begin
             begin
                 for(int i = 0; i < NUM_BRAMS; i++) //32 BRAMs, each holds 8 state value
                 begin
-                    o_bck_prv_st[i*8] <= bram_dout[0][i][7:0]; // need to have 1 cycle delay compared to address
-                    o_bck_prv_st[i*8 + 1] <= bram_dout[0][i][15:8];
-                    o_bck_prv_st[i*8 + 2] <= bram_dout[0][i][23:16];
-                    o_bck_prv_st[i*8 + 3] <= bram_dout[0][i][31:24];
+                    o_bck_prv_st[i*8]     <= bram_dout_reg[0][i][7:0]; // need to have 1 cycle delay compared to address
+                    o_bck_prv_st[i*8 + 1] <= bram_dout_reg[0][i][15:8];
+                    o_bck_prv_st[i*8 + 2] <= bram_dout_reg[0][i][23:16];
+                    o_bck_prv_st[i*8 + 3] <= bram_dout_reg[0][i][31:24];
 
-                    o_bck_prv_st[i*8 + 4] <= bram_dout[1][i][7:0];
-                    o_bck_prv_st[i*8 + 5] <= bram_dout[1][i][15:8];
-                    o_bck_prv_st[i*8 + 6] <= bram_dout[1][i][23:16];
-                    o_bck_prv_st[i*8 + 7] <= bram_dout[1][i][31:24];
+                    o_bck_prv_st[i*8 + 4] <= bram_dout_reg[1][i][7:0];
+                    o_bck_prv_st[i*8 + 5] <= bram_dout_reg[1][i][15:8];
+                    o_bck_prv_st[i*8 + 6] <= bram_dout_reg[1][i][23:16];
+                    o_bck_prv_st[i*8 + 7] <= bram_dout_reg[1][i][31:24];
                 end
                 if(depth > 0)
                     depth <= depth - 2;
