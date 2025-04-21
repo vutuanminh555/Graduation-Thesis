@@ -1,7 +1,7 @@
 `include "param_def.sv"
 `timescale 1ns / 1ps
 
-module traceback(   clk, rst, en_t, // use BRAM with AXI DMA
+module traceback(   clk, rst, en_t,
                     i_sel_node, i_bck_prv_st,
                     o_decoder_data, o_decoder_done); 
 

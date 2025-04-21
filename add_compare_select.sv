@@ -14,7 +14,7 @@ output logic [`MAX_STATE_REG_NUM - 1:0] o_sel_node;
 
 logic [`MAX_STATE_REG_NUM - 1:0] sel_node;
 
-logic [8:0] node_mem [`MAX_STATE_NUM];  // maximum traceback depth of 85
+logic [8:0] node_mem [`MAX_STATE_NUM];  // hold data for maximum traceback depth of 85
 
 logic [8:0] min_node;
 

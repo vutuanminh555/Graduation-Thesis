@@ -1,7 +1,7 @@
 `include "param_def.sv"
 `timescale 1ns / 1ps
 
-module slice(   clk, rst, en_s, // use dual port BRAM with AXI DMA
+module slice(   clk, rst, en_s,
                 i_code_rate, i_mode_sel, i_encoder_data_frame, i_decoder_data_frame, 
                 o_tx_data, o_rx_data); 
 
@@ -32,7 +32,12 @@ begin
         if (en_s == 1)
         begin 
             if(i_mode_sel == `ENCODE_MODE)
-                count_tx <= count_tx - 1;
+            begin
+                if(count_tx == 0)
+                    count_tx <= count_tx;
+                else
+                    count_tx <= count_tx - 1;
+            end
             else if(i_mode_sel == `DECODE_MODE)
             begin
                 if(i_code_rate == `CODE_RATE_2)
@@ -58,7 +63,7 @@ begin
     end
 end
 
-always_ff @(posedge clk) // o_rx_data 
+always_ff @(posedge clk) // o_tx_data and o_rx_data 
 begin
     if(rst == 0)
     begin

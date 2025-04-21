@@ -25,6 +25,7 @@ begin
         count_tx <= 383;
         o_encoder_data <= 0;
         o_encoder_done <= 0;
+        encoder_state <= 0;
         for(int i = 0; i < `MAX_STATE_NUM; i++)
         begin
             for(int j = 0; j < `RADIX; j++)
@@ -37,13 +38,11 @@ begin
     begin
         if(en_ce == 1)
         begin
-            if(i_mode_sel == `ENCODE_MODE) // need to pad 0 at the end of file
+            if(i_mode_sel == `ENCODE_MODE) 
             begin
                 if(i_code_rate == `CODE_RATE_2)
                 begin
                     count_tx <= count_tx - 2;
-                    // o_encoder_data[count_tx] <= encode(i_gen_poly, {encoder_state, i_tx_data})[0];
-                    // o_encoder_data[count_tx - 1] <= encode(i_gen_poly, {encoder_state, i_tx_data})[1];
                     {o_encoder_data[count_tx - 1], o_encoder_data[count_tx]} <= encode(i_gen_poly, {encoder_state, i_tx_data});
                     if(count_tx == 129)
                         o_encoder_done <= 1;
@@ -51,9 +50,6 @@ begin
                 else if(i_code_rate == `CODE_RATE_3)
                 begin
                     count_tx <= count_tx - 3;
-                    // o_encoder_data[count_tx] <= encode(i_gen_poly, {encoder_state, i_tx_data})[0];
-                    // o_encoder_data[count_tx - 1] <= encode(i_gen_poly, {encoder_state, i_tx_data})[1];
-                    // o_encoder_data[count_tx - 2] <= encode(i_gen_poly, {encoder_state, i_tx_data})[2];
                     {o_encoder_data[count_tx - 2], o_encoder_data[count_tx - 1], o_encoder_data[count_tx]} <= encode(i_gen_poly, {encoder_state, i_tx_data});
                     if(count_tx == 2)
                         o_encoder_done <= 1;
@@ -87,7 +83,7 @@ begin
     end
 end
 
-function logic [`MAX_CODE_RATE - 1:0] encode (  input logic [`MAX_CONSTRAINT_LENGTH - 1:0] gen_poly [`MAX_CODE_RATE], // max k outputs 
+function logic [`MAX_CODE_RATE - 1:0] encode (  input logic [`MAX_CONSTRAINT_LENGTH - 1:0] gen_poly [`MAX_CODE_RATE], 
                                                 input logic [`MAX_CONSTRAINT_LENGTH - 1:0] mux_state); // state combine with input
     automatic logic [`MAX_CODE_RATE - 1:0] encoded_data;
     encoded_data = 0;

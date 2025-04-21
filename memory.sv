@@ -17,7 +17,7 @@ logic wrk_mode;
 logic mem_delay;
 
 // Parameters for BRAM configuration
-localparam BRAM_DATA_WIDTH = 32; // can be reduced by half, only save 2 first and 2 last bit
+localparam BRAM_DATA_WIDTH = 32; 
 localparam BRAM_ADDR_WIDTH = 7; // with traceback depth = 64
 localparam NUM_BRAMS = 32;
 
@@ -45,7 +45,7 @@ begin
         .CLOCKING_MODE("common_clock"),
         .MEMORY_INIT_FILE("none"),
         .MEMORY_INIT_PARAM("0"),
-        .MEMORY_OPTIMIZATION("false"), // true: area, false: performance
+        .MEMORY_OPTIMIZATION("false"), 
         .MEMORY_PRIMITIVE("block"),
         .MEMORY_SIZE(BRAM_DATA_WIDTH * `TRACEBACK_DEPTH * 2), // use both port A and B for writing and reading
         .MESSAGE_CONTROL(0),
@@ -58,7 +58,7 @@ begin
         .RST_MODE_A("SYNC"),
         .RST_MODE_B("SYNC"),
         .SIM_ASSERT_CHK(0), // simulation debug
-        .USE_EMBEDDED_CONSTRAINT(0), // apply optimal placement constraint for distributed RAM (LUT)
+        .USE_EMBEDDED_CONSTRAINT(0), 
         .USE_MEM_INIT(0),
         .WAKEUP_TIME("disable_sleep"),
         .WRITE_DATA_WIDTH_A(BRAM_DATA_WIDTH),
@@ -95,7 +95,7 @@ begin
 end
 endgenerate
 
-always_ff @(posedge clk) 
+always_ff @(posedge clk)  // pipeline reg output
 begin
     for(int i = 0; i < NUM_BRAMS; i++)
     begin
@@ -113,7 +113,7 @@ begin
         begin
             o_bck_prv_st[i] <= 0;
         end
-        for (int i = 0; i < NUM_BRAMS; i++) // only reset data at address 0 ?
+        for (int i = 0; i < NUM_BRAMS; i++) 
         begin
             bram_din[0][i] <= 0;
             bram_din[1][i] <= 0;
@@ -145,7 +145,7 @@ begin
             begin
                 for(int i = 0; i < NUM_BRAMS; i++) //32 BRAMs, each holds 8 state value
                 begin
-                    o_bck_prv_st[i*8]     <= bram_dout_reg[0][i][7:0]; // need to have 1 cycle delay compared to address
+                    o_bck_prv_st[i*8]     <= bram_dout_reg[0][i][7:0]; // have 2 cycle delay compared to address
                     o_bck_prv_st[i*8 + 1] <= bram_dout_reg[0][i][15:8];
                     o_bck_prv_st[i*8 + 2] <= bram_dout_reg[0][i][23:16];
                     o_bck_prv_st[i*8 + 3] <= bram_dout_reg[0][i][31:24];
