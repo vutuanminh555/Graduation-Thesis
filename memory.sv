@@ -16,6 +16,8 @@ logic [6:0] depth;
 logic wrk_mode;
 logic mem_delay;
 
+logic wen;
+
 // Parameters for BRAM configuration
 localparam BRAM_DATA_WIDTH = 32; 
 localparam BRAM_ADDR_WIDTH = 7; // with traceback depth = 64
@@ -109,22 +111,25 @@ begin
     if (rst == 0) 
     begin
         depth <= 0;
-        for (int i = 0; i < `MAX_STATE_NUM; i++) 
-        begin
-            o_bck_prv_st[i] <= 0;
-        end
+        wen <= 0;
+        // for (int i = 0; i < `MAX_STATE_NUM; i++) 
+        // begin
+        //     o_bck_prv_st[i] <= 0;
+        // end
         for (int i = 0; i < NUM_BRAMS; i++) 
         begin
-            bram_din[0][i] <= 0;
-            bram_din[1][i] <= 0;
+        //     bram_din[0][i] <= 0;
+        //     bram_din[1][i] <= 0;
             bram_addr[0][i] <= depth;
             bram_addr[1][i] <= depth + 1;
         end
     end
-    else
+    else if(en_m == 1)
     begin
-        if(en_m == 1)
-        begin
+        // if(en_m == 1)
+        // begin
+            wen <= ~wen;
+
             for(int i = 0; i < NUM_BRAMS; i++)
             begin
                 bram_addr[0][i] <= depth;
@@ -133,12 +138,12 @@ begin
 
             if(wrk_mode == 0) // write mode
             begin
-                for(int i = 0; i < NUM_BRAMS; i++) // working, memory need 1 cycle delay to store data
-                begin
-                    bram_din[0][i] <= {i_fwd_prv_st[i*8 + 3], i_fwd_prv_st[i*8 + 2], i_fwd_prv_st[i*8 + 1], i_fwd_prv_st[i*8]};
-                    bram_din[1][i] <= {i_fwd_prv_st[i*8 + 7], i_fwd_prv_st[i*8 + 6], i_fwd_prv_st[i*8 + 5], i_fwd_prv_st[i*8 + 4]};
-                end
-                if(depth < `TRACEBACK_DEPTH*2 - 2)
+                    for(int i = 0; i < NUM_BRAMS; i++) // working, memory need 1 cycle delay to store data
+                    begin
+                        bram_din[0][i] <= {i_fwd_prv_st[i*8 + 3], i_fwd_prv_st[i*8 + 2], i_fwd_prv_st[i*8 + 1], i_fwd_prv_st[i*8]};
+                        bram_din[1][i] <= {i_fwd_prv_st[i*8 + 7], i_fwd_prv_st[i*8 + 6], i_fwd_prv_st[i*8 + 5], i_fwd_prv_st[i*8 + 4]};
+                    end
+                if(depth < `TRACEBACK_DEPTH*2 - 2 && wen == 1)
                     depth <= depth + 2;
             end
             else if(wrk_mode == 1) // read mode 
@@ -158,14 +163,14 @@ begin
                 if(depth > 0)
                     depth <= depth - 2;
             end
-        end
-        else
-        begin
-            for (int i = 0; i < `MAX_STATE_NUM; i++) 
-            begin
-                o_bck_prv_st[i] <= 0;
-            end
-        end
+        //end
+        // else
+        // begin
+        //     for (int i = 0; i < `MAX_STATE_NUM; i++) 
+        //     begin
+        //         o_bck_prv_st[i] <= 0;
+        //     end
+        // end
     end
 end
 
@@ -174,11 +179,11 @@ begin
     if(rst == 0)
     begin
         wrk_mode <= 0;
-        mem_delay <= 0;
+        //mem_delay <= 0;
     end
     else
     begin
-        if (depth == `TRACEBACK_DEPTH*2 - 2) 
+        if (depth == 6) //`TRACEBACK_DEPTH*2 - 2
             mem_delay <= 1;
         if(mem_delay == 1)
             wrk_mode <= 1;
@@ -188,25 +193,26 @@ end
 
 always_ff @(posedge clk) // Output flag
 begin
-    if (rst == 0)
-    begin
-        o_sync <= 0;
-    end
-    else
-    begin
-        if(en_m == 1)
-        begin
-            if(wrk_mode == 0) 
+    // if (rst == 0)
+    // begin
+    //     o_sync <= 0;
+    // end
+    //else 
+    // if(en_m == 1)
+    // begin
+        //if(en_m == 1)
+        //begin
+            if(wrk_mode == 0 && depth == 6) //wrk_mode == 0 && depth == `TRACEBACK_DEPTH*2 - 6
             begin
-                if(depth == `TRACEBACK_DEPTH*2 - 6)
+                //if(depth == `TRACEBACK_DEPTH*2 - 6)
                     o_sync <= 1;
             end
-        end 
-        else 
-        begin
-            o_sync <= 0;
-        end
-    end
+        //end 
+        // else 
+        // begin
+        //     o_sync <= 0;
+        // end
+    //end
 end
 
 endmodule

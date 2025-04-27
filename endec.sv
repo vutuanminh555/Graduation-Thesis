@@ -5,7 +5,7 @@ module endec(   sys_clk, rst, en,
                 i_code_rate,
                 i_constr_len,
                 i_gen_poly_flat,
-                i_mode_sel,
+                //i_mode_sel,
                 i_encoder_data_frame, 
                 i_decoder_data_frame, 
                 o_encoder_data, o_encoder_done,
@@ -15,19 +15,20 @@ input logic sys_clk, rst, en;
 input logic i_code_rate; 
 input logic i_constr_len;
 input logic [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
-input logic i_mode_sel;
+//input logic i_mode_sel;
 input logic [127:0] i_encoder_data_frame;
-input logic [383:0] i_decoder_data_frame;
+input logic [383:0] i_decoder_data_frame; 
 
 output logic [383:0] o_encoder_data;
 output logic o_encoder_done;
-output logic [127:0] o_decoder_data;
+output logic [127:0] o_decoder_data; 
 output logic o_decoder_done;
 
 logic [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE];
 generate
     genvar i;
-    for (i = 0; i < `MAX_CODE_RATE; i = i + 1) begin : gen_poly_reconstruct
+    for (i = 0; i < `MAX_CODE_RATE; i = i + 1) 
+    begin
         assign i_gen_poly[i] = i_gen_poly_flat[i*`MAX_CONSTRAINT_LENGTH +: `MAX_CONSTRAINT_LENGTH];
     end
 endgenerate
@@ -52,7 +53,7 @@ logic [`MAX_STATE_REG_NUM - 1:0] sel_node;
 control C1 (.clk(sys_clk),
             .rst(rst),
             .en(en),
-            .i_mode_sel(i_mode_sel),
+            //.i_mode_sel(i_mode_sel),
             .i_sync(sync),
             .o_en_ce(en_ce),
             .o_en_s(en_s),
@@ -67,7 +68,7 @@ conv_encoder CE1(   .clk(sys_clk),
                     .i_gen_poly(i_gen_poly),
                     .i_code_rate(i_code_rate),
                     .i_tx_data(tx_data), 
-                    .i_mode_sel(i_mode_sel),
+                    //.i_mode_sel(i_mode_sel),
                     .o_trans_data(trans_data),
                     .o_encoder_data(o_encoder_data),
                     .o_encoder_done(o_encoder_done)); 
@@ -76,7 +77,7 @@ slice S1 (  .clk(sys_clk), // need to implement with PS
             .rst(rst), // should add encode mode
             .en_s(en_s),
             .i_code_rate(i_code_rate),
-            .i_mode_sel(i_mode_sel),
+            //.i_mode_sel(i_mode_sel),
             .i_encoder_data_frame(i_encoder_data_frame),
             .i_decoder_data_frame(i_decoder_data_frame),
             .o_tx_data(tx_data),
@@ -85,6 +86,7 @@ slice S1 (  .clk(sys_clk), // need to implement with PS
 branch_metric BM1 ( .clk(sys_clk),
                     .rst(rst),
                     .en_bm(en_bm),
+                    //.i_constr_len(i_constr_len),
                     .i_rx_data(rx_data),
                     .i_trans_data(trans_data),
                     .o_dist(distance));

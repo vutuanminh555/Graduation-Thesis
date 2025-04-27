@@ -2,12 +2,13 @@
 `timescale 1ns / 1ps
 
 module slice(   clk, rst, en_s,
-                i_code_rate, i_mode_sel, i_encoder_data_frame, i_decoder_data_frame, 
+                i_code_rate, //i_mode_sel, 
+                i_encoder_data_frame, i_decoder_data_frame, 
                 o_tx_data, o_rx_data); 
 
 input logic clk, rst, en_s;
 input logic i_code_rate; 
-input logic i_mode_sel;
+//input logic i_mode_sel;
 input logic [127:0] i_encoder_data_frame;
 input logic [383:0] i_decoder_data_frame;
 
@@ -17,51 +18,59 @@ output logic [`SLICED_INPUT_NUM - 1:0] o_rx_data;
 logic [6:0] count_tx;
 logic [8:0] count_rx;
 
+logic rx_toggle;
+
 always_ff @(posedge clk) // count_tx and count_rx
 begin
     if (rst == 0)
     begin
         count_tx <= 127;
         if(i_code_rate == `CODE_RATE_2)
-            count_rx <= 255;
+            count_rx <= 15; // 255
         else if(i_code_rate == `CODE_RATE_3)
             count_rx <= 383; 
+        rx_toggle <= 0;
     end
-    else 
+    else if (en_s == 1)
     begin
-        if (en_s == 1)
-        begin 
-            if(i_mode_sel == `ENCODE_MODE)
-            begin
-                if(count_tx == 0)
-                    count_tx <= count_tx;
-                else
+        // if (en_s == 1)
+        // begin 
+            // if(i_mode_sel == `ENCODE_MODE)
+            // begin
+                // if(count_tx == 0)
+                //     count_tx <= count_tx;
+                // else
                     count_tx <= count_tx - 1;
-            end
-            else if(i_mode_sel == `DECODE_MODE)
-            begin
+            //end
+            // else if(i_mode_sel == `DECODE_MODE)
+            // begin
+                rx_toggle <= ~rx_toggle;
                 if(i_code_rate == `CODE_RATE_2)
                 begin
-                    if(count_rx == 3)
-                    count_rx <= count_rx;
-                    else
+                    // if(count_rx == 3)
+                    // count_rx <= count_rx;
+                    // else
+                    if(rx_toggle == 1)
                     count_rx <= count_rx - 4;
                 end
                 else if(i_code_rate == `CODE_RATE_3) 
                 begin
-                    if(count_rx == 5)
-                    count_rx <= count_rx;
-                    else
+                    // if(count_rx == 5)
+                    // count_rx <= count_rx;
+                    // else
+                    if(rx_toggle == 1)
                     count_rx <= count_rx - 6;
                 end
-            end
-        end
-        else
-        begin
+            //end
+        //end
+        // else
+        // begin
 
-        end
+        // end
     end
 end
+
+
 
 always_ff @(posedge clk) // o_tx_data and o_rx_data 
 begin
@@ -72,12 +81,12 @@ begin
     end
     else
     begin
-        if(en_s == 1)
-        begin
-            if(i_mode_sel == `ENCODE_MODE)
+        // if(en_s == 1)
+        // begin
+            //if(i_mode_sel == `ENCODE_MODE)
                 o_tx_data <= i_encoder_data_frame[count_tx];
-            else if(i_mode_sel == `DECODE_MODE)
-            begin
+            // else if(i_mode_sel == `DECODE_MODE)
+            // begin
                 if(i_code_rate == `CODE_RATE_2)
                 begin
                     o_rx_data[1:0] <= {i_decoder_data_frame[count_rx - 1], i_decoder_data_frame[count_rx]};
@@ -88,17 +97,17 @@ begin
                     o_rx_data[2:0] = {i_decoder_data_frame[count_rx - 2], i_decoder_data_frame[count_rx - 1], i_decoder_data_frame[count_rx]};
                     o_rx_data[5:3] = {i_decoder_data_frame[count_rx - 5], i_decoder_data_frame[count_rx - 4], i_decoder_data_frame[count_rx - 3]};
                 end
-                else
-                begin
-                    o_rx_data <= 0;
-                end
-            end
-        end
-        else
-        begin
-            o_tx_data <= 0;
-            o_rx_data <= 0;
-        end
+                // else
+                // begin
+                //     o_rx_data <= 0;
+                // end
+            //end
+        //end
+        // else
+        // begin
+        //     o_tx_data <= 0;
+        //     o_rx_data <= 0;
+        // end
     end
 end
 
