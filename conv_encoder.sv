@@ -21,33 +21,31 @@ always_ff @(posedge clk) // output all 1024 transitions to branch metric modules
 begin
     if(rst == 0)
     begin
-        count_tx <= 383;
+        if(i_code_rate == `CODE_RATE_2)
+            count_tx <= 385; // for 1 cycle delay from slice module 
+        else if(i_code_rate == `CODE_RATE_3)
+            count_tx <= 386;
         o_encoder_data <= 0;
         o_encoder_done <= 0;
         encoder_state <= 0;
     end
     else if(en_ce == 1)
     begin
-        if(i_code_rate == `CODE_RATE_2)
+        if(o_encoder_done == 0)
         begin
-            if(count_tx > 127)
+            if(i_code_rate == `CODE_RATE_2)
             begin
                 count_tx <= count_tx - 2;
                 {o_encoder_data[count_tx - 1], o_encoder_data[count_tx]} <= encode(i_gen_poly, {encoder_state, i_tx_data});
             end
-            if(count_tx == 129)
-                o_encoder_done <= 1;
-        end
-        else if(i_code_rate == `CODE_RATE_3)
-        begin
-            if(count_tx < 511) // odd interaction with combinational encode function 
+            else if(i_code_rate == `CODE_RATE_3)
             begin
                 count_tx <= count_tx - 3;
                 {o_encoder_data[count_tx - 2], o_encoder_data[count_tx - 1], o_encoder_data[count_tx]} <= encode(i_gen_poly, {encoder_state, i_tx_data});
             end
-            if(count_tx == 2)
-                o_encoder_done <= 1;
         end
+        if(count_tx == 129 || count_tx == 2)
+            o_encoder_done <= 1;
         encoder_state <= {encoder_state[`MAX_STATE_REG_NUM - 2:0], i_tx_data}; // shift and change state
 
 

@@ -43,26 +43,32 @@ end
 
 initial
 begin
-    i_code_rate = `CODE_RATE_2; 
-    i_constr_len = `CONSTR_LEN_3; 
+    i_code_rate = `CODE_RATE_3; 
+    i_constr_len = `CONSTR_LEN_9; 
 
-    i_gen_poly_flat[8:0] = 9'b000000111; // matlab polynomial is reversed
-    i_gen_poly_flat[17:9] = 9'b000000101; 
-    i_gen_poly_flat[26:18] = 9'b000000000;
+    // i_gen_poly_flat[8:0] = 9'b000000111; // matlab polynomial is reversed
+    // i_gen_poly_flat[17:9] = 9'b000000101; 
+    // i_gen_poly_flat[26:18] = 9'b000000000;
 
     //constraint length 9: 557, 663, 711
-    // i_gen_poly_flat[8:0] = 9'b111101101; // matlab polynomial is reversed
-    // i_gen_poly_flat[17:9] = 9'b110011011; 
-    // i_gen_poly_flat[26:18] = 9'b100100111;
+    i_gen_poly_flat[8:0] = 9'b111101101; // matlab polynomial is reversed
+    i_gen_poly_flat[17:9] = 9'b110011011; 
+    i_gen_poly_flat[26:18] = 9'b100100111;
 
-    i_encoder_data_frame = 128'b10011000010101000110101110000011000000111001111010001001111011101101010000011101110010011110010111111001101011000001011101010001;
+    i_encoder_data_frame = 128'b11010000000001011010001100110010000110111011111100001000010111000010101111000110000100011010111010001000001000001000001110011101;
     i_decoder_data_frame = 256'b1110111110000110011100111000100010000110100100101111010100011010101001111110110011011001111110111110000110010001101010011111101100001101011111100001011100111011000000001101010010111101010010000110101001111110111101100111001110000101110000001110111110111110;
 end
 
-always_ff @(posedge o_decoder_done)
+// always_ff @(posedge o_decoder_done)
+// begin
+//     $display("Decoder output data is: %b", o_decoder_data);
+//     // $display("Encoder output data is: %b", o_encoder_data);
+//     $finish;
+// end
+
+always_ff @(posedge o_encoder_done)
 begin
-    $display("Decoder output data is: %b", o_decoder_data);
-    //$display("Encoder output data is: %b", o_encoder_data);
+    $display("Encoder output data is: %b", o_encoder_data);
     $finish;
 end
 

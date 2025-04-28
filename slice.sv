@@ -56,7 +56,7 @@ begin
         o_tx_data <= 0;
         o_rx_data <= 0;
     end
-    else
+    else if(en_s == 1)
     begin
         o_tx_data <= i_encoder_data_frame[count_tx];
         if(i_code_rate == `CODE_RATE_2)
