@@ -1,13 +1,11 @@
 `include "param_def.sv"
 `timescale 1ns / 1ps
 
-module control( clk, rst, en,
-                //i_mode_sel, 
+module control( clk, rst, en, 
                 i_sync,
                 o_en_ce, o_en_s, o_en_bm, o_en_acs, o_en_m, o_en_t);
 
 input logic clk, rst, en;
-//input logic i_mode_sel;
 input logic i_sync;
 
 output logic o_en_ce, o_en_s, o_en_bm, o_en_acs, o_en_m, o_en_t;
@@ -22,7 +20,6 @@ localparam [2:0] s3  = 3'b011;
 localparam [2:0] s4  = 3'b100;
 localparam [2:0] s5  = 3'b101;
 localparam [2:0] s6  = 3'b110;
-//localparam [2:0] s7  = 3'b111;
 
 logic [10:0] count;
 
@@ -43,10 +40,6 @@ begin
             if(state == s5)
                 mem_delay <= mem_delay + 1;
         end
-        // else 
-        // begin
-
-        // end
     end
     
 end
@@ -62,15 +55,10 @@ begin
             o_en_acs = 0; 
             o_en_m = 0; 
             o_en_t = 0; 
-            // if (i_mode_sel == `DECODE_MODE)
-                    nxt_state = s1;
-            // else if(i_mode_sel == `ENCODE_MODE) // encode mode
-                //nxt_state = s1;
-            // else
-            //     nxt_state = s0;
+            nxt_state = s1;
         end
         
-        s1: // decoder mode
+        s1: 
         begin
             o_en_ce = 1; 
             o_en_s = 1;
@@ -78,15 +66,10 @@ begin
             o_en_acs = 0; 
             o_en_m = 0; 
             o_en_t = 0;
-            //if(i_mode_sel == `DECODE_MODE)
-                nxt_state = s2;
-            // else if(i_mode_sel == `ENCODE_MODE)
-            //     nxt_state = s2;
-            // else
-            //     nxt_state = s0;
+            nxt_state = s2;
         end
 
-        s2: // calculate Hamming distance
+        s2: 
         begin
             o_en_ce = 1; 
             o_en_s = 1;
@@ -97,7 +80,7 @@ begin
             nxt_state = s3;
         end
 
-        s3: // creating trellis diagram
+        s3: 
         begin
             o_en_ce = 1; 
             o_en_s = 1;
@@ -122,7 +105,7 @@ begin
                 nxt_state = s4;
         end
 
-        s5: // mem_delay
+        s5: 
         begin
             o_en_ce = 1; 
             o_en_s = 1; 
@@ -130,13 +113,13 @@ begin
             o_en_acs = 0; 
             o_en_m = 1; 
             o_en_t = 0;
-            if(mem_delay == 5)
+            if(mem_delay == 7)
                 nxt_state = s6;
             else
                 nxt_state = s5;
         end
 
-        s6: // start tracing back
+        s6: 
         begin
             o_en_ce = 1; 
             o_en_s = 1; 

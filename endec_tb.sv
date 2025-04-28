@@ -7,7 +7,6 @@ logic clk, rst, en;
 logic i_code_rate;
 logic i_constr_len;
 logic [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
-//logic i_mode_sel;
 logic [127:0] i_encoder_data_frame;
 logic [383:0] i_decoder_data_frame; 
 
@@ -24,7 +23,6 @@ endec_interface EI1 (   .sys_clk(clk),
                         .i_code_rate(i_code_rate),
                         .i_constr_len(i_constr_len),
                         .i_gen_poly_flat(i_gen_poly_flat),
-                        //.i_mode_sel(i_mode_sel),
                         .i_encoder_data_frame(i_encoder_data_frame), 
                         .i_decoder_data_frame(i_decoder_data_frame), 
                         .o_encoder_data(o_encoder_data),
@@ -40,7 +38,6 @@ begin
         clk = 0;
         en = 1;
         rst = 0;
-        //i_encoder_bit = 0;
         #16 rst = 1;
 end
 
@@ -58,10 +55,8 @@ begin
     // i_gen_poly_flat[17:9] = 9'b110011011; 
     // i_gen_poly_flat[26:18] = 9'b100100111;
 
-    //i_mode_sel = `DECODE_MODE;
     i_encoder_data_frame = 128'b10011000010101000110101110000011000000111001111010001001111011101101010000011101110010011110010111111001101011000001011101010001;
-    //i_decoder_data_frame = 384'b111100110100000001010001010111010111010101011010011111100101100100100001100111000110000000000101010010001100111000011111010111111000101101011000101011001001101101100001001101000100111000100001000100110001111011101011111100111000011101110000110111001100011100100001011100010011111100101011000101110001111011000100010000000100001000011010111011100111011100101101111011100111011100101101;
-    i_decoder_data_frame = 16'b1110000110001100;
+    i_decoder_data_frame = 256'b1110111110000110011100111000100010000110100100101111010100011010101001111110110011011001111110111110000110010001101010011111101100001101011111100001011100111011000000001101010010111101010010000110101001111110111101100111001110000101110000001110111110111110;
 end
 
 always_ff @(posedge o_decoder_done)

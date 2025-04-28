@@ -23,27 +23,18 @@ begin
     chosen_node <= nxt_chosen_node;
     if(rst == 0)
     begin
-        // chosen_node <= 0;
         o_decoder_data <= 0;
         count <= 0;
     end
     else if(en_t == 1)
     begin
-        // if(en_t == 1)
-        // begin
-            //chosen_node <= nxt_chosen_node;
-            if(count < `TRACEBACK_DEPTH*2 - 2)
-            begin
+        if(o_decoder_done == 0)
+        begin
             o_decoder_data[count] <= pair_bit[0]; 
             o_decoder_data[count + 1] <= pair_bit[1];
+        end
+        if(count < `TRACEBACK_DEPTH*2 - 2)
             count <= count + 2;
-            end
-        //end
-        // else
-        // begin
-        //     chosen_node <= i_sel_node; 
-        //     o_decoder_data <= 0;
-        // end
     end
 end
 
@@ -53,40 +44,20 @@ begin
     begin
         o_decoder_done <= 0;
     end
-    else if(en_t == 1)
+    else if(en_t == 1 && count == `TRACEBACK_DEPTH*2 - 2)
     begin
-    //     if(en_t == 1)
-    //     begin
-            if(count == 8) //`TRACEBACK_DEPTH*2 - 2
-                o_decoder_done <= 1;
-        //end
-        // else
-        // begin   
-        //     o_decoder_done <= 0;
-        // end
+        o_decoder_done <= 1;
     end
 end
 
 always_comb
 begin
-    //if(rst == 0)
-    //begin
-        nxt_chosen_node = i_sel_node;
-        pair_bit = chosen_node[1:0];
-    //end
-    //else 
-    //begin
-        if(en_t == 1)
-        begin
-            nxt_chosen_node = i_bck_prv_st[chosen_node];
-            // pair_bit = chosen_node[1:0];
-        end
-        // else
-        // begin
-        //     nxt_chosen_node = i_sel_node;
-        //     pair_bit = 0;
-        // end
-    //end
+    nxt_chosen_node = i_sel_node;
+    pair_bit = chosen_node[1:0];
+    if(en_t == 1)
+    begin
+        nxt_chosen_node = i_bck_prv_st[chosen_node];
+    end
 end
 
 endmodule
