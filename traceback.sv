@@ -15,6 +15,7 @@ output logic o_decoder_done;
 logic [`MAX_STATE_REG_NUM - 1:0] chosen_node;
 logic [`MAX_STATE_REG_NUM - 1:0] nxt_chosen_node;
 
+//(* use_dsp = "yes" *) 
 logic [6:0] count;
 logic [`OUTPUT_BIT_NUM - 1:0] pair_bit;
 
@@ -41,13 +42,9 @@ end
 always_ff @(posedge clk)
 begin
     if(rst == 0)
-    begin
         o_decoder_done <= 0;
-    end
     else if(en_t == 1 && count == `TRACEBACK_DEPTH*2 - 2)
-    begin
         o_decoder_done <= 1;
-    end
 end
 
 always_comb

@@ -3,7 +3,6 @@
 
 module endec_interface (  sys_clk, rst, en,
                         i_code_rate, 
-                        i_constr_len,
                         i_gen_poly_flat,
                         i_encoder_data_frame,
                         i_decoder_data_frame,
@@ -14,20 +13,25 @@ input wire sys_clk, rst, en;
 
 // Configuration inputs
 input wire i_code_rate;
-input wire i_constr_len;
 
 // Generator polynomial inputs (flattened)
 input wire [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
 
 // Encoder interface
 input wire [127:0] i_encoder_data_frame;
-output wire [383:0] o_encoder_data;
+output wire [383:0] o_encoder_data; // 383
 output wire o_encoder_done;
 
 // Decoder interface
-input wire [383:0] i_decoder_data_frame;
+input wire [383:0] i_decoder_data_frame; // 383
 output wire [127:0] o_decoder_data;
 output wire o_decoder_done;
+
+// wire [383:0] o_encoder_data_origin;
+// wire [383:0] i_decoder_data_frame_origin;
+
+// assign i_decoder_data_frame_origin[255:0] = i_decoder_data_frame;
+// assign o_encoder_data_origin[383:128] = o_encoder_data;
 
 // Instantiate the original module
 endec E1 (
@@ -35,7 +39,6 @@ endec E1 (
     .rst(rst),
     .en(en),
     .i_code_rate(i_code_rate),
-    .i_constr_len(i_constr_len),
     .i_gen_poly_flat(i_gen_poly_flat),
     .i_encoder_data_frame(i_encoder_data_frame),
     .i_decoder_data_frame(i_decoder_data_frame),
@@ -62,28 +65,27 @@ endmodule
 
 // input wire sys_clk, rst_n;
 
-// // AXI RX
+// //AXI RX
 // input wire [31:0] axi_rx_tdata;
 // input wire axi_rx_tlast; // valid and ready must already be high
 // output reg axi_rx_tready; // active high
 // input wire axi_rx_tvalid; // active high, deactivate when handshake is complete, handshake complete when both signal is high
 
-// // AXI TX
+// //AXI TX
 // output reg [31:0] axi_tx_tdata;
 // output reg axi_tx_tlast; // signal last transfer in a packet
 // input wire axi_tx_tready;
 // output reg axi_tx_tvalid;
 
 
-// // Config signals
+// //Config signals
 // reg rst; // internal reset signal
 // reg en;
 // reg i_code_rate;
-// reg i_constr_len;
-// //reg i_mode_sel;
+// reg i_mode_sel;
 // reg [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
 
-// // data for 1 packet
+// //data for 1 packet
 // reg [127:0] i_encoder_data_frame;
 // wire [383:0] o_encoder_data; // 383
 // wire o_encoder_done;
@@ -91,33 +93,28 @@ endmodule
 // wire [127:0] o_decoder_data;
 // wire o_decoder_done;
 
-// // for FSM
+// //for FSM
 // reg [2:0] state; 
 // reg [2:0] nxt_state;
 // localparam [2:0] RST = 3'b000;
 // localparam [2:0] CONF = 3'b001;
 // localparam [2:0] ENCODE = 3'b010;
 // localparam [2:0] DECODE = 3'b011;
-// localparam [2:0] s4 = 3'b100;
-// localparam [2:0] s5 = 3'b101;
-// localparam [2:0] s6 = 3'b110;
-// localparam [2:0] s7 = 3'b111;
 
-// reg [6:0] i_e_count; // fixed
+// reg [6:0] i_e_count; 
 // reg [8:0] o_e_count;
 // reg [8:0] i_d_count;
-// reg [6:0] o_d_count; // fixed
+// reg [6:0] o_d_count;
 
 
-// // AXI RX - TX
+// //AXI RX - TX
 // always @(posedge sys_clk) // need to reset endec after finish processing
 // begin
 //     if(rst_n == 0)
 //     begin
 //         axi_rx_tready <= 0;
 //         i_code_rate <= 0;
-//         i_constr_len <= 0;
-//         //i_mode_sel <= 0;
+//         i_mode_sel <= 0;
 //         i_gen_poly_flat <= 0;
 //         i_encoder_data_frame <= 0;
 //         i_decoder_data_frame <= 0;
@@ -126,10 +123,10 @@ endmodule
 //         axi_tx_tlast <= 0; 
 //         axi_tx_tvalid <= 0;
 
-//         i_e_count <= 127;
-//         o_e_count <= 383;
-//         i_d_count <= 383;
-//         o_d_count <= 127;
+//         // i_e_count <= 127;
+//         // o_e_count <= 383;
+//         // i_d_count <= 383;
+//         // o_d_count <= 127;
 //     end
 //     else
 //     begin
@@ -139,8 +136,7 @@ endmodule
 //             begin
 //                 axi_rx_tready <= 1; // ready to receive config signal
 //                 i_code_rate <= 0;
-//                 i_constr_len <= 0;
-//                 //i_mode_sel <= 0;
+//                 i_mode_sel <= 0;
 //                 i_gen_poly_flat <= 0;
 //                 i_encoder_data_frame <= 0;
 //                 i_decoder_data_frame <= 0;
@@ -155,8 +151,7 @@ endmodule
 //                 if(axi_rx_tvalid == 1 && axi_rx_tready == 1 && axi_rx_tlast == 1) // handshake, config data only has 1 transfer per packet
 //                 begin // implicit axi_rx_tready = 1 from reset
 //                     i_code_rate <= axi_rx_tdata[28];
-//                     i_constr_len <= axi_rx_tdata[27];
-//                     //i_mode_sel <= axi_rx_tdata[29];
+//                     i_mode_sel <= axi_rx_tdata[29];
 //                     i_gen_poly_flat <= axi_rx_tdata[26:0];
 //                 end
 
@@ -231,8 +226,7 @@ endmodule
 //             begin
 //                 axi_rx_tready <= 0;
 //                 i_code_rate <= 0;
-//                 i_constr_len <= 0;
-//                 //i_mode_sel <= 0;
+//                 i_mode_sel <= 0;
 //                 i_gen_poly_flat <= 0;
 //                 i_encoder_data_frame <= 0;
 //                 i_decoder_data_frame <= 0;
@@ -247,7 +241,7 @@ endmodule
 // end
 
 
-// //  FSM
+// // FSM
 // always @(posedge sys_clk) 
 // begin
 //     if(rst_n == 0)
@@ -307,13 +301,12 @@ endmodule
 //     endcase
 // end
 
-// // Instantiate the original module
+// //Instantiate the original module
 // endec E1 (
 //     .sys_clk(sys_clk),
 //     .rst(rst),
 //     .en(en),
 //     .i_code_rate(i_code_rate),
-//     .i_constr_len(i_constr_len),
 //     .i_gen_poly_flat(i_gen_poly_flat),
 //     .i_encoder_data_frame(i_encoder_data_frame),
 //     .i_decoder_data_frame(i_decoder_data_frame),

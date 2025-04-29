@@ -11,6 +11,7 @@ input logic i_sync;
 output logic o_en_ce, o_en_s, o_en_bm, o_en_acs, o_en_m, o_en_t;
 
 logic [2:0] state, nxt_state;
+//(* use_dsp = "yes" *) 
 logic [4:0] mem_delay; 
 
 localparam [2:0] s0  = 3'b000;
@@ -21,21 +22,17 @@ localparam [2:0] s4  = 3'b100;
 localparam [2:0] s5  = 3'b101;
 localparam [2:0] s6  = 3'b110;
 
-logic [10:0] count;
-
 always_ff @(posedge clk) 
 begin
     if (rst == 0)
     begin
         state <= s0;
         mem_delay <= 0;
-        count <= 1;
     end
     else
     begin
         if (en == 1)
         begin
-            count <= count + 1;
             state <= nxt_state;
             if(state == s5)
                 mem_delay <= mem_delay + 1;

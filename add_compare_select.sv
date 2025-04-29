@@ -2,27 +2,24 @@
 `timescale 1ns / 1ps
 
 module add_compare_select(  clk, rst, en_acs,
-                            i_constr_len, i_dist, 
+                            i_dist, 
                             o_fwd_prv_st, o_sel_node);
 
 input logic clk, rst, en_acs;
-input logic i_constr_len;
 input logic [2:0] i_dist [`MAX_STATE_NUM][`RADIX]; // distance per transition
 
 output logic [`MAX_STATE_REG_NUM - 1:0] o_fwd_prv_st [`MAX_STATE_NUM];
 output logic [`MAX_STATE_REG_NUM - 1:0] o_sel_node;
 
-
-logic [8:0] node_mem [`MAX_STATE_NUM];  // hold data for maximum traceback depth of 85
-
+logic [8:0] node_mem [`MAX_STATE_NUM];  // use 32 write first bram
 logic [8:0] pm [`MAX_STATE_NUM][`RADIX];
 
-logic [7:0] stage1 [128];
-logic [7:0] stage2 [64];
-logic [7:0] stage3 [32];
-logic [7:0] stage4 [16];
-logic [7:0] stage5 [8];
-logic [7:0] stage6 [4];
+logic [7:0] stage1 [128]; // use 16 bram
+logic [7:0] stage2 [64]; // use 8 bram
+logic [7:0] stage3 [32]; // use 4 bram
+logic [7:0] stage4 [16]; // use 2 bram 
+logic [7:0] stage5 [8]; // use 1 bram 
+logic [7:0] stage6 [4]; 
 logic [7:0] stage7 [2];
 
 logic toggle;
@@ -58,10 +55,7 @@ begin
         begin
             for(int j = 0; j < `RADIX; j++)
             begin
-                if(i_constr_len == `CONSTR_LEN_3)
-                    pm[i][j] <= node_mem[{i[7:2],j[1:0]}] + i_dist[{i[7:2],j[1:0]}][{i[0],i[1]}]; // i_dist must remain for 2 cycles
-                else
-                    pm[i][j] <= node_mem[{j[1:0],i[7:2]}] + i_dist[{j[1:0],i[7:2]}][{i[0],i[1]}];
+                pm[i][j] <= node_mem[{j[1:0],i[7:2]}] + i_dist[{j[1:0],i[7:2]}][{i[0],i[1]}];
             end
         end
     end
@@ -78,10 +72,7 @@ begin
             if(pm[i][j] < min_pm) // nxt_state have the same input but different previous state
             begin
                 min_pm = pm[i][j];
-                if(i_constr_len == `CONSTR_LEN_3)
-                    min_prv_st = {i[7:2],j[1:0]};
-                else
-                    min_prv_st = {j[1:0],i[7:2]};
+                min_prv_st = {j[1:0],i[7:2]};
             end
         end 
         o_fwd_prv_st[i] = min_prv_st ; // output address is next state, value is previous state

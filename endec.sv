@@ -3,7 +3,6 @@
 
 module endec(   sys_clk, rst, en,
                 i_code_rate,
-                i_constr_len,
                 i_gen_poly_flat,
                 i_encoder_data_frame, 
                 i_decoder_data_frame, 
@@ -12,7 +11,6 @@ module endec(   sys_clk, rst, en,
 
 input logic sys_clk, rst, en;
 input logic i_code_rate; 
-input logic i_constr_len;
 input logic [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
 input logic [127:0] i_encoder_data_frame;
 input logic [383:0] i_decoder_data_frame; 
@@ -88,7 +86,6 @@ branch_metric BM1 ( .clk(sys_clk),
 add_compare_select ACS1 (   .clk(sys_clk),
                             .rst(rst),
                             .en_acs(en_acs),
-                            .i_constr_len(i_constr_len),
                             .i_dist(distance),
                             .o_fwd_prv_st(fwd_prv_st),
                             .o_sel_node(sel_node));

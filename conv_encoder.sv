@@ -14,6 +14,7 @@ output logic [`SLICED_INPUT_NUM - 1:0] o_trans_data [`MAX_STATE_NUM][`RADIX]; //
 output logic [383:0] o_encoder_data; 
 output logic o_encoder_done; 
 
+//(* use_dsp = "yes" *) 
 logic [8:0] count_tx;
 logic [`MAX_STATE_REG_NUM - 1:0] encoder_state; 
 

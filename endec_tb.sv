@@ -5,7 +5,6 @@ module endec_tb();
 
 logic clk, rst, en;
 logic i_code_rate;
-logic i_constr_len;
 logic [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
 logic [127:0] i_encoder_data_frame;
 logic [383:0] i_decoder_data_frame; 
@@ -21,7 +20,6 @@ endec_interface EI1 (   .sys_clk(clk),
                         .rst(rst),
                         .en(en),
                         .i_code_rate(i_code_rate),
-                        .i_constr_len(i_constr_len),
                         .i_gen_poly_flat(i_gen_poly_flat),
                         .i_encoder_data_frame(i_encoder_data_frame), 
                         .i_decoder_data_frame(i_decoder_data_frame), 
@@ -43,34 +41,33 @@ end
 
 initial
 begin
-    i_code_rate = `CODE_RATE_3; 
-    i_constr_len = `CONSTR_LEN_9; 
+    i_code_rate = `CODE_RATE_2; 
 
-    // i_gen_poly_flat[8:0] = 9'b000000111; // matlab polynomial is reversed
-    // i_gen_poly_flat[17:9] = 9'b000000101; 
-    // i_gen_poly_flat[26:18] = 9'b000000000;
+    i_gen_poly_flat[8:0] = 9'b000000111; // matlab polynomial is reversed
+    i_gen_poly_flat[17:9] = 9'b000000101; 
+    i_gen_poly_flat[26:18] = 9'b000000000;
 
     //constraint length 9: 557, 663, 711
-    i_gen_poly_flat[8:0] = 9'b111101101; // matlab polynomial is reversed
-    i_gen_poly_flat[17:9] = 9'b110011011; 
-    i_gen_poly_flat[26:18] = 9'b100100111;
+    // i_gen_poly_flat[8:0] = 9'b111101101; // matlab polynomial is reversed
+    // i_gen_poly_flat[17:9] = 9'b110011011; 
+    // i_gen_poly_flat[26:18] = 9'b100100111;
 
-    i_encoder_data_frame = 128'b11010000000001011010001100110010000110111011111100001000010111000010101111000110000100011010111010001000001000001000001110011101;
-    i_decoder_data_frame = 256'b1110111110000110011100111000100010000110100100101111010100011010101001111110110011011001111110111110000110010001101010011111101100001101011111100001011100111011000000001101010010111101010010000110101001111110111101100111001110000101110000001110111110111110;
+    i_encoder_data_frame = 128'b11110011011101111010011101011100011111010011101100010110011110011101000100001100111101000000010011111110000100101111001111110001;
+    i_decoder_data_frame = 256'b1101101001111101010001100100011010010010111101100100100001100111001101101010010010111101100100010111001110000101111101101001111101100100101100111011000011010111110110100100101100000000001110111101101010101001110000111011111000011010011111011010101001110011;
 end
 
-// always_ff @(posedge o_decoder_done)
-// begin
-//     $display("Decoder output data is: %b", o_decoder_data);
-//     // $display("Encoder output data is: %b", o_encoder_data);
-//     $finish;
-// end
-
-always_ff @(posedge o_encoder_done)
+always_ff @(posedge o_decoder_done)
 begin
+    $display("Decoder output data is: %b", o_decoder_data);
     $display("Encoder output data is: %b", o_encoder_data);
     $finish;
 end
+
+// always_ff @(posedge o_encoder_done)
+// begin
+//     $display("Encoder output data is: %b", o_encoder_data);
+//     $finish;
+// end
 
 endmodule
 
@@ -98,7 +95,6 @@ endmodule
 
 // // Data packet
 // logic i_code_rate;
-// logic i_constr_len;
 // logic i_mode_sel;
 // logic [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
 // logic [127:0] i_encoder_data_frame;
@@ -122,7 +118,6 @@ endmodule
 // begin
 //         // Initialization
 //         i_code_rate = `CODE_RATE_2;
-//         i_constr_len = `CONSTR_LEN_3;
 //         i_mode_sel = `DECODE_MODE;
 //         i_gen_poly_flat[8:0] = 9'b000000111; 
 //         i_gen_poly_flat[17:9] = 9'b000000101; 
