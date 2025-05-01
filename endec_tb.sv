@@ -1,160 +1,176 @@
-`include "param_def.sv"
-`timescale 1ns / 1ps
-
-module endec_tb(); 
-
-logic clk, rst, en;
-logic i_code_rate;
-logic [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
-logic [127:0] i_encoder_data_frame;
-logic [383:0] i_decoder_data_frame; 
-
-
-logic [383:0] o_encoder_data;
-logic o_encoder_done;
-logic [127:0] o_decoder_data;
-logic o_decoder_done;
-
-
-endec_interface EI1 (   .sys_clk(clk),
-                        .rst(rst),
-                        .en(en),
-                        .i_code_rate(i_code_rate),
-                        .i_gen_poly_flat(i_gen_poly_flat),
-                        .i_encoder_data_frame(i_encoder_data_frame), 
-                        .i_decoder_data_frame(i_decoder_data_frame), 
-                        .o_encoder_data(o_encoder_data),
-                        .o_encoder_done(o_encoder_done),
-                        .o_decoder_data(o_decoder_data), 
-                        .o_decoder_done(o_decoder_done));
-
-always #5 clk = ~clk;
-
-initial 
-begin
-        // Initialization
-        clk = 0;
-        en = 1;
-        rst = 0;
-        #16 rst = 1;
-end
-
-initial
-begin
-    i_code_rate = `CODE_RATE_2; 
-
-    i_gen_poly_flat[8:0] = 9'b000000111; // matlab polynomial is reversed
-    i_gen_poly_flat[17:9] = 9'b000000101; 
-    i_gen_poly_flat[26:18] = 9'b000000000;
-
-    //constraint length 9: 557, 663, 711
-    // i_gen_poly_flat[8:0] = 9'b111101101; // matlab polynomial is reversed
-    // i_gen_poly_flat[17:9] = 9'b110011011; 
-    // i_gen_poly_flat[26:18] = 9'b100100111;
-
-    i_encoder_data_frame = 128'b11110011011101111010011101011100011111010011101100010110011110011101000100001100111101000000010011111110000100101111001111110001;
-    i_decoder_data_frame = 256'b1101101001111101010001100100011010010010111101100100100001100111001101101010010010111101100100010111001110000101111101101001111101100100101100111011000011010111110110100100101100000000001110111101101010101001110000111011111000011010011111011010101001110011;
-end
-
-always_ff @(posedge o_decoder_done)
-begin
-    $display("Decoder output data is: %b", o_decoder_data);
-    $display("Encoder output data is: %b", o_encoder_data);
-    $finish;
-end
-
-// always_ff @(posedge o_encoder_done)
-// begin
-//     $display("Encoder output data is: %b", o_encoder_data);
-//     $finish;
-// end
-
-endmodule
-
-
-
-
-
 // `include "param_def.sv"
 // `timescale 1ns / 1ps
 
 // module endec_tb(); 
 
-// // AXI Interface
-// logic sys_clk, rst_n;
-
-// logic [31:0] axi_tx_tdata;
-// logic axi_tx_tlast;
-// logic axi_tx_tready;
-// logic axi_tx_tvalid;
-
-// logic [31:0] axi_rx_tdata;
-// logic axi_rx_tlast;
-// logic axi_rx_tready;
-// logic axi_rx_tvalid;
-
-// // Data packet
+// logic clk, rst, en;
 // logic i_code_rate;
-// logic i_mode_sel;
 // logic [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
 // logic [127:0] i_encoder_data_frame;
-// logic [383:0] i_decoder_data_frame;
+// logic [383:0] i_decoder_data_frame; // 383
 
 
-// endec_interface EI1   ( .sys_clk(sys_clk), 
-//                         .rst_n(rst_n),
-//                         .axi_rx_tdata(axi_tx_tdata),
-//                         .axi_rx_tlast(axi_tx_tlast),
-//                         .axi_rx_tready(axi_tx_tready),
-//                         .axi_rx_tvalid(axi_tx_tvalid),
-//                         .axi_tx_tdata(axi_rx_tdata),
-//                         .axi_tx_tlast(axi_rx_tlast),
-//                         .axi_tx_tready(axi_rx_tready),
-//                         .axi_tx_tvalid(axi_rx_tvalid));
+// logic [383:0] o_encoder_data; // 383
+// logic o_encoder_done;
+// logic [127:0] o_decoder_data;
+// logic o_decoder_done;
 
-// always #5 sys_clk = ~sys_clk;
+
+// endec_interface EI1 (   .sys_clk(clk),
+//                         .rst(rst),
+//                         .en(en),
+//                         .i_code_rate(i_code_rate),
+//                         .i_gen_poly_flat(i_gen_poly_flat),
+//                         .i_encoder_data_frame(i_encoder_data_frame), 
+//                         .i_decoder_data_frame(i_decoder_data_frame), 
+//                         .o_encoder_data(o_encoder_data),
+//                         .o_encoder_done(o_encoder_done),
+//                         .o_decoder_data(o_decoder_data), 
+//                         .o_decoder_done(o_decoder_done));
+
+// always #5 clk = ~clk;
 
 // initial 
 // begin
 //         // Initialization
-//         i_code_rate = `CODE_RATE_2;
-//         i_mode_sel = `DECODE_MODE;
-//         i_gen_poly_flat[8:0] = 9'b000000111; 
-//         i_gen_poly_flat[17:9] = 9'b000000101; 
-//         i_gen_poly_flat[26:18] = 9'b000000000;
-//         i_decoder_data_frame = 16'b1101101010100110;
-//         i_encoder_data_frame = 128'b10011000010101000110101110000011000000111001111010001001111011101101010000011101110010011110010111111001101011000001011101010001;
-//         sys_clk = 0;
-//         rst_n = 0;
-//         //i_encoder_bit = 0;
-//         #16 rst_n = 1;
+//         clk = 0;
+//         en = 1;
+//         rst = 0;
+//         #16 rst = 1;
 // end
 
 // initial
 // begin
-//     // axi_tx_tdata <= 
-//     // axi_tx_tlast <=
-//     // axi_tx_tvalid <=
+//     i_code_rate = `CODE_RATE_2; 
 
-//     // axi_rx_tready <= 
+//     // i_gen_poly_flat[8:0] = 9'b000000111; // matlab polynomial is reversed
+//     // i_gen_poly_flat[17:9] = 9'b000000101; 
+//     // i_gen_poly_flat[26:18] = 9'b000000000;
+
+//     //constraint length 9: 557, 663, 711
+//     i_gen_poly_flat[8:0] = 9'b111101101; // matlab polynomial is reversed
+//     i_gen_poly_flat[17:9] = 9'b110011011; 
+//     i_gen_poly_flat[26:18] = 9'b000000000;
+//     //i_gen_poly_flat[26:18] = 9'b100100111;
+
+//     i_encoder_data_frame = 128'b11111110010001011000110011110110110001001001101001001110001001011111100011001000000010011000010111111100010111110010001110110101;
+//     i_decoder_data_frame = 256'b1110001110001010000100100110001110011100110110011001001001100001101000101100101100110010001000001000010001000110111110100000111111101000111011101010010110101010010110110001100011011101001100011001010011011000101001110110010000111000100110111011001010010110;
 // end
 
-// always_ff @(posedge sys_clk)
+// always_ff @(posedge o_decoder_done)
 // begin
-//     if(rst_n == 0)
-//     begin
-//         axi_tx_tdata <= 0;
-//         axi_tx_tlast <= 0;
-//         axi_tx_tvalid <= 0;
-//         axi_rx_tready <= 0;
-//     end
-//     else
-//     begin
-//         if(axi_tx_tready == 1) // receiver is ready
-//         begin
-
-//         end
-//     end
+//     $display("Decoder output data is: %b", o_decoder_data);
+//     $display("Encoder output data is: %b", o_encoder_data);
+//     $finish;
 // end
 
-// endmodule 
+// endmodule
+
+
+
+
+
+`include "param_def.sv"
+`timescale 1ns / 1ps
+
+module endec_tb(); 
+
+// AXI Interface
+logic sys_clk, rst_n;
+
+logic [63:0] m_axis_tdata;
+logic m_axis_tlast;
+logic m_axis_tready;
+logic m_axis_tvalid;
+
+logic [63:0] s_axis_tdata;
+logic s_axis_tlast;
+logic s_axis_tready;
+logic s_axis_tvalid;
+
+// Data packet
+logic i_code_rate;
+logic i_mode_sel;
+logic [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
+logic [127:0] i_encoder_data_frame;
+logic [383:0] i_decoder_data_frame;
+logic [383:0] o_encoder_data;
+logic [127:0] o_decoder_data;
+
+logic [63:0] config_data;
+logic [575:0] tx_data;
+logic [511:0] rx_data;
+
+logic [8:0] tx_count;
+logic [8:0] rx_count;
+
+assign config_data[26:0] = i_gen_poly_flat;
+assign config_data[27] = i_code_rate;
+assign config_data[28] = i_mode_sel;
+assign tx_data[127:0] = i_encoder_data_frame;
+assign tx_data[511:128] = i_decoder_data_frame;
+assign tx_data[575:512] = config_data;
+assign o_encoder_data = rx_data[383:0];
+assign o_decoder_data = rx_data[511:384];
+always #5 sys_clk = ~sys_clk;
+
+initial 
+begin
+        // Initialization
+        i_code_rate = `CODE_RATE_2;
+        i_gen_poly_flat[8:0] = 9'b000000111; 
+        i_gen_poly_flat[17:9] = 9'b000000101; 
+        i_gen_poly_flat[26:18] = 9'b000000000;
+        i_decoder_data_frame = 16'b1101101010100110;
+        i_encoder_data_frame = 128'b10011000010101000110101110000011000000111001111010001001111011101101010000011101110010011110010111111001101011000001011101010001;
+        sys_clk = 0;
+        rst_n = 0;
+        #16 rst_n = 1;
+end
+
+always_ff @(posedge sys_clk)
+begin
+    if(rst_n == 0)
+    begin
+        m_axis_tdata <= 0;
+        m_axis_tlast <= 0;
+        m_axis_tvalid <= 0;
+        s_axis_tready <= 0;
+        tx_count <= 575;
+        rx_count <= 511;
+    end
+    else
+    begin
+        // TX
+        m_axis_tvalid <= $urandom_range(0, 1);
+        m_axis_tdata <= tx_data[tx_count -:63];
+        if(m_axis_tvalid == 1 && m_axis_tready == 1)
+            tx_count <= tx_count - 64;
+        if((tx_count == 575 || tx_count == 127) && m_axis_tvalid == 1)
+            m_axis_tlast <= 1;
+        if(m_axis_tlast == 1 && m_axis_tready == 1 && m_axis_tvalid == 1)
+            m_axis_tlast <= 0;
+
+        //RX
+        s_axis_tready <= $urandom_range(0, 1);
+        if(s_axis_tready == 1 && s_axis_tvalid == 1)
+        begin
+            rx_data[rx_count -:63] <= s_axis_tdata;
+            rx_count <= rx_count - 64;
+        end
+        
+    end
+end
+
+endec_interface EI1(.sys_clk(sys_clk),
+                    .rst_n(rst_n),
+                    .s_axis_tdata(m_axis_tdata),
+                    .s_axis_tlast(m_axis_tlast),
+                    .s_axis_tready(m_axis_tready),
+                    .s_axis_tvalid(m_axis_tvalid),
+                    .m_axis_tdata(s_axis_tdata),
+                    .m_axis_tlast(s_axis_tlast),
+                    .m_axis_tready(s_axis_tready),
+                    .m_axis_tvalid(s_axis_tvalid));
+
+endmodule 

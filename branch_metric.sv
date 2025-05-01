@@ -1,11 +1,11 @@
 `include "param_def.sv"
 `timescale 1ns / 1ps
 
-module branch_metric(clk, rst, en_bm, 
+module branch_metric(clk, //rst, en_bm, 
                     i_rx_data, i_trans_data, 
                     o_dist);
 
-input logic clk, rst, en_bm;
+input logic clk; //rst, en_bm;
 input logic [`SLICED_INPUT_NUM - 1:0] i_trans_data [`MAX_STATE_NUM][`RADIX];
 input logic [`SLICED_INPUT_NUM - 1:0] i_rx_data; 
 

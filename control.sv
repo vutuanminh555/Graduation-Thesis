@@ -3,15 +3,14 @@
 
 module control( clk, rst, en, 
                 i_sync,
-                o_en_ce, o_en_s, o_en_bm, o_en_acs, o_en_m, o_en_t);
+                o_en_ce, o_en_s, o_en_acs, o_en_m, o_en_t);
 
 input logic clk, rst, en;
 input logic i_sync;
 
-output logic o_en_ce, o_en_s, o_en_bm, o_en_acs, o_en_m, o_en_t;
+output logic o_en_ce, o_en_s, o_en_acs, o_en_m, o_en_t;
 
-logic [2:0] state, nxt_state;
-//(* use_dsp = "yes" *) 
+logic [2:0] state, nxt_state; 
 logic [4:0] mem_delay; 
 
 localparam [2:0] s0  = 3'b000;
@@ -48,7 +47,6 @@ begin
         begin
             o_en_ce = 0; 
             o_en_s = 0; 
-            o_en_bm = 0; 
             o_en_acs = 0; 
             o_en_m = 0; 
             o_en_t = 0; 
@@ -58,8 +56,7 @@ begin
         s1: 
         begin
             o_en_ce = 1; 
-            o_en_s = 1;
-            o_en_bm = 0; 
+            o_en_s = 1; 
             o_en_acs = 0; 
             o_en_m = 0; 
             o_en_t = 0;
@@ -70,7 +67,6 @@ begin
         begin
             o_en_ce = 1; 
             o_en_s = 1;
-            o_en_bm = 1; 
             o_en_acs = 0; 
             o_en_m = 0; 
             o_en_t = 0;
@@ -81,7 +77,6 @@ begin
         begin
             o_en_ce = 1; 
             o_en_s = 1;
-            o_en_bm = 1; 
             o_en_acs = 1; 
             o_en_m = 0; 
             o_en_t = 0;
@@ -92,7 +87,6 @@ begin
         begin
             o_en_ce = 1; 
             o_en_s = 1;
-            o_en_bm = 1; 
             o_en_acs = 1; 
             o_en_m = 1; 
             o_en_t = 0;
@@ -105,8 +99,7 @@ begin
         s5: 
         begin
             o_en_ce = 1; 
-            o_en_s = 1; 
-            o_en_bm = 0; 
+            o_en_s = 1;  
             o_en_acs = 0; 
             o_en_m = 1; 
             o_en_t = 0;
@@ -120,7 +113,6 @@ begin
         begin
             o_en_ce = 1; 
             o_en_s = 1; 
-            o_en_bm = 0; 
             o_en_acs = 0; 
             o_en_m = 1; 
             o_en_t = 1;
@@ -131,7 +123,6 @@ begin
         begin
             o_en_ce = 0; 
             o_en_s = 0; 
-            o_en_bm = 0; 
             o_en_acs = 0; 
             o_en_m = 0; 
             o_en_t = 0;

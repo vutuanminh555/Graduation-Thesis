@@ -12,10 +12,9 @@ input logic [`MAX_STATE_REG_NUM - 1:0] i_fwd_prv_st [`MAX_STATE_NUM];
 output logic [`MAX_STATE_REG_NUM - 1:0] o_bck_prv_st [`MAX_STATE_NUM];
 output logic o_sync;
 
-//(* use_dsp = "yes" *) 
 logic [6:0] depth; 
 logic wrk_mode;
-//(* use_dsp = "yes" *) 
+
 logic [2:0] mem_delay;
 
 logic wen;
@@ -67,8 +66,8 @@ begin
         .WAKEUP_TIME("disable_sleep"),
         .WRITE_DATA_WIDTH_A(BRAM_DATA_WIDTH),
         .WRITE_DATA_WIDTH_B(BRAM_DATA_WIDTH),
-        .WRITE_MODE_A("WRITE_FIRST"),
-        .WRITE_MODE_B("WRITE_FIRST")
+        .WRITE_MODE_A("NO_CHANGE"),
+        .WRITE_MODE_B("NO_CHANGE")
     ) td_mem (
         .douta(bram_dout[0][i]), // data out
         .doutb(bram_dout[1][i]),

@@ -14,9 +14,7 @@ input logic [383:0] i_decoder_data_frame;
 output logic o_tx_data;
 output logic [`SLICED_INPUT_NUM - 1:0] o_rx_data;
 
-//(* use_dsp = "yes" *) 
 logic [6:0] count_tx;
-//(* use_dsp = "yes" *) 
 logic [8:0] count_rx;
 
 logic rx_toggle;
@@ -38,9 +36,9 @@ begin
         rx_toggle <= ~rx_toggle;
         if(rx_toggle == 1)
         begin
-            if(i_code_rate == `CODE_RATE_2)
+            if(i_code_rate == `CODE_RATE_2 && count_rx > 3)
                 count_rx <= count_rx - 4;
-            else if(i_code_rate == `CODE_RATE_3) 
+            else if(i_code_rate == `CODE_RATE_3 && count_rx > 5) 
                 count_rx <= count_rx - 6;
         end
     end

@@ -31,7 +31,7 @@ endgenerate
 
 logic sync;
 
-logic en_ce, en_s, en_bm, en_acs, en_m, en_t;
+logic en_ce, en_s, en_acs, en_m, en_t;
 
 logic tx_data;
 logic [`SLICED_INPUT_NUM - 1:0] rx_data;
@@ -52,7 +52,6 @@ control C1 (.clk(sys_clk),
             .i_sync(sync),
             .o_en_ce(en_ce),
             .o_en_s(en_s),
-            .o_en_bm(en_bm),
             .o_en_acs(en_acs),
             .o_en_m(en_m),
             .o_en_t(en_t));
@@ -77,8 +76,6 @@ slice S1 (  .clk(sys_clk),
             .o_rx_data(rx_data));
 
 branch_metric BM1 ( .clk(sys_clk),
-                    .rst(rst),
-                    .en_bm(en_bm),
                     .i_rx_data(rx_data),
                     .i_trans_data(trans_data),
                     .o_dist(distance));

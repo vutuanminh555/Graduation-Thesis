@@ -15,7 +15,6 @@ output logic o_decoder_done;
 logic [`MAX_STATE_REG_NUM - 1:0] chosen_node;
 logic [`MAX_STATE_REG_NUM - 1:0] nxt_chosen_node;
 
-//(* use_dsp = "yes" *) 
 logic [6:0] count;
 logic [`OUTPUT_BIT_NUM - 1:0] pair_bit;
 
