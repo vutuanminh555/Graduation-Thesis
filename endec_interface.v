@@ -69,11 +69,13 @@ output reg m_axis_tlast; // signal last transfer in a packet
 input wire m_axis_tready;
 output reg m_axis_tvalid;
 
+reg nxt_rst;
+reg nxt_en; 
+
 //Config signals
 reg rst; // internal reset signal
 reg en;
 wire i_code_rate;
-wire i_mode_sel;
 wire [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
 
 //data for 1 packet
@@ -103,7 +105,6 @@ reg [511:0] tx_data;
 
 assign i_gen_poly_flat = config_data[26:0];
 assign i_code_rate = config_data[27];
-assign i_mode_sel = config_data[28];
 assign i_encoder_data_frame = rx_data[127:0];  
 assign i_decoder_data_frame = rx_data[511:128];
 
@@ -133,7 +134,7 @@ begin
         begin
             if(s_axis_tvalid == 1 && s_axis_tready == 1) // s_axis_tready = 1 from CONF
             begin
-                rx_data[rx_count -:63] <= s_axis_tdata; 
+                rx_data[rx_count -:64] <= s_axis_tdata; 
                 rx_count <= rx_count - 64;
                 if(s_axis_tlast == 1) 
                     s_axis_tready <= 0;
@@ -149,10 +150,10 @@ begin
         TX_DATA: 
         begin
             m_axis_tvalid <= 1;
-            m_axis_tdata <= tx_data[tx_count -:63];
+            m_axis_tdata <= tx_data[tx_count -:64];
             if(m_axis_tready == 1)
                 tx_count <= tx_count - 64;
-            if(tx_count == 127) // 1 cycle before the final cycle 
+            if(tx_count == 63) 
                 m_axis_tlast <= 1;
         end
 
@@ -173,25 +174,33 @@ end
 always @(posedge sys_clk)
 begin
     if(rst_n == 0)
+    begin
         state <= RST;
+        rst <= 0;
+        en <= 0;
+    end
     else
+    begin
         state <= nxt_state;
+        rst <= nxt_rst;
+        en <= nxt_en;
+    end
 end
 
 always @(*) // internal reset and en signal
 begin
-    case(state)
+    case(state) // change rst and en to sequential
         RST:
         begin
-            rst = 0;
-            en = 0;
+            nxt_rst = 0;
+            nxt_en = 0;
             nxt_state = CONF;
         end
 
         CONF:
         begin
-            rst = 1; // RST + CONF = rst pulse
-            en = 0;
+            nxt_rst = 0; // RST + CONF = rst pulse
+            nxt_en = 0;
             if(s_axis_tvalid == 1 && s_axis_tready == 1 && s_axis_tlast == 1)
                 nxt_state = RX_DATA;
             else
@@ -200,8 +209,8 @@ begin
 
         RX_DATA:
         begin
-            rst = 1;
-            en = 0;
+            nxt_rst = 0;
+            nxt_en = 0;
             if(s_axis_tvalid == 1 && s_axis_tready == 1 && s_axis_tlast == 1)
                 nxt_state = WORKING;
             else
@@ -210,8 +219,8 @@ begin
 
         WORKING:
         begin
-            rst = 1;
-            en = 1; // turn on enable signal
+            nxt_rst = 1;
+            nxt_en = 1; // turn on enable signal
             if(o_encoder_done == 1 && o_decoder_done == 1) // finished processing data
                 nxt_state = TX_DATA;
             else
@@ -220,8 +229,8 @@ begin
 
         TX_DATA:
         begin
-            rst = 1;
-            en = 0;
+            nxt_rst = 1;
+            nxt_en = 0;
             if(m_axis_tvalid == 1 && m_axis_tready == 1 && m_axis_tlast == 1)
                 nxt_state = RST;
             else 
@@ -230,8 +239,8 @@ begin
 
         default:
         begin
-            rst = 1;
-            en = 0;
+            nxt_rst = 1;
+            nxt_en = 0;
             nxt_state = RST;
         end
     endcase
