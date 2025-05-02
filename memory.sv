@@ -131,7 +131,7 @@ begin
 
         if(wrk_mode == 0) // write mode
         begin
-                for(int i = 0; i < NUM_BRAMS; i++) // working, memory need 1 cycle delay to store data
+                for(int i = 0; i < NUM_BRAMS; i++) // memory need 1 cycle delay to store data
                 begin
                     bram_din[0][i] <= {i_fwd_prv_st[i*8 + 3], i_fwd_prv_st[i*8 + 2], i_fwd_prv_st[i*8 + 1], i_fwd_prv_st[i*8]};
                     bram_din[1][i] <= {i_fwd_prv_st[i*8 + 7], i_fwd_prv_st[i*8 + 6], i_fwd_prv_st[i*8 + 5], i_fwd_prv_st[i*8 + 4]};

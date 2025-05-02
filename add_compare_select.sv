@@ -6,19 +6,19 @@ module add_compare_select(  clk, rst, en_acs,
                             o_fwd_prv_st, o_sel_node);
 
 input logic clk, rst, en_acs;
-input logic [2:0] i_dist [`MAX_STATE_NUM][`RADIX]; // distance per transition
+input logic [2:0] i_dist [`MAX_STATE_NUM][`RADIX]; 
 
 output logic [`MAX_STATE_REG_NUM - 1:0] o_fwd_prv_st [`MAX_STATE_NUM];
 output logic [`MAX_STATE_REG_NUM - 1:0] o_sel_node;
 
-logic [8:0] node_mem [`MAX_STATE_NUM];  // use 32 write first bram
+logic [8:0] node_mem [`MAX_STATE_NUM];  
 logic [8:0] pm [`MAX_STATE_NUM][`RADIX];
 
-logic [7:0] stage1 [128]; // use 16 bram
-logic [7:0] stage2 [64]; // use 8 bram
-logic [7:0] stage3 [32]; // use 4 bram
-logic [7:0] stage4 [16]; // use 2 bram 
-logic [7:0] stage5 [8]; // use 1 bram 
+logic [7:0] stage1 [128]; 
+logic [7:0] stage2 [64]; 
+logic [7:0] stage3 [32]; 
+logic [7:0] stage4 [16]; 
+logic [7:0] stage5 [8]; 
 logic [7:0] stage6 [4]; 
 logic [7:0] stage7 [2];
 

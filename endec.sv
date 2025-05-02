@@ -6,6 +6,7 @@ module endec(   sys_clk, rst, en,
                 i_gen_poly_flat,
                 i_encoder_data_frame, 
                 i_decoder_data_frame, 
+                i_prv_encoder_state,
                 o_encoder_data, o_encoder_done,
                 o_decoder_data, o_decoder_done);  
 
@@ -14,6 +15,7 @@ input logic i_code_rate;
 input logic [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
 input logic [127:0] i_encoder_data_frame;
 input logic [383:0] i_decoder_data_frame; 
+input logic [`MAX_STATE_REG_NUM - 1:0] i_prv_encoder_state;
 
 output logic [383:0] o_encoder_data;
 output logic o_encoder_done;
@@ -62,6 +64,7 @@ conv_encoder CE1(   .clk(sys_clk),
                     .i_gen_poly(i_gen_poly),
                     .i_code_rate(i_code_rate),
                     .i_tx_data(tx_data), 
+                    .i_prv_encoder_state(i_prv_encoder_state),
                     .o_trans_data(trans_data),
                     .o_encoder_data(o_encoder_data),
                     .o_encoder_done(o_encoder_done)); 
