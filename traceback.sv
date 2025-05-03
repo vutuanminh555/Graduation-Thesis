@@ -3,7 +3,7 @@
 
 module traceback(   clk, rst, en_t,
                     i_sel_node, i_bck_prv_st,
-                    o_decoder_data, o_decoder_done, p_count); 
+                    o_decoder_data, o_decoder_done); // p_count); 
 
 input logic clk, rst, en_t;
 input logic [`MAX_STATE_REG_NUM - 1:0] i_sel_node; 
@@ -11,7 +11,7 @@ input logic [`MAX_STATE_REG_NUM - 1:0] i_bck_prv_st [`MAX_STATE_NUM];
 
 output logic [`TRACEBACK_DEPTH*2 - 1:0] o_decoder_data;
 output logic o_decoder_done;
-output logic [6:0] p_count;
+// output logic [6:0] p_count;
 
 
 logic [`MAX_STATE_REG_NUM - 1:0] chosen_node;
@@ -20,7 +20,7 @@ logic [`MAX_STATE_REG_NUM - 1:0] nxt_chosen_node;
 logic [6:0] count;
 logic [`OUTPUT_BIT_NUM - 1:0] pair_bit;
 
-assign p_count = count;
+// assign p_count = count;
 
 always_ff @(posedge clk)
 begin

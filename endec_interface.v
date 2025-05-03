@@ -8,45 +8,45 @@ module endec_interface (  sys_clk, rst, en,
                         i_decoder_data_frame,
                         i_prv_encoder_state,
                         o_encoder_data, o_encoder_done,
-                        o_decoder_data, o_decoder_done,
-                        p_bram_addr, p_bram_din, p_bram_dout, p_bram_dout_reg, p_fwd_prv_st, p_count, p_state, p_nxt_state, p_mem_delay, p_sync, p_en_ce, p_en_s, p_en_acs, p_en_m, p_en_t);
+                        o_decoder_data, o_decoder_done);
+                        //p_bram_addr, p_bram_din, p_bram_dout, p_bram_dout_reg, p_fwd_prv_st, p_count, p_state, p_nxt_state, p_mem_delay, p_sync, p_en_ce, p_en_s, p_en_acs, p_en_m, p_en_t);
 
 input wire sys_clk, rst, en;
 input wire i_code_rate;
 input wire [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
 input wire [127:0] i_encoder_data_frame;
-input wire [255:0] i_decoder_data_frame; // 383
+input wire [383:0] i_decoder_data_frame; // 383
 input wire [`MAX_STATE_REG_NUM - 1:0] i_prv_encoder_state;
 
-output wire [255:0] o_encoder_data; // 383
+output wire [383:0] o_encoder_data; // 383
 output wire o_encoder_done;
 output wire [127:0] o_decoder_data;
 output wire o_decoder_done;
 
-output wire [6:0] p_bram_addr;
-output wire [31:0] p_bram_din;
-output wire [31:0] p_bram_dout;
-output wire [31:0] p_bram_dout_reg;
+// output wire [6:0] p_bram_addr;
+// output wire [31:0] p_bram_din;
+// output wire [31:0] p_bram_dout;
+// output wire [31:0] p_bram_dout_reg;
 
-output wire [`MAX_STATE_REG_NUM - 1:0] p_fwd_prv_st;
+// output wire [`MAX_STATE_REG_NUM - 1:0] p_fwd_prv_st;
 
-output wire [6:0] p_count;
+// output wire [6:0] p_count;
 
-output wire [2:0] p_state, p_nxt_state;
-output wire [4:0] p_mem_delay;
+// output wire [2:0] p_state, p_nxt_state;
+// output wire [4:0] p_mem_delay;
 
-output wire p_sync;
-output wire p_en_ce;
-output wire p_en_s;
-output wire p_en_acs;
-output wire p_en_m;
-output wire p_en_t;
+// output wire p_sync;
+// output wire p_en_ce;
+// output wire p_en_s;
+// output wire p_en_acs;
+// output wire p_en_m;
+// output wire p_en_t;
 
-wire [383:0] i_decoder_data_frame_origin;
-wire [383:0] o_encoder_data_origin;
+// wire [383:0] i_decoder_data_frame_origin;
+// wire [383:0] o_encoder_data_origin;
 
-assign i_decoder_data_frame_origin[255:0] = i_decoder_data_frame;
-assign o_encoder_data = o_encoder_data_origin[383:128];
+// assign i_decoder_data_frame_origin[255:0] = i_decoder_data_frame;
+// assign o_encoder_data = o_encoder_data_origin[383:128];
 
 endec E1 (
     .sys_clk(sys_clk),
@@ -55,27 +55,27 @@ endec E1 (
     .i_code_rate(i_code_rate),
     .i_gen_poly_flat(i_gen_poly_flat),
     .i_encoder_data_frame(i_encoder_data_frame),
-    .i_decoder_data_frame(i_decoder_data_frame_origin),
+    .i_decoder_data_frame(i_decoder_data_frame),
     .i_prv_encoder_state(i_prv_encoder_state),
-    .o_encoder_data(o_encoder_data_origin),
+    .o_encoder_data(o_encoder_data),
     .o_encoder_done(o_encoder_done),
     .o_decoder_data(o_decoder_data),
-    .o_decoder_done(o_decoder_done),
-    .p_bram_addr(p_bram_addr), // probe signal 
-    .p_bram_din(p_bram_din), 
-    .p_bram_dout(p_bram_dout), 
-    .p_bram_dout_reg(p_bram_dout_reg),
-    .p_fwd_prv_st(p_fwd_prv_st),
-    .p_count(p_count),
-    .p_state(p_state),
-    .p_nxt_state(p_nxt_state),
-    .p_mem_delay(p_mem_delay),
-    .p_sync(p_sync),
-    .p_en_ce(p_en_ce),
-    .p_en_s(p_en_s),
-    .p_en_acs(p_en_acs),
-    .p_en_m(p_en_m),
-    .p_en_t(p_en_t));
+    .o_decoder_done(o_decoder_done));
+    // .p_bram_addr(p_bram_addr), // probe signal 
+    // .p_bram_din(p_bram_din), 
+    // .p_bram_dout(p_bram_dout), 
+    // .p_bram_dout_reg(p_bram_dout_reg),
+    // .p_fwd_prv_st(p_fwd_prv_st),
+    // .p_count(p_count),
+    // .p_state(p_state),
+    // .p_nxt_state(p_nxt_state),
+    // .p_mem_delay(p_mem_delay),
+    // .p_sync(p_sync),
+    // .p_en_ce(p_en_ce),
+    // .p_en_s(p_en_s),
+    // .p_en_acs(p_en_acs),
+    // .p_en_m(p_en_m),
+    // .p_en_t(p_en_t));
 
 endmodule
 
