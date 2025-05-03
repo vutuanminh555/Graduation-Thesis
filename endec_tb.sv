@@ -89,6 +89,7 @@ endmodule
 // logic [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
 // logic [127:0] i_encoder_data_frame;
 // logic [383:0] i_decoder_data_frame;
+// logic [`MAX_STATE_REG_NUM - 1:0] i_prv_encoder_state;
 // logic [383:0] o_encoder_data;
 // logic [127:0] o_decoder_data;
 
@@ -103,6 +104,7 @@ endmodule
 
 // assign config_data[26:0] = i_gen_poly_flat;
 // assign config_data[27] = i_code_rate;
+// assign config_data[35:28] = i_prv_encoder_state;
 // assign tx_data[127:0] = i_encoder_data_frame;
 // assign tx_data[511:128] = i_decoder_data_frame;
 // assign tx_data[575:512] = config_data;
@@ -114,11 +116,12 @@ endmodule
 // begin
 //         // Initialization
 //         i_code_rate = `CODE_RATE_3;
+//         i_prv_encoder_state = 8'b01010010;
 //         i_gen_poly_flat[8:0] = 9'b111101101; // matlab polynomial is reversed
 //         i_gen_poly_flat[17:9] = 9'b110011011; 
 //         i_gen_poly_flat[26:18] = 9'b100100111;
 //         i_decoder_data_frame = 384'b111011101001001111001001011010010100100100001100111111010110100000100111111010100111100111010111101011110101100101101111001000000101000011001111111001011010000101100111001101000001010110100101001110011111101011011000010010101000000001001110010011001100101100110010010101010001001101010101111100000110011101100001100000001000101101110101100111011011100100001100111111010110100000011011;
-//         i_encoder_data_frame = 128'b10010100111101111011100100110001111000011111101001100110000001001100101110011010111010100101110000101101111001001111011110111010;
+//         i_encoder_data_frame = 128'b00100100110110111111000010100111001011011100001101100100110100110110110100010000111100111000010010011101011100010010111001011111;
 //         sys_clk = 0;
 //         rst_n = 0;
 //         #16 rst_n = 1;
@@ -138,7 +141,6 @@ endmodule
 //     else
 //     begin
 //         // TX
-
 //         m_axis_tvalid <= 1;
 //         m_axis_tdata <= tx_data[tx_count -:64];
 //         if(m_axis_tready == 1)

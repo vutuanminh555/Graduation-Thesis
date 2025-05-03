@@ -8,19 +8,45 @@ module endec_interface (  sys_clk, rst, en,
                         i_decoder_data_frame,
                         i_prv_encoder_state,
                         o_encoder_data, o_encoder_done,
-                        o_decoder_data, o_decoder_done);
+                        o_decoder_data, o_decoder_done,
+                        p_bram_addr, p_bram_din, p_bram_dout, p_bram_dout_reg, p_fwd_prv_st, p_count, p_state, p_nxt_state, p_mem_delay, p_sync, p_en_ce, p_en_s, p_en_acs, p_en_m, p_en_t);
 
 input wire sys_clk, rst, en;
 input wire i_code_rate;
 input wire [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
 input wire [127:0] i_encoder_data_frame;
-input wire [383:0] i_decoder_data_frame; 
+input wire [255:0] i_decoder_data_frame; // 383
 input wire [`MAX_STATE_REG_NUM - 1:0] i_prv_encoder_state;
 
-output wire [383:0] o_encoder_data;
+output wire [255:0] o_encoder_data; // 383
 output wire o_encoder_done;
 output wire [127:0] o_decoder_data;
 output wire o_decoder_done;
+
+output wire [6:0] p_bram_addr;
+output wire [31:0] p_bram_din;
+output wire [31:0] p_bram_dout;
+output wire [31:0] p_bram_dout_reg;
+
+output wire [`MAX_STATE_REG_NUM - 1:0] p_fwd_prv_st;
+
+output wire [6:0] p_count;
+
+output wire [2:0] p_state, p_nxt_state;
+output wire [4:0] p_mem_delay;
+
+output wire p_sync;
+output wire p_en_ce;
+output wire p_en_s;
+output wire p_en_acs;
+output wire p_en_m;
+output wire p_en_t;
+
+wire [383:0] i_decoder_data_frame_origin;
+wire [383:0] o_encoder_data_origin;
+
+assign i_decoder_data_frame_origin[255:0] = i_decoder_data_frame;
+assign o_encoder_data = o_encoder_data_origin[383:128];
 
 endec E1 (
     .sys_clk(sys_clk),
@@ -29,12 +55,27 @@ endec E1 (
     .i_code_rate(i_code_rate),
     .i_gen_poly_flat(i_gen_poly_flat),
     .i_encoder_data_frame(i_encoder_data_frame),
-    .i_decoder_data_frame(i_decoder_data_frame),
+    .i_decoder_data_frame(i_decoder_data_frame_origin),
     .i_prv_encoder_state(i_prv_encoder_state),
-    .o_encoder_data(o_encoder_data),
+    .o_encoder_data(o_encoder_data_origin),
     .o_encoder_done(o_encoder_done),
     .o_decoder_data(o_decoder_data),
-    .o_decoder_done(o_decoder_done));
+    .o_decoder_done(o_decoder_done),
+    .p_bram_addr(p_bram_addr), // probe signal 
+    .p_bram_din(p_bram_din), 
+    .p_bram_dout(p_bram_dout), 
+    .p_bram_dout_reg(p_bram_dout_reg),
+    .p_fwd_prv_st(p_fwd_prv_st),
+    .p_count(p_count),
+    .p_state(p_state),
+    .p_nxt_state(p_nxt_state),
+    .p_mem_delay(p_mem_delay),
+    .p_sync(p_sync),
+    .p_en_ce(p_en_ce),
+    .p_en_s(p_en_s),
+    .p_en_acs(p_en_acs),
+    .p_en_m(p_en_m),
+    .p_en_t(p_en_t));
 
 endmodule
 
@@ -76,6 +117,7 @@ endmodule
 
 // //data for 1 packet
 // wire [127:0] i_encoder_data_frame;
+// wire [`MAX_STATE_REG_NUM -1:0] i_prv_encoder_state;
 // wire [383:0] o_encoder_data; 
 // wire o_encoder_done;
 // wire [383:0] i_decoder_data_frame;
@@ -83,8 +125,8 @@ endmodule
 // wire o_decoder_done;
 
 // //for FSM
-// reg [2:0] state;
-// reg [2:0] nxt_state;
+// (* fsm_encoding = "sequential" *) reg [2:0] state;
+// (* fsm_encoding = "sequential" *) reg [2:0] nxt_state;
 // localparam [2:0] RST = 3'b000;
 // localparam [2:0] CONF = 3'b001;
 // localparam [2:0] RX_DATA = 3'b010;
@@ -101,6 +143,7 @@ endmodule
 
 // assign i_gen_poly_flat = config_data[26:0];
 // assign i_code_rate = config_data[27];
+// assign i_prv_encoder_state = config_data[35:28];
 // assign i_encoder_data_frame = rx_data[127:0];  
 // assign i_decoder_data_frame = rx_data[511:128];
 
@@ -197,7 +240,7 @@ endmodule
 
 //         CONF:
 //         begin
-//             nxt_rst = 0; // RST + CONF = rst pulse
+//             nxt_rst = 0; 
 //             nxt_en = 0;
 //             if(s_axis_tvalid == 1 && s_axis_tready == 1 && s_axis_tlast == 1)
 //                 nxt_state = RX_DATA;
@@ -218,7 +261,7 @@ endmodule
 //         WORKING:
 //         begin
 //             nxt_rst = 1;
-//             nxt_en = 1; // turn on enable signal
+//             nxt_en = 1; 
 //             if(o_encoder_done == 1 && o_decoder_done == 1) // finished processing data
 //                 nxt_state = TX_DATA;
 //             else
@@ -237,7 +280,7 @@ endmodule
 
 //         default:
 //         begin
-//             nxt_rst = 1;
+//             nxt_rst = 0;
 //             nxt_en = 0;
 //             nxt_state = RST;
 //         end
@@ -253,6 +296,7 @@ endmodule
 //     .i_gen_poly_flat(i_gen_poly_flat),
 //     .i_encoder_data_frame(i_encoder_data_frame),
 //     .i_decoder_data_frame(i_decoder_data_frame),
+//     .i_prv_encoder_state(i_prv_encoder_state),
 //     .o_encoder_data(o_encoder_data),
 //     .o_encoder_done(o_encoder_done),
 //     .o_decoder_data(o_decoder_data),

@@ -55,6 +55,8 @@ begin
         begin
             for(int j = 0; j < `RADIX; j++)
             begin
+                // if(i_constr_len == `CONSTR_LEN_3)
+                //     pm[i][j] <= node_mem[{i[7:2],j[1:0]}] + i_dist[{i[7:2],j[1:0]}][{i[0],i[1]}];
                 pm[i][j] <= node_mem[{j[1:0],i[7:2]}] + i_dist[{j[1:0],i[7:2]}][{i[0],i[1]}];
             end
         end
@@ -79,7 +81,7 @@ begin
     end
 end
 
-always_ff @(posedge clk) // adress = index; value = winner state
+always_ff @(posedge clk) // adress = index; value = winning state
 begin
     for(int i = 0; i < 128; i++)
     begin   
