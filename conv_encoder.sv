@@ -29,7 +29,7 @@ begin
         encoder_state <= i_prv_encoder_state;
         slice_delay <= 0;
     end
-    else if(en_ce == 1)
+    else if(en_ce == 1) 
     begin
         slice_delay <= 1;
         if(o_encoder_done == 0 && slice_delay == 1)

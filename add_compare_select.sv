@@ -81,7 +81,7 @@ begin
     end
 end
 
-always_ff @(posedge clk) // adress = index; value = winning state
+always_ff @(posedge clk) // address = index; value = winning state
 begin
     for(int i = 0; i < 128; i++)
     begin   

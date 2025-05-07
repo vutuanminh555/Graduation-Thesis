@@ -4,23 +4,14 @@
 module control( clk, rst, en, 
                 i_sync,
                 o_en_ce, o_en_s, o_en_acs, o_en_m, o_en_t);
-                //p_state, p_nxt_state, p_mem_delay);
 
 input logic clk, rst, en;
 input logic i_sync;
 
 output logic o_en_ce, o_en_s, o_en_acs, o_en_m, o_en_t;
 
-// output logic [2:0] p_state, p_nxt_state;
-// output logic [4:0] p_mem_delay;
-
 logic [2:0] state, nxt_state; 
-logic [4:0] mem_delay; // can reduce 1 bit
-
-// assign p_state = state;
-// assign p_nxt_state = nxt_state;
-// assign p_mem_delay = mem_delay;
-
+logic [4:0] mem_delay;
 
 localparam [2:0] s0  = 3'b000;
 localparam [2:0] s1  = 3'b001;
@@ -52,7 +43,7 @@ end
 always_comb 
 begin
     case(state)
-        s0: // reset 
+        s0:
         begin
             o_en_ce = 0; 
             o_en_s = 0; 
