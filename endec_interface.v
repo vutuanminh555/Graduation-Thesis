@@ -235,7 +235,7 @@ begin
         begin
             nxt_rst = 1; 
             nxt_en = 0;
-            if(m_axis_tvalid == 1 && m_axis_tready == 1 && m_axis_tlast == 1)
+            if(tx_count == 448)
                 nxt_state = RST;
             else 
                 nxt_state = TX_DATA;
