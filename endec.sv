@@ -13,11 +13,11 @@ module endec(   sys_clk, rst, en,
 input logic sys_clk, rst, en;
 input logic i_code_rate; 
 input logic [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
-input logic [319:0] i_encoder_data_frame;
+input logic [191:0] i_encoder_data_frame;
 input logic [383:0] i_decoder_data_frame; 
 input logic [`MAX_STATE_REG_NUM - 1:0] i_prv_encoder_state;
 
-output logic [959:0] o_encoder_data;
+output logic [575:0] o_encoder_data;
 output logic o_encoder_done;
 output logic [127:0] o_decoder_data; 
 output logic o_decoder_done;
@@ -34,7 +34,7 @@ endgenerate
 
 logic sync;
 logic en_ce, en_s, en_acs, en_m, en_t;
-logic [1:0] tx_data;
+logic tx_data;
 logic [`SLICED_INPUT_NUM - 1:0] rx_data;
 logic [`MAX_STATE_REG_NUM - 1:0] bck_prv_st [`MAX_STATE_NUM];
 logic [`SLICED_INPUT_NUM - 1:0] trans_data [`MAX_STATE_NUM][`RADIX];

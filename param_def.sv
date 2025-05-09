@@ -1,10 +1,6 @@
 `ifndef PARAM_DEF_H
 `define PARAM_DEF_H
 
-// constant
-`define ENCODE_MODE             1'b0
-`define DECODE_MODE             1'b1
-
 `define MAX_CODE_RATE           3
 `define MAX_CONSTRAINT_LENGTH   9
 `define RADIX                   4 

@@ -13,11 +13,11 @@ module endec_interface (  sys_clk, rst, en,
 input wire sys_clk, rst, en;
 input wire i_code_rate;
 input wire [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
-input wire [319:0] i_encoder_data_frame;
+input wire [191:0] i_encoder_data_frame; 
 input wire [383:0] i_decoder_data_frame;
 input wire [`MAX_STATE_REG_NUM - 1:0] i_prv_encoder_state;
 
-output wire [959:0] o_encoder_data; 
+output wire [575:0] o_encoder_data; 
 output wire o_encoder_done;
 output wire [127:0] o_decoder_data;
 output wire o_decoder_done;

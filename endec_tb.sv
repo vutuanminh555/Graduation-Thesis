@@ -6,11 +6,11 @@ module endec_tb();
 logic clk, rst, en;
 logic i_code_rate;
 logic [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
-logic [319:0] i_encoder_data_frame;
+logic [191:0] i_encoder_data_frame;
 logic [383:0] i_decoder_data_frame; 
 logic [`MAX_STATE_REG_NUM - 1:0] i_prv_encoder_state;
 
-logic [959:0] o_encoder_data; 
+logic [575:0] o_encoder_data; 
 logic o_encoder_done;
 logic [127:0] o_decoder_data;
 logic o_decoder_done;

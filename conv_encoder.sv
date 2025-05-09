@@ -8,11 +8,11 @@ module conv_encoder(clk, rst, en_ce,
 input logic clk, rst, en_ce;
 input logic [`MAX_CONSTRAINT_LENGTH - 1:0] i_gen_poly [`MAX_CODE_RATE]; 
 input logic i_code_rate;
-input logic [1:0] i_tx_data;
+input logic i_tx_data;
 input logic [`MAX_STATE_REG_NUM - 1:0] i_prv_encoder_state;
 
 output logic [`SLICED_INPUT_NUM - 1:0] o_trans_data [`MAX_STATE_NUM][`RADIX]; // 6 bit output
-output logic [959:0] o_encoder_data; 
+output logic [575:0] o_encoder_data; 
 output logic o_encoder_done; 
 
 logic [9:0] count_tx;
@@ -23,7 +23,7 @@ always_ff @(posedge clk) // output all 1024 transitions to branch metric modules
 begin
     if(rst == 0)
     begin
-        count_tx <= 959; 
+        count_tx <= 575; 
         o_encoder_data <= 0;
         o_encoder_done <= 0;
         encoder_state <= i_prv_encoder_state;
@@ -36,20 +36,22 @@ begin
         begin
             if(i_code_rate == `CODE_RATE_2)
             begin
-                count_tx <= count_tx - 4;
-                {o_encoder_data[count_tx - 1], o_encoder_data[count_tx    ]}   <= encode(i_gen_poly, {encoder_state, i_tx_data[0]});
-                {o_encoder_data[count_tx - 3], o_encoder_data[count_tx - 2]}   <= encode(i_gen_poly, {encoder_state[`MAX_STATE_REG_NUM - 2:0], i_tx_data[0], i_tx_data[1]});
+                count_tx <= count_tx - 2;
+                {o_encoder_data[count_tx - 1], o_encoder_data[count_tx]} <= encode(i_gen_poly, {encoder_state, i_tx_data});
+                if(count_tx == 193)
+                    o_encoder_done <= 1;
             end
             else if(i_code_rate == `CODE_RATE_3)
             begin
-                count_tx <= count_tx - 6; 
-                {o_encoder_data[count_tx - 2],  o_encoder_data[count_tx - 1],  o_encoder_data[count_tx    ]}    <= encode(i_gen_poly, {encoder_state, i_tx_data[0]});
-                {o_encoder_data[count_tx - 5],  o_encoder_data[count_tx - 4],  o_encoder_data[count_tx - 3]}    <= encode(i_gen_poly, {encoder_state[`MAX_STATE_REG_NUM - 2:0], i_tx_data[0], i_tx_data[1]});
+                count_tx <= count_tx - 3; 
+                {o_encoder_data[count_tx - 2],  o_encoder_data[count_tx - 1],  o_encoder_data[count_tx]} <= encode(i_gen_poly, {encoder_state, i_tx_data});
+                if(count_tx == 2)
+                    o_encoder_done <= 1;
             end
-            encoder_state <= {encoder_state[`MAX_STATE_REG_NUM - 3:0], i_tx_data[0], i_tx_data[1]}; // shift and change state
+            encoder_state <= {encoder_state[`MAX_STATE_REG_NUM - 2:0], i_tx_data}; // shift and change state
         end
-        if((count_tx == 323 && i_code_rate == `CODE_RATE_2) || (count_tx == 5 && i_code_rate == `CODE_RATE_3)) 
-            o_encoder_done <= 1;
+        // if(count_tx == 131 || count_tx == 5) // i_code_rate signal cause problem?
+        //     o_encoder_done <= 1;
 
         for(int i = 0; i < `MAX_STATE_NUM; i++)
         begin
