@@ -34,7 +34,7 @@ endgenerate
 
 logic sync;
 logic en_ce, en_s, en_acs, en_m, en_t;
-logic tx_data;
+logic [7:0] tx_data;
 logic [`SLICED_INPUT_NUM - 1:0] rx_data;
 logic [`MAX_STATE_REG_NUM - 1:0] bck_prv_st [`MAX_STATE_NUM];
 logic [`SLICED_INPUT_NUM - 1:0] trans_data [`MAX_STATE_NUM][`RADIX];

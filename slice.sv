@@ -11,7 +11,7 @@ input logic i_code_rate;
 input logic [127:0] i_encoder_data_frame;
 input logic [383:0] i_decoder_data_frame;
 
-output logic o_tx_data;
+output logic [7:0] o_tx_data;
 output logic [`SLICED_INPUT_NUM - 1:0] o_rx_data;
 
 logic [6:0] count_tx;
@@ -32,7 +32,7 @@ begin
     end
     else if (en_s == 1)
     begin
-        count_tx <= count_tx - 1;
+        count_tx <= count_tx - 8;
         rx_toggle <= ~rx_toggle;
         if(rx_toggle == 1)
         begin
@@ -55,7 +55,14 @@ begin
     end
     else if(en_s == 1)
     begin
-        o_tx_data <= i_encoder_data_frame[count_tx];
+        o_tx_data[0] <= i_encoder_data_frame[count_tx];
+        o_tx_data[1] <= i_encoder_data_frame[count_tx - 1];
+        o_tx_data[2] <= i_encoder_data_frame[count_tx - 2];
+        o_tx_data[3] <= i_encoder_data_frame[count_tx - 3];
+        o_tx_data[4] <= i_encoder_data_frame[count_tx - 4];
+        o_tx_data[5] <= i_encoder_data_frame[count_tx - 5];
+        o_tx_data[6] <= i_encoder_data_frame[count_tx - 6];
+        o_tx_data[7] <= i_encoder_data_frame[count_tx - 7];
         if(i_code_rate == `CODE_RATE_2)
         begin
             o_rx_data[1:0] <= {i_decoder_data_frame[count_rx - 1], i_decoder_data_frame[count_rx]};
