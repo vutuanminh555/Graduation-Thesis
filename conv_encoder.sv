@@ -38,20 +38,16 @@ begin
             begin
                 count_tx <= count_tx - 2;
                 {o_encoder_data[count_tx - 1], o_encoder_data[count_tx]} <= encode(i_gen_poly, {encoder_state, i_tx_data});
-                if(count_tx == 193)
-                    o_encoder_done <= 1;
             end
             else if(i_code_rate == `CODE_RATE_3)
             begin
                 count_tx <= count_tx - 3; 
-                {o_encoder_data[count_tx - 2],  o_encoder_data[count_tx - 1],  o_encoder_data[count_tx]} <= encode(i_gen_poly, {encoder_state, i_tx_data});
-                if(count_tx == 2)
-                    o_encoder_done <= 1;
+                {o_encoder_data[count_tx - 2], o_encoder_data[count_tx - 1], o_encoder_data[count_tx]} <= encode(i_gen_poly, {encoder_state, i_tx_data});
             end
             encoder_state <= {encoder_state[`MAX_STATE_REG_NUM - 2:0], i_tx_data}; // shift and change state
         end
-        // if(count_tx == 131 || count_tx == 5) // i_code_rate signal cause problem?
-        //     o_encoder_done <= 1;
+        if(count_tx == 193 || count_tx == 2)
+            o_encoder_done <= 1;
 
         for(int i = 0; i < `MAX_STATE_NUM; i++)
         begin

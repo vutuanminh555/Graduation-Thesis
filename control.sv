@@ -11,7 +11,7 @@ input logic i_sync;
 output logic o_en_ce, o_en_s, o_en_acs, o_en_m, o_en_t;
 
 logic [2:0] state, nxt_state; 
-logic [4:0] mem_delay;
+logic [2:0] mem_delay;
 
 localparam [2:0] s0  = 3'b000;
 localparam [2:0] s1  = 3'b001;
