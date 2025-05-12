@@ -79,7 +79,7 @@ wire i_code_rate;
 wire [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
 
 //data for 1 packet
-wire [`MAX_STATE_REG_NUM -1:0] i_prv_encoder_state;
+wire [`MAX_STATE_REG_NUM - 1:0] i_prv_encoder_state;
 wire [191:0] i_encoder_data_frame;
 wire [575:0] o_encoder_data; 
 wire o_encoder_done;
@@ -90,18 +90,26 @@ wire o_decoder_done;
 //for FSM
 reg state;
 reg nxt_state;
-localparam RST = 1'b0;
+localparam RST     = 1'b0;
 localparam WORKING = 1'b1;
 
-reg [9:0] rx_buffer_count = 0;
+reg rx_state;
+reg rx_nxt_state;
+localparam RX_IDLE = 1'b0;
+localparam RX_DATA = 1'b1;
+
+reg tx_state;
+reg tx_nxt_state;
+localparam TX_IDLE = 1'b0;
+localparam TX_DATA = 1'b1;
+
+reg [9:0] rx_buffer_count = 0; // need initialization because rx_data start with rst
 reg [9:0] tx_count;
 
 reg [639:0] rx_data;
 reg [703:0] tx_data;
 
 reg [639:0] rx_data_buffer;
-reg endec_finish = 0;
-reg rx_data_buffer_ready = 0;
 reg prv_en; // to detect posedge en
 
 assign i_gen_poly_flat = rx_data[26:0];
@@ -136,9 +144,14 @@ end
 
 always @(posedge sys_clk) // RX_DATA
 begin
-    if(prv_en == 0 && en == 1) // == rising edge of en 
-        rx_data_buffer_ready <= 0; // retrieve data for the new cycle
-    if(rx_data_buffer_ready == 0) // when buffered data is read by module 
+    case(rx_state)
+    RX_IDLE:
+    begin
+        rx_buffer_count <= 0;
+        s_axis_tready <= 0;
+    end
+
+    RX_DATA:
     begin
         s_axis_tready <= 1;
         if(s_axis_tvalid == 1) 
@@ -146,24 +159,29 @@ begin
             rx_data_buffer[rx_buffer_count +:64] <= s_axis_tdata; 
             rx_buffer_count <= rx_buffer_count + 64;
             if(s_axis_tlast == 1)
-            begin
                 s_axis_tready <= 0;
-                rx_data_buffer_ready <= 1;
-            end
         end
     end
-    else // rx_data_buffer_ready == 1,  rst state 
+
+    default:
     begin
         rx_buffer_count <= 0;
         s_axis_tready <= 0;
     end
+    endcase
 end
 
 always @(posedge sys_clk) // TX_DATA
 begin
-    if(o_encoder_done == 1 && o_decoder_done == 1)
-        endec_finish <= 1; // hold value even after module go to the next cycle
-    if(endec_finish == 1)
+    case(tx_state)
+    TX_IDLE:
+    begin
+        tx_count <= 0;
+        m_axis_tvalid <= 0;
+        m_axis_tlast <= 0;
+    end
+
+    TX_DATA:
     begin
         m_axis_tvalid <= 1;
         m_axis_tdata <= tx_data[tx_count +:64];
@@ -175,18 +193,19 @@ begin
         begin
             m_axis_tvalid <= 0;
             m_axis_tlast <= 0;
-            endec_finish <= 0; // wait for the next cycle
         end
     end
-    else // endec_finish == 0, rst state
+
+    default:
     begin
         tx_count <= 0;
         m_axis_tvalid <= 0;
         m_axis_tlast <= 0;
     end
+    endcase
 end
 
-// FSM
+// FSM 
 always @(posedge sys_clk)
 begin
     if(rst_n == 0)
@@ -195,6 +214,10 @@ begin
         rst <= 0;
         en <= 0;
         prv_en <= 0;
+
+        rx_state <= RX_DATA;
+
+        tx_state <= TX_IDLE;
     end
     else
     begin
@@ -202,22 +225,25 @@ begin
         rst <= nxt_rst;
         en <= nxt_en;
         prv_en <= en;
+
+        rx_state <= rx_nxt_state;
+
+        tx_state <= tx_nxt_state;
     end
 end
 
-always @(*) // internal reset and en signal
+always @(*) 
 begin
-    case(state) 
+    case(state) // internal reset and en signal
         RST:
         begin
             nxt_rst = 0;
             nxt_en = 0;
-            if(rx_data_buffer_ready == 1 && o_encoder_done == 0 && o_decoder_done == 0) // ensure data reset of previous cycle
+            if(rx_state == RX_IDLE && o_encoder_done == 0 && o_decoder_done == 0) // ensure data reset of previous cycle
                 nxt_state = WORKING;
             else 
                 nxt_state = RST;
         end
-
         WORKING:
         begin
             nxt_rst = 1;
@@ -227,12 +253,53 @@ begin
             else
                 nxt_state = WORKING;
         end
-
         default:
         begin
             nxt_rst = 0;
             nxt_en = 0;
             nxt_state = RST;
+        end
+    endcase
+
+    case(rx_state)
+        RX_IDLE:
+        begin
+            if(prv_en == 0 && en == 1) // rising edge of internal en signal
+                rx_nxt_state = RX_DATA;
+            else
+                rx_nxt_state = RX_IDLE;
+        end
+        RX_DATA:
+        begin
+            if(s_axis_tlast == 1)
+                rx_nxt_state = RX_IDLE;
+            else
+                rx_nxt_state = RX_DATA;
+        end
+        default:
+        begin
+            rx_nxt_state = RX_IDLE;
+        end
+    endcase
+
+    case(tx_state)
+        TX_IDLE:
+        begin
+            if(o_encoder_done == 1 && o_decoder_done == 1)
+                tx_nxt_state = TX_DATA;
+            else
+                tx_nxt_state = TX_IDLE;
+        end
+        TX_DATA:
+        begin
+            if(m_axis_tlast == 1)
+                tx_nxt_state = TX_IDLE;
+            else
+                tx_nxt_state = TX_DATA;
+        end
+        default:
+        begin
+            tx_nxt_state = TX_IDLE;
         end
     endcase
 end

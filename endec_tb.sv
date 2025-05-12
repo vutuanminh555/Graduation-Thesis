@@ -169,9 +169,6 @@ begin
         m_axis_tdata <= tx_data[tx_count +:64];
         if(m_axis_tready == 1)
         begin
-            // if(tx_count == 640)
-            //     tx_count <= 0;
-            // else
             delay <= 1;
             if(delay == 1)
                 tx_count <= tx_count + 64;
