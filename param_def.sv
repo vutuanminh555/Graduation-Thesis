@@ -5,11 +5,11 @@
 `define MAX_CONSTRAINT_LENGTH   9
 `define RADIX                   4 
 
-`define MAX_STATE_NUM           256 // = 2 ^ (MAX_CONSTRAINT_LENGTH - 1)        
+`define MAX_STATE_NUM           256        
 `define MAX_STATE_REG_NUM       `MAX_CONSTRAINT_LENGTH-1 
-`define OUTPUT_BIT_NUM          2 // = log2(`RADIX)
-`define TRACEBACK_DEPTH         64 // = traceback_depth*decode_bit_num
-`define SLICED_INPUT_NUM        6 //`MAX_CODE_RATE*DECODE_BIT_NUM
+`define OUTPUT_BIT_NUM          2
+`define TRACEBACK_DEPTH         64
+`define SLICED_INPUT_NUM        6
 
 // select code rate
 `define CODE_RATE_2             1'b0

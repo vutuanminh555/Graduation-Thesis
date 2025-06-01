@@ -51,7 +51,9 @@ module endec_interface( sys_clk, rst_n,
                         m_axis_tlast,
                         m_axis_tready,
                         m_axis_tvalid,
-                        m_axis_aclk);
+                        m_axis_aclk,
+                        p_rx_data,
+                        p_rx_data_buffer);
 
 input wire sys_clk, rst_n;
 
@@ -69,12 +71,22 @@ output reg m_axis_tlast; // signal last transfer in a packet
 input wire m_axis_tready;
 output reg m_axis_tvalid;
 
+
+// probing signal 
+
+output wire [127:0] p_rx_data;
+output wire [127:0] p_rx_data_buffer;
+
+
+
 reg nxt_rst;
 reg nxt_en; 
 
-//Config signals
-reg rst; // internal reset signal
+// internal control signal
+reg rst; 
 reg en;
+
+//config signals
 wire i_code_rate;
 wire [`MAX_CONSTRAINT_LENGTH*`MAX_CODE_RATE - 1:0] i_gen_poly_flat;
 
@@ -119,12 +131,21 @@ assign i_encoder_data_frame = rx_data[255:64];
 assign i_decoder_data_frame = rx_data[639:256];
 
 
+// probing signals
+
+assign p_rx_data = rx_data[191:64];
+assign p_rx_data_buffer = rx_data_buffer[191:64]; 
+
+
+
+
+
 always @(posedge sys_clk)
 begin
     case(state)
         RST:
         begin
-            rx_data <= rx_data_buffer;
+            rx_data <= rx_data_buffer; 
         end
 
         WORKING:
@@ -154,7 +175,7 @@ begin
     RX_DATA:
     begin
         s_axis_tready <= 1;
-        if(s_axis_tvalid == 1) 
+        if(s_axis_tvalid == 1 && s_axis_tready == 1)
         begin
             rx_data_buffer[rx_buffer_count +:64] <= s_axis_tdata; 
             rx_buffer_count <= rx_buffer_count + 64;
@@ -271,7 +292,7 @@ begin
         end
         RX_DATA:
         begin
-            if(s_axis_tlast == 1)
+            if(s_axis_tvalid == 1 && s_axis_tlast == 1)
                 rx_nxt_state = RX_IDLE;
             else
                 rx_nxt_state = RX_DATA;
@@ -292,7 +313,7 @@ begin
         end
         TX_DATA:
         begin
-            if(m_axis_tlast == 1)
+            if(m_axis_tready == 1 && m_axis_tlast == 1)
                 tx_nxt_state = TX_IDLE;
             else
                 tx_nxt_state = TX_DATA;
