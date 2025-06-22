@@ -19,6 +19,7 @@ localparam [2:0] s2  = 3'b010;
 localparam [2:0] s3  = 3'b011;
 localparam [2:0] s4  = 3'b100;
 localparam [2:0] s5  = 3'b101;
+localparam [2:0] s6  = 3'b110;
 
 always_ff @(posedge clk) 
 begin
@@ -32,7 +33,7 @@ begin
         if (en == 1)
         begin
             state <= nxt_state;
-            if(state == s4)
+            if(state == s5)
                 mem_delay <= mem_delay + 1;
         end
     end
@@ -66,7 +67,7 @@ begin
         begin
             o_en_ce = 1; 
             o_en_s = 1;
-            o_en_acs = 1; 
+            o_en_acs = 0; 
             o_en_m = 0; 
             o_en_t = 0;
             nxt_state = s3;
@@ -77,15 +78,25 @@ begin
             o_en_ce = 1; 
             o_en_s = 1;
             o_en_acs = 1; 
-            o_en_m = 1; 
+            o_en_m = 0; 
             o_en_t = 0;
-            if(i_sync == 1)
-                nxt_state = s4;
-            else 
-                nxt_state = s3;
+            nxt_state = s4;
         end
 
         s4: 
+        begin
+            o_en_ce = 1; 
+            o_en_s = 1;
+            o_en_acs = 1; 
+            o_en_m = 1; 
+            o_en_t = 0;
+            if(i_sync == 1)
+                nxt_state = s5;
+            else 
+                nxt_state = s4;
+        end
+
+        s5: 
         begin
             o_en_ce = 1; 
             o_en_s = 1;  
@@ -93,19 +104,19 @@ begin
             o_en_m = 1; 
             o_en_t = 0;
             if(mem_delay == 7)
-                nxt_state = s5;
+                nxt_state = s6;
             else
-                nxt_state = s4;
+                nxt_state = s5;
         end
 
-        s5: 
+        s6: 
         begin
             o_en_ce = 1; 
             o_en_s = 1; 
             o_en_acs = 0; 
             o_en_m = 1; 
             o_en_t = 1;
-            nxt_state = s5;
+            nxt_state = s6;
         end
 
         default:
