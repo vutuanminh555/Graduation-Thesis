@@ -1,0 +1,6 @@
+=== SCOREBOARD ===
+Total samples compared: 100
+Matching samples: 100
+Mismatched samples: 0
+
+All samples matched perfectly!
