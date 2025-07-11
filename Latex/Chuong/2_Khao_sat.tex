@@ -1,0 +1,48 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+\section{Khảo sát hiện trạng}
+
+Hiện nay, việc triển khai bộ mã hóa tích chập và giải mã Viterbi có thể được thực hiện bằng nhiều giải pháp khác nhau, mỗi phương pháp mang lại những ưu/nhược điểm riêng. CPU là lựa chọn linh hoạt và dễ triển khai nhờ thư viện phần mềm phong phú, nhưng độ trễ cao và kém hiệu quả khi xử lý song song khối lượng lớn dữ liệu. Trong khi đó, GPU cải thiện hiệu suất nhờ kiến trúc song song, nhưng tiêu thụ năng lượng lớn và đòi hỏi tối ưu hóa phức tạp. Giải pháp ASIC cho hiệu năng tối ưu và tiết kiệm điện năng, nhưng chi phí thiết kế đắt đỏ và không linh hoạt khi thuật toán thay đổi. FPGA cân bằng giữa hiệu suất và khả năng tùy biến, phù hợp cho các ứng dụng đòi hỏi độ trễ thấp, nhưng kiến trúc server truyền thống chưa tối ưu để tích hợp FPGA. Cuối cùng, giải pháp SoC kết hợp CPU + FPGA khắc phục hạn chế của từng thành phần riêng lẻ bằng cách kết hợp xử lý phần mềm linh hoạt và tốc độ phần cứng, nhưng đòi hỏi thiết kế đồng bộ cả phần cứng lẫn phần mềm, dẫn đến độ phức tạp gia tăng.
+
+\begin{table}[H]
+\centering{}
+    \begin{tabular}{p{0.13\linewidth} p{0.35\linewidth} p{0.35\linewidth}}
+        \hline
+        \textbf{Giải pháp} & \textbf{Ưu điểm}  & \textbf{Nhược điểm}\\ \hline\hline
+        CPU  & Linh hoạt, dễ triển khai  & Độ trễ cao, tốn tài nguyên khi xử lý song song   \\ \hline
+        GPU  & Dễ tiếp cận, có khả năng xử lý song song  & Khó triển khai hơn CPU, tốn năng lượng   \\ \hline
+        ASIC   & Hiệu năng cao, tiết kiệm năng lượng   & Chi phí thiết kế đắt, khó thay đổi thuật toán  \\ \hline
+        FPGA        & Cân bằng hiệu năng và linh hoạt   & Chưa tối ưu cho kiến trúc server   \\ \hline
+        SoC  & Xử lý song song, độ trễ thấp, mở rộng được   & Đòi hỏi thiết kế tối ưu phần cứng và phần mềm  \\ \hline
+        \end{tabular}
+    \caption{So sánh các giải pháp triển khai thiết kế}
+    \label{table:So sánh các giải pháp triển khai thiết kế}
+\end{table}.
+
+Nhìn chung, tùy vào yêu cầu cụ thể về hiệu suất, độ trễ, chi phí, và khả năng mở rộng mà doanh nghiệp có thể lựa chọn giải pháp phù hợp. Trong bối cảnh các hệ thống server hiện đại hướng đến kiến trúc lai, SoC hoặc FPGA tích hợp sẵn trong data center đang nổi lên như xu hướng tối ưu cho bài toán mã hóa/giải mã quy mô lớn.
+
+\newpage
+\section{Thông số cấu hình cần thiết }
+
+Để triển khai bộ mã hóa/giải mã dưới dạng server một cách hiệu quả, ta cần xây dựng yêu cầu chức năng và phi chức năng dựa vào những vấn đề cụ thể cần giải quyết.
+
+\begin{table}[H]
+\centering{}
+    \begin{tabular}{|p{0.25\linewidth} |p{0.28\linewidth} |p{0.37\linewidth}|}
+        \hline
+        \textbf{Vấn đề giải quyết} & \textbf{Yêu cầu chức năng}  & \textbf{Yêu cầu phi chức năng}\\ \hline\hline
+        Tính ứng dụng  & Hỗ trợ tốc độ mã: 1/2, 1/3, chiều dài ràng buộc: 5, 7, 9 và tất cả các đa thức sinh  &    \\ \hline
+        Thông lượng xử lý  & Thuật toán mã hóa, giải mã được tăng tốc bởi FPGA theo kiến trúc Radix-4  & Thông lượng mã hóa, giải mã phải lớn hơn 100Mbps   \\ \hline
+        Khả năng tái cấu hình  & Có khả năng thay đổi cấu hình khi hệ thống đang hoạt động   & Tốc độ mã, ma trận sinh, chiều dài ràng buộc phải dễ dàng cho phép thay đổi  \\ \hline
+        Khả năng khử nhiễu  & Độ sâu dò ngược 64 bước thời gian  &   \\ \hline
+        Độ trễ  &  Lập trình baremetal cho CPU  &   \\ \hline
+        Khả năng truy cập từ xa   &  Hệ thống hoạt động như một server  &  Quá trình cài đặt và truy cập phải dễ dàng với người không chuyên \\ \hline
+        Độ tin cậy  & Truyền tải dữ liệu qua giao thức TCP   & Không được xảy ra lỗi trong quá trình truyền nhận dữ liệu   \\ \hline
+        Độ linh hoạt  & Truyền dữ liệu dưới dạng các tập tin  & Các tập tin phải hoạt động độc lập với nhau   \\ \hline
+        \end{tabular}
+    \caption{Yêu cầu chức năng và phi chức năng của hệ thống}
+\end{table}
+
+
+\end{document}

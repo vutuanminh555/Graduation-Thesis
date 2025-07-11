@@ -1,0 +1,83 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+\section{Đóng góp nổi bật}
+
+\subsection{Tổng quát hóa thuật toán mã hóa tích chập và giải mã Viterbi}
+
+Tính tổng quát hóa là một yêu cầu quan trọng của Endec Server. Do thiết kế PL không thể thay đổi trong lúc hoạt động, việc xây dựng một kiến trúc phần cứng có thể xử lý nhiều cấu hình khác nhau trở thành một thách thức cần phải giải quyết.  
+ 
+Đầu ra của mã hóa tích chập có thể biểu diễn bằng công thức:  
+\[
+\sum_{k=0}^{K-1} x^k \cdot y^k \quad
+\]  
+
+Trong đó:
+\begin{itemize}
+    \item $K$: Chiều dài ràng buộc của hệ thống.
+    \item $x^k$: Giá trị bit thứ k trong thanh ghi dịch.
+    \item $y^k$: Giá trị bit thứ k trong đa thức sinh.
+\end{itemize}  
+
+Ta có thể nhận thấy đa thức sinh hoạt động như một bit mask: nếu $y^k = 1$, giá trị $x^k$ được giữ lại, nếu $y^k = 0$, giá trị $x^k$ bị loại bỏ. Nhận xét trên cho thấy cấu trúc phần cứng cho chiều dài ràng buộc lớn có thể tái sử dụng cho chiều dài ràng buộc nhỏ. Khi dùng cấu trúc $K$ lớn cho $K'$ nhỏ, chỉ cần đặt $y^k = 0$ với mọi $k > K' - 1$. Như vậy, hệ thống có thể linh hoạt mở rộng mà không cần thay đổi kiến trúc phần cứng cơ bản. 
+
+\subsection{Kết hợp mã hóa tích chập và giải mã Viterbi}
+\label{section:Kết hợp mã hóa tích chập và giải mã Viterbi}
+
+Thiết kế ban đầu của đề tài chỉ tập trung vào triển khai bộ giải mã Viterbi. Tuy nhiên, trong quá trình thực hiện, người thiết kế nhận thấy rằng việc hỗ trợ tất cả các đa thức sinh khả thi với thông số tốc độ mã 1/3, chiều dài ràng buộc 9 và 1024 dịch chuyển mỗi chu kỳ sẽ đòi hỏi một dung lượng bộ nhớ rất lớn để lưu trữ tất cả giá trị. Nhận thức này đã dẫn đến ý tưởng mới: tính toán giá trị đầu ra dựa trên đa thức sinh đầu vào thay vì lưu trữ trước các kết quả.
+
+Để thực hiện phương pháp này, cần tích hợp thêm bộ mã hóa tích chập vào trong bộ giải mã Viterbi. Mặc dù vậy, do thuật toán mã hóa tích chập có độ phức tạp không cao, việc xử lý song song hai luồng dữ liệu (vừa giải mã vừa mã hóa) không phải là thách thức đáng kể. Từ đó, khái niệm về bộ xử lý kết hợp giải mã/mã hóa đã được hình thành.
+
+\section{Thảo luận}
+
+\subsection{Tiềm năng cho giải mã quyết định mềm}
+
+Một hạn chế đáng kể của bộ giải mã hiện tại là chưa hỗ trợ quyết định mềm. Về mặt kiến trúc, việc tích hợp quyết định mềm vào thiết kế hiện có tương đối đơn giản, chỉ cần điều chỉnh khối branch\_metric. Tuy nhiên, thách thức chính nằm ở các phép toán đặc thù của quyết định mềm, đòi hỏi thực hiện các phép lũy thừa và khai căn - những toán tử mà chỉ có khối DSP mới được tối ưu để xử lý hiệu quả.
+
+Với yêu cầu xử lý 1024 dịch chuyển trong một bước thời gian cùng giới hạn 220 khối DSP trên PYNQ-Z2 \cite{noauthor_aup_nodate}, giải pháp khả thi duy nhất để triển khai quyết định mềm là tăng chu kỳ tính toán trong khối branch\_metric. Tuy nhiên, do luồng dữ liệu được xử lý tuyến tính, bất kỳ sự tắc nghẽn nào ở khối đầu nguồn như branch\_metric sẽ ảnh hưởng nghiêm trọng đến thông lượng tổng thể của hệ thống.
+
+Xuất phát từ những phân tích trên, người thiết kế đã quyết định không triển khai quyết định mềm cho hệ thống trong phạm vi đề tài này.
+
+\subsection{Khả năng tương thích giữa chiều dài ràng buộc 3 và Radix-4}
+\label{subsection:constraint_len3_radix_4}
+
+Kiến trúc Radix-2 truyền thống có đặc điểm là tất cả các chiều dài ràng buộc thông dụng (từ 3 đến 9) đều sử dụng cùng một thuật toán tương đồng, do số lượng thanh ghi dịch luôn nhỏ hơn một so với chiều dài ràng buộc và lớn hơn số bit xử lý trong mỗi chu kỳ (1 bit). Điều này dẫn đến việc trạng thái trước của thanh ghi dịch luôn ảnh hưởng đến trạng thái sau đối với mọi chiều dài ràng buộc phổ biến. 
+
+Tuy nhiên, kiến trúc Radix-4 xử lý 2 bit/chu kỳ tạo ra sự khác biệt đáng kể: với chiều dài ràng buộc 3, số thanh ghi dịch giảm xuống còn 2 (3-1), khiến toàn bộ bit của chu kỳ trước bị đẩy ra khỏi thanh ghi trong mỗi chu kỳ mới. Kết quả là mỗi bước thời gian trong quá trình giải mã trở nên độc lập hoàn toàn, đòi hỏi phải có thuật toán riêng biệt cho các chiều dài ràng buộc lớn hơn 3. 
+
+Trong quá trình phát triển, người thiết kế đã thành công trong việc xây dựng thuật toán giải mã cho chiều dài ràng buộc 3 phù hợp với kiến trúc phần cứng hiện có và đã được kiểm thử chức năng đầy đủ. Tuy nhiên, vấn đề nảy sinh khi triển khai trên phần cứng thực tế: việc bổ sung thuật toán riêng này làm tăng gấp đôi kích thước và tài nguyên sử dụng cho khối add\_compare\_select - vốn đã phải xử lý song song 1024 dịch chuyển trong mỗi chu kỳ. Xét đến hạn chế về tài nguyên của board PYNQ-Z2 \cite{noauthor_aup_nodate}, cùng với thực tế là chiều dài ràng buộc 3 không mang lại hiệu quả khử nhiễu đáng kể cho các hệ thống thực tế và ít được sử dụng trong các ứng dụng hiện nay, người thiết kế đã quyết định không hỗ trợ chiều dài ràng buộc 3 trong thiết kế cuối cùng.
+
+
+\subsection{Vấn đề về nghẽn tín hiệu trong triển khai thiết kế}
+\label{subsection:signal_congestion}
+
+Thiết kế hiện tại sử dụng khoảng 81\% tài nguyên LUT trong PL, một con số tưởng chừng khiêm tốn nhưng thực tế đã đạt ngưỡng gần giới hạn. Nguyên nhân chính xuất phát từ việc vị trí các LUT và FF trên PL là cố định, đòi hỏi phải tối ưu hóa cực kỳ cẩn thận trong việc bố trí tín hiệu kết nối và sắp xếp các khối chức năng.
+
+Quá trình triển khai thiết kế trên Vivado thường gặp phải nhiều khó khăn đáng kể, đặc biệt khi mức độ sử dụng tài nguyên vượt quá ngưỡng 85\%. Một trong những thách thức chính là hiện tượng tắc nghẽn tín hiệu (congestion), thường trở thành nguyên nhân trực tiếp dẫn đến thất bại trong giai đoạn tổng hợp. Hơn nữa, việc sử dụng tài nguyên ở mức độ cao không chỉ làm giảm hiệu suất thiết kế mà còn kéo dài đáng kể thời gian cần thiết cho quá trình tổng hợp và triển khai. Một điểm hạn chế quan trọng khác nằm ở cách Vivado báo cáo thông tin: công cụ chỉ cung cấp dữ liệu về mức độ sử dụng tài nguyên sau khi toàn bộ quy trình hoàn tất. Điều này buộc người thiết kế phải chờ đợi đến giai đoạn cuối cùng mới có thể xác định được tính khả thi của việc triển khai, gây ra sự chậm trễ đáng kể và cản trở tiến độ phát triển tổng thể.
+\subsection{Tối ưu khối add\_compare\_select}
+\label{section:Tối ưu khối add_compare_select}
+
+Khối add\_compare\_select là thành phần sử dụng nhiều tài nguyên nhất trong hệ thống do phải xử lý hai tác vụ phức tạp: tìm dịch chuyển có path metric nhỏ nhất trong bốn khả năng và xác định nút nhỏ nhất trong 256 nút. Việc tối ưu hóa khối này đặt ra những thách thức đáng kể về mặt kiến trúc. Nguyên nhân chính khiến khối này tiêu tốn nhiều tài nguyên xuất phát từ đặc tính của LUT - vốn là phần tử tổ hợp không có khả năng lưu trữ. Khi các phép toán được nối tiếp mà không có FF trung gian, số lượng LUT cần thiết sẽ tăng theo hàm mũ. Hơn nữa, bản thân việc triển khai LUT trên PL cũng tốn kém tài nguyên do yêu cầu diện tích lớn, khiến chúng trở thành thành phần quý giá cần được sử dụng hợp lý.
+
+Đối với bài toán tìm nút nhỏ nhất trong 256 nút, giải pháp tương đối đơn giản nhờ tính chất tuyến tính của thuật toán. Bằng cách áp dụng phương pháp chia đôi (tree-based comparison), độ trễ tính toán tăng từ 1 lên 8 chu kỳ (tương ứng $\log_{2} 256$) nhưng giúp tiết kiệm đáng kể số lượng LUT sử dụng. Bên cạnh đó, độ trễ này chỉ ảnh hưởng ở giai đoạn đầu của quá trình xử lý, và hoàn toàn chấp nhận được trong hệ thống có 209 chu kỳ cho mỗi khung dữ liệu.
+
+Tuy nhiên, việc tối ưu tính toán path metric lại phức tạp hơn nhiều do yêu cầu đặc thù của thuật toán. Khác với việc tìm nút nhỏ nhất, path metric đòi hỏi tính toán theo kiểu feed-forward, nghĩa là mỗi kết quả đầu ra phải được xác định trước khi nhận đầu vào tiếp theo. Điều này khiến mọi độ trễ đều có tính chất tích lũy qua các chu kỳ xử lý. Trong bối cảnh tài nguyên hạn chế, người thiết kế buộc phải đưa ra giải pháp cân bằng bằng cách chèn thêm FF trung gian, làm tăng độ trễ từ 1 lên 2 chu kỳ cho mỗi bước tính toán. Với độ sâu dò ngược 64 bước, hệ thống phải chịu thêm 64 chu kỳ trễ tổng cộng. Bên cạnh đó, thông lượng hệ thống còn bị giảm 44\% do bị tăng thêm 64 chu kỳ xử lý cho mỗi khung dữ liệu. Đây là minh chứng rõ ràng cho sự đánh đổi giữa hiệu năng và tài nguyên sử dụng trong thiết kế FPGA.
+
+\subsection{Tối ưu khối memory}
+\label{section:Tối ưu khối memory}
+
+Việc lưu trữ dữ liệu với yêu cầu 8 bit cho mỗi nút, 256 nút mỗi bước thời gian và tổng cộng 64 bước thời gian đòi hỏi một dung lượng bộ nhớ cực lớn. Thực tế triển khai cho thấy, phương án sử dụng LUT và FF truyền thống vượt xa khả năng đáp ứng của board PYNQ-Z2 \cite{noauthor_aup_nodate}. Cụ thể, cách tiếp cận này đã làm mức sử dụng LUT và FF tăng vọt lên lần lượt là 600\% và 500\%, đồng thời khiến quá trình tổng hợp và triển khai trên Vivado kéo dài hơn 5 giờ do tình trạng nghẽn tín hiệu như đã phân tích trong mục \ref{subsection:signal_congestion}. Những hạn chế này cho thấy giải pháp dựa trên LUT và FF là không khả thi trong thực tế.
+
+Để khắc phục vấn đề trên, giải pháp sử dụng BRAM trong PL được đề xuất nhằm tận dụng tài nguyên phần cứng chuyên dụng cho lưu trữ dữ liệu. Với khả năng truy cập một thanh ghi 36 bit mỗi chu kỳ ở mỗi cổng và hỗ trợ chế độ cổng đôi (True Dual Port), BRAM cho phép đọc/ghi đồng thời qua hai cổng độc lập trong cùng một chu kỳ xung nhịp. Nhờ đó, trạng thái của 4 nút có thể được kết hợp vào một cổng, và với hai cổng hoạt động song song, mỗi khối BRAM có thể xử lý dữ liệu cho 8 nút cùng lúc. Tính toán cho thấy chỉ cần $\frac{256}{8} = 32$ khối BRAM là đủ để đọc/ghi dữ liệu song song cho toàn bộ 256 nút trong một chu kỳ, vừa tối ưu tài nguyên vừa đảm bảo hiệu năng hệ thống.
+
+\section{Kết luận}
+
+Đồ án đã hoàn thành mục tiêu thiết kế và triển khai thành công hệ thống Endec Server tích hợp bộ mã hóa tích chập và giải mã Viterbi trên nền tảng SoC, đáp ứng đầy đủ các yêu cầu về hiệu năng xử lý, tính linh hoạt trong cấu hình và khả năng truy cập từ xa. Thông qua việc áp dụng kiến trúc Radix-4 được tối ưu hóa, hệ thống đạt được thông lượng ấn tượng 28.8 Mbps cho mã hóa và 19.2 Mbps cho giải mã, vượt trội so với các giải pháp phần mềm truyền thống như MATLAB. Những đóng góp nổi bật của nghiên cứu bao gồm việc tổng quát hóa thuật toán để hỗ trợ đa dạng cấu hình từ chiều dài ràng buộc 4-9 và tốc độ mã 1/2-1/3, tích hợp song song cả chức năng mã hóa và giải mã trên cùng kiến trúc phần cứng để tận dụng tối đa tài nguyên FPGA, cũng như triển khai thành công mô hình server với giao thức TCP hỗ trợ truy cập từ xa thông qua Mesh Network sử dụng Tailscale, mở ra khả năng ứng dụng rộng rãi trong các hệ thống IoT và truyền thông phân tán.
+
+Hệ thống đã khắc phục hiệu quả những hạn chế của các nghiên cứu trước đây về tính khả dụng và khả năng tích hợp, đồng thời giải quyết thành công các thách thức kỹ thuật như vấn đề nghẽn tín hiệu và tối ưu tài nguyên PL. Cụ thể, giải pháp sử dụng kiến trúc BRAM thay thế cho LUT/FF trong khối memory, kết hợp với phương pháp tối ưu hóa khối add\_compare\_select thông qua chia nhỏ các phép toán phức tạp và triển khai pipeline hóa luồng dữ liệu đã giúp duy trì thông lượng ổn định cho toàn hệ thống. Những kết quả này không chỉ khẳng định tính khả thi của giải pháp tích hợp phần cứng-phần mềm mà còn mở ra nhiều hướng phát triển tiềm năng trong tương lai.
+
+\section{Hướng phát triển}
+
+Để tiếp tục nâng cao hiệu năng và mở rộng phạm vi ứng dụng, các hướng nghiên cứu tiếp theo có thể tập trung vào việc tích hợp giải mã quyết định mềm bằng cách tận dụng khối DSP cho các phép toán phức tạp, tối ưu hóa hiệu suất thông qua việc khai thác song song hai lõi xử lý PS theo chế độ AMP, nghiên cứu thuật toán lai Radix-2/Radix-4 để hỗ trợ đầy đủ chiều dài ràng buộc 3, cũng như tích hợp hệ thống vào các giải pháp SDR hay trung tâm dữ liệu yêu cầu xử lý tín hiệu tốc độ cao. Những phát triển này sẽ tiếp tục củng cố vị thế của Endec Server như một giải pháp toàn diện, cân bằng giữa hiệu suất xử lý và tính linh hoạt, đáp ứng nhu cầu ngày càng cao của các hệ thống truyền thông hiện đại.
+
+\end{document}

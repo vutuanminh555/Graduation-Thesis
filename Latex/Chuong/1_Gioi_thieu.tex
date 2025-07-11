@@ -1,0 +1,25 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+\section{Đặt vấn đề}
+
+Trong bối cảnh cách mạng công nghiệp 4.0, nhu cầu truyền dẫn dữ liệu tốc độ cao, ổn định và tiết kiệm năng lượng ngày càng trở nên cấp thiết. Các hệ thống viễn thông, IoT, hàng không vũ trụ hay an ninh quốc phòng đều đòi hỏi khả năng truyền tin chính xác ngay cả trong điều kiện nhiễu cao. Tuy nhiên, việc xử lý tín hiệu trên phần mềm truyền thống thường gặp hạn chế về tốc độ và độ trễ, đặc biệt với các thuật toán phức tạp như mã hóa tích chập và giải mã Viterbi.
+
+Bài toán đặt ra là làm thế nào để tăng tốc quá trình mã hóa và giải mã dữ liệu một cách hiệu quả, đảm bảo độ tin cậy cao mà vẫn tiết kiệm tài nguyên phần cứng. Trong các giải pháp khả thi, FPGA nổi bật nhờ khả năng xử lý song song, tái cấu hình và tối ưu hiệu năng. Nếu triển khai thành công bộ mã hóa tích chập và giải mã Viterbi trên FPGA, hệ thống không chỉ đạt được tốc độ xử lý gần thời gian thực mà còn có thể ứng dụng rộng rãi trong các lĩnh vực như truyền thông không dây, hệ thống định vi, an toàn thông tin, xử lý tín hiệu số.
+
+Việc nghiên cứu thiết kế một hệ thống phần cứng có khả năng hoạt động như một server thu/phát dữ liệu mã hóa sẽ mở ra hướng tiếp cận mới, góp phần nâng cao hiệu suất truyền thông và giảm thiểu lỗi trong các điều kiện kênh truyền không lý tưởng. Đây chính là vấn đề cấp thiết cần giải quyết, đáp ứng xu thế phát triển của công nghệ truyền thông hiện đại.
+
+\section{Khảo sát đề tài}
+\label{section:Khảo sát đề tài}
+
+Hiện nay đã có rất nhiều nghiên cứu tập trung vào tối ưu hiệu năng phần cứng của bộ mã hóa tích chập và giải mã Viterbi trên FPGA, nhưng các nghiên cứu này chưa giải quyết được bài toán triển khai dưới dạng server truy cập từ xa. Nghiên cứu \cite{sun_fpga_2012} đạt thông lượng 80 Mbps với kiến trúc song song toàn phần cho bộ giải mã (2,1,7), sử dụng cơ chế lưu trữ dữ liệu tối ưu và RAM phân tán để giảm 10\% tài nguyên logic, tiết kiệm 5\% năng lượng. Tương tự như vậy, cả ba nghiên cứu \cite{li_design_2012}, \cite{basavaraj_fpga_2023}, \cite{mandwale_different_2015} chỉ tập trung vào triển khai thuần phần cứng, không cung cấp cơ chế giao tiếp mạng để tích hợp vào hệ thống server.
+
+Qua các khảo sát trên ta có thể xác định được ba hạn chế lớn trong các cách triển khai hiện tại: (i) các thiết kế tồn tại dưới dạng module phần cứng độc lập, thiếu giao diện mạng hoặc giao thức truyền dữ liệu để hoạt động như server; (ii) việc triển khai yêu cầu kiến thức chuyên sâu về FPGA để tái cấu hình module và công cụ thiết kế qua đó hạn chế ứng dụng thực tế; (iii) các bộ mã hóa cứng hóa thông số, không cho phép cập nhật tốc độ mã và đa thức sinh từ xa – yêu cầu quan trọng khi triển khai server đa dịch vụ.
+
+\section{Định hướng nghiên cứu}
+
+Để khắc phục những hạn chế đã nêu ở mục \ref{section:Khảo sát đề tài}, nghiên cứu này hướng đến phát triển bộ mã hóa tích chập và giải mã Viterbi được tăng tốc bởi FPGA và triển khai dưới dạng server với các chức năng chính sau: (i) tải lên dữ liệu cần mã hóa/giải mã từ xa; (ii) cấu hình thông số động (tốc độ mã, đa thức sinh, chiều dài ràng buộc) dễ dàng thay vì sửa đổi HDL; (iii) dùng kỹ thuật pipeline và song song hóa để tối ưu thông lượng xử lý. Từ đó nghiên cứu này sẽ kết hợp hiệu năng xử lý song song của FPGA với tính linh hoạt của mô hình server, cho phép người dùng không chuyên khai thác sức mạnh mã hóa tích chập và giải mã Viterbi thông qua kết nối từ xa. Hướng tiếp cận này mở rộng ứng dụng tiềm năng sang lĩnh vực IoT, hệ thống giám sát từ xa, và xử lý tín hiệu phân tán.
+
+%\section{Mục tiêu, đối tượng, phương pháp nghiên cứu}
+
+\end{document}
